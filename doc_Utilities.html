@@ -1,0 +1,1612 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <title>Documentation for the IDL routines in project Utilities</title>
+   </head>
+<body>
+<h1>Documentation for the IDL routines in project Utilities</h1>
+<h2>alogb</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns the logarithm of a strictly positive number <code>arg</code> to an arbitrary but strictly positive base <code>base</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function verifies the validity of the input arguments <code>arg</code> and <code>base</code>, and computes the logarithm of <code>arg</code> in base <code>base</code>, if the operation is allowed, as <span class="math inline">log(<em>a</em><em>r</em><em>g</em>,&#8198;<em>b</em><em>a</em><em>s</em><em>e</em>)=log(<em>a</em><em>r</em><em>g</em>,&#8198;10)/log(<em>b</em><em>a</em><em>s</em><em>e</em>,&#8198;10)</span>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = alogb(arg, base, DOUBLE = double, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg {Number} [I]:</code> An arbitrary but strictly positive number.</p></li>
+<li><p><code>base {Number} [I]:</code> An arbitrary but strictly positive number different from 1.0.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DOUBLE = double {INTEGER} [I] (Default value: 0):</code> Flag to request that computations be conducted in <code>DOUBLE</code> precision (<code>1</code>).</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>FLOAT</code>, <code>DOUBLE</code> or <code>NaN</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the logarithm of <code>arg</code> in base <code>base</code>, as a single or double precision number, depending on the setting of the optional input keyword parameter <code>DOUBLE</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>NaN</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Argument <code>arg</code> is not of numeric type.</p></li>
+<li><p>Error 120: Argument <code>arg</code> is not strictly positive.</p></li>
+<li><p>Error 130: Argument <code>base</code> is not of numeric type.</p></li>
+<li><p>Error 140: Argument <code>base</code> is not strictly positive.</p></li>
+<li><p>Error 150: Argument <code>base</code> must be different from 1.0.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_complex.pro</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>is_single.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> Arguments <code>arg</code> and <code>base</code> can be provided in any positive numeric type, but the returned result will always be of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p><strong>Note 2:</strong> The function returns <code>NaN</code> if either input argument is not a strictly positive number.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; a = 100.0
+IDL&gt; res = alogb(a, 10)
+IDL&gt; PRINT, res
+      2.00000
+
+IDL&gt; res = alogb(a, 5)
+IDL&gt; PRINT, res
+      2.86135
+IDL&gt; PRINT, 5^res
+      100.000
+
+IDL&gt; res = alogb(a, EXP(1.0))
+IDL&gt; PRINT, res
+      4.60517
+IDL&gt; PRINT, EXP(4.60517)
+      100.000
+
+IDL&gt; res = alogb(-1.0, 10, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+          NaN
+IDL&gt; PRINT, excpt_cond
+Error 110 in routine ALOGB: Argument arg is not strictly
+positive.</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>capitalize</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns a copy of the input positional parameter with the first character in upper case. The input argument itself is unmodified.</p></li>
+<li><p><strong>Algorithm:</strong> This function checks the validity of the input positional parameter <code>arg_str</code> and ensures that its first character is upper case.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = capitalize(arg_str, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg_str {STRING} [I]:</code> The string that needs to be capitalized.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns a copy of the input argument <code>arg_str</code> with the first character capitalized, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null <code>STRING</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>arg_str</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>arg_str</code> does not contain at least 1 character.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function only modifies the case of the first character of a copy of the input string; the rest of the string is copied verbatim. Hence, if multiple words need to be capitalized, the function needs to be called separately for each word.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; arg_str = &#39;south africa&#39;
+IDL&gt; res = capitalize(arg_str, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &#39;, res, &#39; and excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+res = South africa and excpt_cond = &gt;&lt;
+IDL&gt; PRINT, &#39;arg_str = &#39;, arg_str
+arg_str = south africa</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial release.</p></li>
+</ul></li>
+</ul>
+<h2>chk_date_ymd</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function takes the input <code>STRING</code> argument <code>date</code>, formatted as <code>YYYY-MM-DD</code>, and provides the <code>year</code>, <code>month</code> and <code>day</code> values as output numeric arguments.</p></li>
+<li><p><strong>Algorithm:</strong> This function checks whether the input argument <code>date</code> is a 10-character long variable of type <code>STRING</code>, splits it on character <code>-</code>, and checks the numerical validity of the 3 elements: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2050, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than 31.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = chk_date_ymd(date, year, month, day, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>date {STRING} [I]:</code> A string indicating a date.</p></li>
+<li><p><code>year {INTEGER} [O]:</code> The numeric year of date <code>date</code>.</p></li>
+<li><p><code>month {INTEGER} [O]:</code> The numeric month of date <code>date</code>.</p></li>
+<li><p><code>day {INTEGER} [O]:</code> The numeric day of date <code>date</code>.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, the desired numeric information is provided through the output positional parameters, the function returns <code>0</code>, and the keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, the values of the invalid output positional parameters is set to <code>0</code>, the function returns a non-zero error code, and the keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>date</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>date</code> is not of length 10.</p></li>
+<li><p>Error 130: Positional parameter <code>date</code> is not properly formatted.</p></li>
+<li><p>Error 140: Positional parameter <code>date</code> specifies an invalid year.</p></li>
+<li><p>Error 150: Positional parameter <code>date</code> specifies an invalid month.</p></li>
+<li><p>Error 160: Positional parameter <code>date</code> specifies an invalid day.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The month and day elements of the argument <code>date</code> must be 0-filled to make up a 10-character long string; hence a date like 5 Feb 2011 must be provided as <code>2011-02-05</code>.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; rc = chk_date_ymd(&#39;2010-01-01&#39;, year, month, day, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+       0   &gt;&lt;
+IDL&gt; PRINT, year, month, day
+    2010       1       1
+
+IDL&gt; rc = chk_date_ymd(&#39;2100-01-01&#39;, year, month, day, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+     140   &gt;Error 140 in CHK_DATE_YMD: Year 2100 is invalid
+     (must be 4 digits long and lie within [1582, 2050]).&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;09&#8211;07: Version 1.0 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>cor_arrays</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes various statistics to describe the possible relations between two arrays containing the same number of data points. The results are stored in the pre-existing output structure <code>stats</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in routines to compute the desired statistics.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = cor_arrays(array_1, array_2, stats, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>array_1 {FLOAT array} [I]:</code> The first array to consider.</p></li>
+<li><p><code>array_2 {FLOAT array} [I]:</code> The second array to consider.</p></li>
+<li><p><code>stats {STRUCTURE} [I/O]:</code> A pre-existing structure to hold the statistical results, organized as follows:</p>
+<pre><code>stats = CREATE_STRUCT(NAME = &#39;Bivariate&#39;, $
+   &#39;experiment&#39;, 0, $
+   &#39;array_1_id&#39;, &#39;&#39;, $
+   &#39;array_2_id&#39;, &#39;&#39;, $
+   &#39;N_points&#39;, 0L, $
+   &#39;RMSD&#39;, 0.0, $
+   &#39;Pearson_cc&#39;, 0.0, $
+   &#39;Spearman_cc&#39;, 0.0, $
+   &#39;Spearman_sig&#39;, 0.0, $
+   &#39;Spearman_D&#39;, 0.0, $
+   &#39;Spearman_PROBD&#39;, 0.0, $
+   &#39;Spearman_ZD&#39;, 0.0, $
+   &#39;Linear_fit_1&#39;, &#39;&#39;, $
+   &#39;Linfit_a_1&#39;, 0.0, $
+   &#39;Linfit_b_1&#39;, 0.0, $
+   &#39;Linfit_CHISQR_1&#39;, 0.0, $
+   &#39;Linfit_PROB_1&#39;, 0.0, $
+   &#39;Linear_fit_2&#39;, &#39;&#39;, $
+   &#39;Linfit_a_2&#39;, 0.0, $
+   &#39;Linfit_b_2&#39;, 0.0, $
+   &#39;Linfit_CHISQR_2&#39;, 0.0, $
+   &#39;Linfit_PROB_2&#39;, 0.0)</code></pre></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, the desired statistics are contained in the output structure <code>stats</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, the output structure is not filled and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>array_1</code> or <code>array_2</code> is not of type numeric.</p></li>
+<li><p>Error 120: Positional parameter <code>array_1</code> or <code>array_2</code> is not an array.</p></li>
+<li><p>Error 130: Positional parameter <code>array_1</code> and <code>array_2</code> are of different sizes.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The structure elements <code>experiment</code>, <code>array_1_id</code> and <code>array_2_id</code> are intended to contain a numeric identifier for the experiment and descriptors of the two arguments. These should be set in the calling routine.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>Program &#39;tst_cor_arrays.pro&#39; sets the following inputs:
+
+x = [65, 63, 67, 64, 68, 62, 70, 66, 68, 67, 69, 71]
+y = [68, 66, 68, 65, 69, 66, 68, 65, 71, 67, 68, 70]
+
+defines the structure &#39;stats&#39;, calls &#39;cor_arrays&#39; and outputs:
+
+         N_points = 12
+             RMSD = 2.10159
+       Pearson_cc = 0.702652
+      Spearman_cc = 0.740262
+     Spearman_sig = 0.00590285
+       Spearman_D = 72.5000
+   Spearman_PROBD = 0.0140817
+      Spearman_ZD = -2.45517
+     Linear_fit_1 = array_2 = a + b x array_1
+       Linfit_a_1 = 35.8248
+       Linfit_b_1 = 0.476378
+  Linfit_CHISQR_1 = 19.7028
+    Linfit_PROB_1 = 1.00000
+     Linear_fit_2 = array_1 = a + b x array_2
+       Linfit_a_2 = -3.37687
+       Linfit_b_2 = 1.03640
+  Linfit_CHISQR_2 = 42.8651
+    Linfit_PROB_2 = 1.00000</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;02&#8211;28: Version 0.8 &#8212; Initial release under the name <code>cor_fields</code>.</p></li>
+<li><p>2017&#8211;07&#8211;20: Version 0.9 &#8212; Renamed function to <code>cor_arrays</code>, removed any reference to <span style="font-variant: small-caps;">MISR</span> or <span style="font-variant: small-caps;">MISR-HR</span> (generic utility routine), updated documentation.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>count_code_lines</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns the approximate number of code lines (as a <code>LONG</code> integer) contained in file <code>file_spec</code>, i.e., the number of lines that are neither blank (empty) nor beginning with a string expression denoting the start of a comment contained in <code>comm_char</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function inspects each and every line of <code>file_spec</code> and counts those that are neither empty nor starting with one of the string(s) provided in <code>comm_char</code>. Blank space (space, TAB) at the start of the line is ignored for this purpose. The <code>STRING</code> variable <code>comm_char</code> can be either a constant or an array, in which case all elements of that array are used in succession to check all possible options. Each element of <code>comm_char</code> can include multiple characters (e.g., to deal with <code>C</code> or <code>PL-1</code> language conventions such as /* comment */).</p></li>
+<li><p><strong>Syntax:</strong> <code>res = count_code_lines(file_spec, comm_char, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>file_spec {STRING} [I]:</code> The file specification (optional path and name) of the file to inspect.</p></li>
+<li><p><code>comm_char {STRING or STRING array} [I]:</code> One (scalar) or more (if array) string expression(s) containing the usual characters to indicate comments in computer languages.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>LONG</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the approximate number of code lines in <code>file_spec</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1L</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>file_spec</code> is not found or unreadable.</p></li>
+<li><p>Error 120: Positional parameter <code>comm_char</code> is not of type <code>STRING</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_array.pro</code></p></li>
+<li><p><code>is_readable.pro</code></p></li>
+<li><p><code>is_scalar.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The <code>IDL</code> built-in command <code>FILE_LINES</code> counts and returns the total number of lines in a text file. By contrast, routine <code>count_code_lines</code> reports on the number of active or effective code lines, i.e., without counting comments and empty lines.</p></li>
+<li><p><strong>Note 2:</strong> The <code>STRING</code> variable <code>comm_char</code> can be either a scalar or an array, in which case all elements of that array are used in succession to check all possible options. Each element of <code>comm_char</code> can include multiple characters (e.g., to deal with C or PL-1 language conventions such as /* comment */). And if <code>comm_char</code> is set to a null string, this function returns the total number of lines in the file.</p></li>
+<li><p><strong>Note 3:</strong> This routine may not yield the correct number of code lines if comments span multiple lines, each terminated by a <code>&lt;CR&gt;</code> and/or <code>&lt;LF&gt;</code>, without repeating the commenting character sequence on each line. However, a comment written on a single long line, which may appear on multiple lines on screen due to wrapping, would be treated correctly.</p></li>
+<li><p><strong>Note 4:</strong> This function is also usable in other contexts that uses a character string at the start of a line to indicate comments, such as in LaTeX, for instance.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; file_spec = $
+   &#39;~/Documents/MySoftware/IDL/Utilities/is_leap/is_leap.pro&#39;
+IDL&gt; PRINT, FILE_LINES(file_spec)
+            191
+IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
+   EXCPT_COND = excpt_cond)
+            54</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>day_of_year</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes the rank (day number) of a date specified by the <code>month</code> and <code>day</code> numbers provided as input arguments, either for an arbitrary common year, or for the particular year specified in the optional keyword parameter <code>year</code>.</p></li>
+<li><p><strong>Algorithm:</strong> By default, this function accumulates and returns the number of days between January 1 and the date specified by the positional parameters <code>month</code> and <code>day</code>, for a common (non leap) year. If the optional keyword parameter <code>year</code> is set to a particular value, this function computes the rank of the specified date taking into account the leap status of that year.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = day_of_year(month, day, YEAR = year, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>month {INTEGER} [I]:</code> The month of the date to characterize, where January is 1, February is 2, <span class="math inline">&#8230;</span> and December is 12.</p></li>
+<li><p><code>day {INTEGER} [I]:</code> The day within the month of the date to characterize, where the first day of the month is 1 and the last day of the month is either 28, 30 or 31, depending on the month.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>YEAR = year {INTEGER} [I]:</code> The specific year for which the computation must be carried out.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the rank number of the specified day in a common year (if the keyword <code>year</code> was not set) or in the specified <code>year</code> (if the keyword was set), and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>month</code> is not a scalar variable of type numeric.</p></li>
+<li><p>Error 120: Positional parameter <code>month</code> is invalid: Must be contained in [1, 12].</p></li>
+<li><p>Error 130: Keyword parameter <code>year</code> is not a scalar variable of type numeric.</p></li>
+<li><p>Error 140: Keyword parameter <code>year</code> is invalid: Must be contained within [1582, 10000].</p></li>
+<li><p>Error 150: Positional parameter <code>day</code> is not a scalar variable of type numeric.</p></li>
+<li><p>Error 160: Positional parameter <code>day</code> is invalid: Must be contained in [1, num_days[month]].</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>is_scalar.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> By default, this function accumulates and returns the number of days between January 1 and the date specified by the positional parameters <code>month</code> and <code>day</code>, for a common (non leap) year. If the optional keyword parameter <code>year</code> is set to a particular value, this routine computes the rank of the specified date taking into account the leap status of that <code>year</code>.</p></li>
+<li><p><strong>Note 2:</strong> If <code>day</code> is set to 29 (implying a leap year), the keyword parameter <code>year</code> must be provided, otherwise the function returns an error code.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = day_of_year(3, 25, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+      84
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;
+
+IDL&gt; res = day_of_year(6, 13, YEAR = 2000, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+     165
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;
+
+IDL&gt; res = day_of_year(2, 29, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+      -1
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 134 in day_of_year: Input argument day
+   is invalid: Must be contained in [1, num_days[month]].
+
+IDL&gt; res = day_of_year(2, 29, YEAR = 2016, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+      60
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>first_char</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns the first character of the input argument <code>arg_str</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in string functions to extract the desired character.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = first_char(arg_str, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg_str {STRING} [I]:</code> An arbitrary string expression.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the desired character, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>arg_str</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 200: Positional parameter <code>arg_str</code> does not contain at least one character.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; PRINT, first_char(&#39;Hello World&#39;)
+H
+
+IDL&gt; PRINT, &#39;&gt;&#39; + first_char(3.14, EXCPT_COND = excpt_cond) + &#39;&lt;&#39;
+&gt;&lt;
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 110 in FIRST_CHAR: Argument must be of type STRING.
+
+[In the following example, variable xyz is undefined.]
+IDL&gt; PRINT, &#39;&gt;&#39; + first_char(xyz, EXCPT_COND = excpt_cond) + &#39;&lt;
+&gt;&lt;
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 110 in FIRST_CHAR: Argument must be of type STRING.</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>force_path_sep</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function trims the argument <code>dir_spec</code> of any white space at the front or at the end of the string and ensures that it is terminated by the path segment separator character for the current operating system. If the argument <code>dir_spec</code> is already terminated by that character, the function returns the input argument.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in functions <code>STRTRIM()</code> and <code>PATH_SEP()</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = force_path_sep(dir_spec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>dir_spec {STRING} [I/O]:</code> An arbitrary directory or path specification.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code> [or N/A].</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the argument <code>dir_spec</code> duly terminated by the appropriate path separator, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>dir_spec</code> is not of type <code>STRING</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>last_char.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; PRINT, force_pathsep(&#39;~/Desktop&#39;)
+~/Desktop/
+
+IDL&gt; PRINT, force_pathsep(&#39;~/Desktop/&#39;)
+~/Desktop/
+
+IDL&gt; print, force_pathsep(&#39;Hello&#39;)
+Hello/</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>get_dirs_sizes</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function searches for directory names matching the pattern <code>dir_patt</code>, and, if any are found, reports their sizes on disk.</p></li>
+<li><p><strong>Algorithm:</strong> This function checks the validity of the input arguments and spawns a <code>Bash</code> shell script using the <code>Linux</code> command <code>du</code> to report on the size of directories matching <code>dir_patt</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = get_dirs_sizes(dir_patt, dirs_names, dirs_sizes, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>dir_patt {STRING} [I]:</code> A pattern of directory names.</p></li>
+<li><p><code>dirs_names {STRING array} [O]:</code> A string array containing the names of the matching directories.</p></li>
+<li><p><code>dirs_sizes {STRING array} [O]:</code> A string array containing the sizes of the matching directories.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, the output arguments <code>dirs_names</code> and <code>dirs_sizes</code> contain the desired information, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>dir_patt</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>dir_patt</code> cannot be a null <code>STRING</code>.</p></li>
+<li><p>Error 300: No directories matching the positional parameter <code>dir_patt</code> have been found.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>set_white.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function may not work in a MS Windows environment, which lacks the <code>du</code> command.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; rc = get_dirs_sizes(&#39;/Volumes/MISR-HR/P16*&#39;, $
+   dirs_names, dirs_sizes, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, dirs_names
+/Volumes/MISR-HR/P167/ /Volumes/MISR-HR/P168/
+/Volumes/MISR-HR/P169/
+IDL&gt; PRINT, dirs_sizes
+81G 553G 337G</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;06: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>is_dir</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns <code>1</code> if argument <code>dir_spec</code> is a directory, and <code>0</code> otherwise.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in function <code>FILEINFO()</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = is_dir(dir_spec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>dir_spec {STRING} [I]:</code> An arbitrary file specification.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>dir_spec</code> is a directory, or <code>0</code> if it is not, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>dir_spec</code> is not of type <code>STRING</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The argument <code>dir_spec</code> can include wild characters (<code>IDL</code>-allowed regular expressions); see the third example below.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; dir_spec = &#39;/Users/mmverstraete/Desktop&#39;
+IDL&gt; PRINT, is_dir(dir_spec)
+       1
+
+IDL&gt; dir_spec = &#39;/Users/mmverstraete/Pictures/Scan_1.jpeg&#39;
+IDL&gt; PRINT, is_dir(dir_spec)
+       0
+
+IDL&gt; dir_spec = &#39;/Volumes/MISR_Data*/P*/&#39;
+IDL&gt; PRINT, is_dir(dir_spec)
+       1</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>is_file</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns <code>1</code> if argument <code>file_spec</code> is a regular file, and <code>0</code> otherwise.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in function <code>FILEINFO()</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = is_file(file_spec)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>file_spec {STRING} [I]:</code> An arbitrary file specification.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>dir_spec</code> is a directory, or <code>0</code> if it is not, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; file_spec = &#39;/Users/mmverstraete/Desktop&#39;
+IDL&gt; PRINT, is_file(file_spec)
+       0
+
+IDL&gt; file_spec = &#39;/Users/mmverstraete/Pictures/Scan_1.jpeg&#39;
+IDL&gt; PRINT, is_file(file_spec)
+       1</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>is_leap</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function reports whether the input positional parameter <code>year</code> is a leap year (<code>1</code>) or not (<code>0</code>).</p></li>
+<li><p><strong>Algorithm:</strong> For dates after 4 October 1582, a year that is exactly divisible by four is a leap year, except that years which are exactly divisible by 100 are not leap years, while centurial years that are exactly divisible by 400 are leap years (See the references section below).</p></li>
+<li><p><strong>Syntax:</strong> <code>res = is_leap(year, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>year {INTEGER} [I]:</code> The year to inspect.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input argument <code>year</code> is a leap year or <code>0</code> it is not a leap year, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Warning 10: The fractional part of positional parameter <code>year</code> is ignored.</p></li>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>year</code> is not of type numeric.</p></li>
+<li><p>Error 120: Positional parameter <code>year</code> is anterior to 1582.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function is applicable only to dates of the Gregorian calendar, i.e., years occurring after 4 October 1582.</p></li>
+<li><p><strong>Note 2:</strong> Fractional years are rounded off (<code>FLOOR</code>) by ignoring the decimal part. A warning is issued but processing continues.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = is_leap(2015, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+       0   &gt;&lt;
+
+IDL&gt; res = is_leap(2016.7, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+       1   &gt;Warning 10 in IS_LEAP: Input argument 2016.70
+       has been rounded off to 2016. Processing continues.&lt;
+
+IDL&gt; res = is_leap(512, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+      -1   &gt;Error 120 in IS_LEAP: Input argument 512
+      is anterior to 1582.&lt;</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>Web site: <code>https://en.wikipedia.org/wiki/Leap_year</code>, accessed on 2017-10-30.</p></li>
+<li><p><code>IDL</code> documentation for built-in routine <code>JULDAY</code>.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>is_lowercase</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function determines whether the input positional parameter <code>char</code> is a lower case letter (returns 1) or not (returns (0).</p></li>
+<li><p><strong>Algorithm:</strong> This function checks the validity of the input argument <code>char</code> and returns <code>1</code> if it is lower case or <code>0</code> if it is not.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = is_lowercase(char, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>char {STRING} [I]:</code> The single character to be tested.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input argument is set in lower case, <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code larger than 1 and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>char</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>char</code> is not of length 1.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = is_lowercase(&#39;b&#39;, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &#39;, res, &#39; and excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;18: Version 1.0 &#8212; Initial release.</p></li>
+</ul></li>
+</ul>
+<h2>is_readable</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory in the file system, and <code>0</code> otherwise.</p></li>
+<li><p><strong>Algorithm:</strong> This function verifies that the input argument <code>file_spec</code> is of type <code>STRING</code> and points to a file or directory that is accessible for reading.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = is_readable(file_spec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>file_spec {STRING} [I]:</code> The file specification (path and/or file name) to be checked for reading.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory, or <code>0</code> if it is not readable, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>file_spec</code> is not accessible or readable.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> If the argument <code>file_spec</code> does not contain a path component (absolute or relative), the file is assumed to be located in the current working directory.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; rc = is_readable(&#39;~/Desktop&#39;, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+1,   &gt;&lt;
+
+IDL&gt; rc = is_readable(EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,   &gt;Error 100 in IS_READABLE: Routine must be called
+with 1 positional parameters: filespec.&lt;
+
+IDL&gt; rc = is_readable(123, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,   &gt;Error 110 in IS_READABLE: Argument filespec
+is not of type string.&lt;
+
+IDL&gt; rc = is_readable(&#39;~/Desktop/junkfile&#39;, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,  &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,  &gt;Error 120 in IS_READABLE: Argument filespec is not found.&lt;
+not found, not a regular file, or unreadable.&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>is_uppercase</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function determines whether the input positional parameter <code>char</code> is an upper case letter (returns 1) or not (returns (0).</p></li>
+<li><p><strong>Algorithm:</strong> This function checks the validity of the input argument <code>char</code> and returns <code>1</code> if it is upper case or <code>0</code> if it is not.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = is_uppercase(char, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>char {STRING} [I]:</code> The single character to be tested.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input argument is set in upper case, <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code larger than 1 and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>char</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>char</code> is not of length 1.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = is_uppercase(&#39;C&#39;, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &#39;, res, &#39; and excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;18: Version 1.0 &#8212; Initial release.</p></li>
+</ul></li>
+</ul>
+<h2>is_writable</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns <code>1</code> if the argument <code>file_spec</code> points to a writable file or directory in the file system, and <code>0</code> otherwise.</p></li>
+<li><p><strong>Algorithm:</strong> This function verifies that the input argument <code>file_spec</code> is of type <code>STRING</code> and points to a file or directory that is accessible for writing.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = is_writeable(file_spec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>file_spec {STRING} [I]:</code> The file specification (path and/or file name) to be checked for writing.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> points to a writable file or directory, or <code>0</code> if it is not writable, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>file_spec</code> is not found.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> If the argument <code>file_spec</code> does not contain a path component (absolute or relative), the file will be assumed to be located in the current working directory.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; rc = is_writable(&#39;~/Desktop&#39;, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+1,   &gt;&lt;
+
+IDL&gt; rc = is_writable(EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,   &gt;Error 100 in IS_WRITABLE: Routine must be called
+with 1 positional parameters: file_spec.&lt;
+
+IDL&gt; rc = is_writable(123, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,   &gt;Error 110 in IS_WRITABLE: Argument file_spec
+is not of type string.&lt;
+
+IDL&gt; rc = is_writable(&#39;~/Desktop/junkfile&#39;, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-1,   &gt;Error 120 in IS_WRITABLE: Argument file_spec is
+not found.&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>last_char</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns the last character of the input argument <code>arg_str</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in string functions to extract the desired character.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = last_char(arg_str)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg_str {STRING} [I]:</code> An arbitrary string expression.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the desired character, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>arg_str</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 200: Positional parameter <code>arg_str</code> does not contain at least one character.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This may be useful, for instance, to check whether a directory name is terminated by the proper path segment separator character for the current operating system.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; path = &#39;/Volumes/MISR_Data&#39;
+IDL&gt; PRINT, last_char(path)
+a
+
+IDL&gt; conc = &#39;Hello&#39; + &#39; World&#39;
+IDL&gt; PRINT, last_char(conc)
+d
+
+IDL&gt; pi = 3.14
+IDL&gt; PRINT, last_char(pi)
+0
+
+IDL&gt; PRINT, last_char(xyz)
+% STRLEN: Variable is undefined: ARG_STR.
+% Execution halted at: LAST_CHAR...
+%                      $MAIN$</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>oom</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This routine returns an integer value representing the order of magnitude of the argument <code>arg</code> in the optional logarithmic base <code>base</code> (10 by default).</p></li>
+<li><p><strong>Algorithm:</strong> The input positional parameters <code>arg</code> and the input keyword parameter <code>base</code> (if provided) must both be strictly positive numbers, in which case this function returns <code>FLOOR(alogb(arg, base))</code>. If either is not strictly positive, the function returns &#8217;NaN&#8217; as well as an exception condition.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = oom(arg, BASE = base, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg</code> is an arbitrary but strictly positive numeric expression.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>BASE = base {Numeric} [I] (Default value: 10.0):</code> An arbitrary but strictly positive numeric expression.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the order of magnitude of argument <code>arg</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>NaN</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>arg</code> is not of type numeric.</p></li>
+<li><p>Error 120: Positional parameter <code>arg</code> is not strictly positive.</p></li>
+<li><p>Error 130: Keyword parameter <code>base</code> is not of type numeric.</p></li>
+<li><p>Error 140: Keyword parameter <code>base</code> is not strictly positive.</p></li>
+<li><p>Error 200: An exception condition occurred in <code>alogb.pro</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> Positional parameter <code>arg</code> and keyword parameter <code>base</code> must both be strictly positive numbers. If the order of magnitude of a negative number is required, provide the absolute value of that number as the argument to <code>oom</code>.</p></li>
+<li><p><strong>Note 2:</strong> Arguments <code>arg</code> and <code>base</code> can be of any numeric type, including <code>COMPLEX</code> or <code>DOUBLE</code>; the result will be of the same type as <code>arg</code>.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; a = 99.9
+IDL&gt; PRINT, oom(a)
+           1
+
+IDL&gt; b = 100.0
+IDL&gt; PRINT, oom(b)
+           2
+
+IDL&gt; c = 123
+IDL&gt; PRINT, oom(c, BASE = 5)
+           2
+
+IDL&gt; e = 123.45
+IDL&gt; PRINT, oom(e, BASE = 2.8)
+           4
+
+IDL&gt; f = -12
+IDL&gt; PRINT, oom(f, EXCPT_COND = excpt_cond)
+          NaN
+IDL&gt; PRINT, excpt_cond
+Error 110 in routine OOM: Argument arg is not
+strictly positive.</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.8 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;07&#8211;11: Version 0.9 &#8212; Moved former argument <code>base</code> into an optional keyword.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>percentile</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function estimates the sample value <code>thresh</code> of the specified percentile <code>per</code> in the input <code>array</code> and returns some basic statistical information on that <code>array</code>, which may contain missing values and may but does not need to be sorted in ascending order.</p></li>
+<li><p><strong>Algorithm:</strong> This function determines the sample value corresponding to the desired percentile <code>per</code> by either selecting a particular item of <code>array</code>, if it corresponds exactly, or interpolates between two <code>array</code> sample values otherwise. If missing values may be present in <code>array</code> (i.e., input keyword parameter AMISS is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = percentile(per, array, amin, amax, thresh, AMISS = amiss, IGN_BEL_STR = ign_bel_str, IGN_ABO_STR = ign_abo_str, ASORT = asort, COUNT = count, DOUBLE = double, EXCPT_COND = excpt_cond</code>)</p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>per {FLOAT} [I]:</code> The desired percentile, a decimal number between 0.0 and 1.0.</p></li>
+<li><p><code>array {FLOAT array} [I]:</code> The statistical sample from which the percentile needs to be estimated.</p></li>
+<li><p><code>amin {FLOAT} [O]:</code> The minimum value of array, within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
+<li><p><code>amax {FLOAT} [O]:</code> The maximum value of array, within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
+<li><p><code>thresh {FLOAT} [O]:</code> The threshold value in the given array, within the allowed range <code>[FLOAT(ign_bel_str),FLOAT(ign_abo_str)]</code>, if specified, such that <code>per</code> percents of the sorted array are below or equal to thresh.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>AMISS = amiss {INTEGER} [I]:</code> Flag indicating whether the array contains (<code>1</code>) or does not contain (<code>0</code>) missing values. If missing values are present in <code>array</code>, they are assumed to be strictly smaller than the numerical equivalent of <code>ign_bel_str</code> or strictly larger than the numerical equivalent of <code>ign_abo_str</code>.</p></li>
+<li><p><code>IGN_BEL_STR = ign_bel_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>amiss</code> keyword has been set, this keyword is mandatory and all array values strictly lower than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>amiss</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
+<li><p><code>IGN_ABO_STR = ign_abo_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>amiss</code> keyword has been set, this keyword is mandatory and all array values strictly higher than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>amiss</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
+<li><p><code>ASORT = asort {INTEGER} [I]:</code> Flag indicating whether <code>array</code> is already sorted in ascending order (<code>1</code>) or not (<code>0</code>).</p></li>
+<li><p><code>COUNT = count {LONG} [O]:</code> If the keyword parameter <code>AMISS = amiss</code> is not set, <code>count</code> is the number of elements of <code>array</code>. If the keyword parameter <code>AMISS = amiss</code> is set, <code>count</code> reports on the number of non-missing elements in <code>array</code> that were considered in the estimation of the percentile <code>thresh</code> (i.e., the number of <code>array</code> elements within the range<br />
+<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>.</p></li>
+<li><p><code>DOUBLE = double {INTEGER} [I]:</code> Flag requesting explicitly (<code>1</code>) that computations be carried out in double precision or not (<code>0</code>).</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, the desired percentile is provided in output argument <code>thresh</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero value and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Warning 10: Keyword parameter <code>IGN_BEL_STR</code> was provided as numerical value and has been converted to a string. Processing continues.</p></li>
+<li><p>Warning 20: Keyword parameter <code>IGN_ABO_STR</code> was provided as numerical value and has been converted to a string. Processing continues.</p></li>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: The requested percentile is not within [0.0, 1.0].</p></li>
+<li><p>Error 120: Input argument <code>array</code> is not an array or not numeric.</p></li>
+<li><p>Error 130: Input argument <code>array</code> contains less than 4 elements.</p></li>
+<li><p>Error 140: Keyword AMISS was set but keyword IGN_BEL_STR was not.</p></li>
+<li><p>Error 150: Keyword AMISS was set but keyword IGN_ABO_STR was not.</p></li>
+<li><p>Error 160: Input <code>array</code> contains less than 2 non-missing values.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The argument <code>array</code> can be multi-dimensional, but the resulting <code>thresh</code> applies to all elements of <code>array</code>.</p></li>
+<li><p><strong>Note 2:</strong> The keyword parameters <code>ign_bel_str</code> and <code>ign_abo_str</code> must be provided as strings because <code>IDL</code> interprets a null value as meaning that this keyword is NOT set (rather than being set to a null value).</p></li>
+<li><p><strong>Note 3:</strong> If missing values may be present in <code>array</code> (i.e., input keyword parameter <code>AMISS</code> is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; a = [1, 7, 3, -99, 4, 5, -99, 9, 6, 2, 8]
+IDL&gt; PRINT, N_ELEMENTS(a), MIN(a), MAX(a)
+          11     -99       9
+IDL&gt; res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
+   IGN_BEL_STR = &#39;0&#39;, IGN_ABO_STR = &#39;100&#39;, COUNT = count, $
+   EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+       0   &gt;&lt;
+IDL&gt; PRINT, thresh, count, amin, amax
+       5           9       1       9
+
+IDL&gt; res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
+IDL&gt;    IGN_BEL_STR = &#39;0&#39;, IGN_ABO_STR = 100, COUNT = count, $
+&gt;    EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, thresh, count, amin, amax
+       5           9       1       9
+IDL&gt; PRINT, excpt_cond
+Warning 20 in PERCENTILE: Keyword IGN_ABO_STR, provided as
+numerical value was converted to a STRING. Processing continues.</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>Web page <code>http://www.itl.nist.gov/div898/handbook/prc/section2/prc252.htm</code>, visited on 30 Oct 2017.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2008&#8211;01&#8211;01: Version 0.5 &#8212; Initial release under the name <code>prctl</code>.</p></li>
+<li><p>2008&#8211;10&#8211;14: Version 0.6 &#8212; Corrections to the documentation.</p></li>
+<li><p>2015&#8211;04&#8211;05: Version 0.7 &#8212; Add reporting the min and max values within the allowable range.</p></li>
+<li><p>2017&#8211;01&#8211;05: Version 0.8 &#8212; Update in-line documentation and add the optional <code>COUNT</code> keyword parameter.</p></li>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Changed function name to percentile, converted some of the input positional parameters into keyword parameters, updated the in-line documentation, implemented the keywords <code>ignore_below</code> and <code>ignore_above</code> as strings to avoid the incorrect interpretation of a null value.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>round_dec</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function rounds the argument <code>arg</code> to a new representation with only <code>n_dec</code> significant decimals.</p></li>
+<li><p><strong>Algorithm:</strong> This function implements the following rules:</p>
+<ul>
+<li><p>If <code>arg</code> is of type <code>BYTE</code> (code 1), <code>INT</code> (code 2), <code>LONG</code> (code 3), <code>UINT</code> (code 12), <code>ULONG</code> (code 13), <code>LONG64</code> (code 14), or <code>ULONG64</code> (code 15), the function returns the argument <code>arg</code> unmodified.</p></li>
+<li><p>If <code>arg</code> is of type <code>FLOAT</code> (code 4), the function returns the desired output provided the total number of significant digits of the input argument does not exceed 6. The accuracy of the result for longer input arguments cannot be guaranteed.</p></li>
+<li><p>If <code>arg</code> is of type <code>DOUBLE</code> (code 5), the function returns the desired output provided the total number of significant digits of the input argument does not exceed 15. The accuracy of the result for longer input arguments cannot be guaranteed.</p></li>
+<li><p>If <code>arg</code> is of a numeric type different than those mentioned above, the function returns <code>NaN</code>.</p></li>
+<li><p>If <code>n_dec</code> is not of one of the numeric types, the function returns the value <code>NaN</code>; if <code>n_dec</code> is a non-integer numeric expression, its <code>INT</code> value, as returned by the <code>FIX</code> built-in function is used.</p></li>
+</ul></li>
+<li><p><strong>Syntax:</strong> <code>res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg {Number} [I]:</code> An arbitrary expression of type <code>FLOAT</code> or <code>DOUBLE</code>. Integer values are tolerated (the function returns the input unmodified). If <code>arg</code> is an array, each of its elements will be treated in the same way.</p></li>
+<li><p><code>n_dec {INTEGER} [I]:</code> The desired number of decimal digits in the result.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>Number</code> or <code>NaN</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected and the input argument <code>arg</code> is of one of the <code>INTEGER</code> types, this function return the value <code>arg</code> itself and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If no exception condition has been detected and the input argument <code>arg</code> is either of type <code>FLOAT</code> or <code>DOUBLE</code>, this function returns a numeric approximation of the input argument <code>arg</code>, rounded to <code>n_dec</code> significant decimals, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>NaN</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input positional parameter <code>n_dec</code> must be numeric.</p></li>
+<li><p>Error 120: Input positional parameter <code>arg</code> cannot be rounded because it is not numeric or <code>COMPLEX</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>type_of.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> Floating point numbers often cannot be represented internally with an exact number of decimals, hence, after rounding off, the returned number is the closest to the desired number but may still contain arbitrary digits in less significant places.</p></li>
+<li><p><strong>Note 2:</strong> If the number of required decimals exceeds the inherent precision of the input number, this function returns a result equal to the input <code>arg</code>. See the examples below.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; arg = 12.345678
+IDL&gt; n_dec = 2
+IDL&gt; res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;arg = &#39;, arg, &#39;n_dec = &#39;, n_dec, &#39;res = &#39;, res, $
+&gt; FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)&#39;
+arg = 12.3456783   n_dec = 2   res = 12.3500004
+
+IDL&gt; arg = 12.987654
+IDL&gt; n_dec = 1
+IDL&gt; res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;arg = &#39;, arg, &#39;n_dec = &#39;, n_dec, &#39;res = &#39;, res, $
+&gt; FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)&#39;
+arg = 12.9876537   n_dec = 1   res = 13.0000000
+
+IDL&gt; arg = [1.23456, 2.34567]
+IDL&gt; n_dec = 1
+IDL&gt; res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, arg
+      1.23456      2.34567
+IDL&gt; PRINT, res
+      1.20000      2.30000</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>set_value_range</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns an &#8216;optimal&#8217; value range to be used in plotting routines, based on the actual minimum and maximum values of the variable to be displayed. It can substitute the default range used by <code>IDL</code> in the <code>PLOT</code> function, if the latter is not satisfactory.</p></li>
+<li><p><strong>Algorithm:</strong> This function selects the minimum and maximum values of a range that contains the values provided as input, decreased and increased by about 1/10th of the range between those values, and appropriately rounded.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = set_value_range(min_val, max_val, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>min_val {FLOAT} [I]:</code> The actual minimum valid value in a dataset, i.e., not considering special codes for missing values.</p></li>
+<li><p><code>max_val {FLOAT} [I]:</code> The actual maximum valid value in a dataset, i.e., not considering special codes for missing values.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>FLOAT array</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the optimal range to plot values within <code>[min_val, max_val]</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns the dummy range <code>res = [-99.9, -99.9]</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>min_val</code> or <code>max_val</code> is not of numeric type.</p></li>
+<li><p>Error 120: The actual range <code>max_val - min_val</code> is null.</p></li>
+<li><p>Error 130: An exception condition occurred in routine <code>oom.pro</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>oom.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = set_value_range(0.12, 0.62, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+      0.00000     0.700000
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;
+
+IDL&gt; res = set_value_range(-2.5, 12.7, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+     -10.0000      20.0000
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;
+
+IDL&gt; res = set_value_range(15.0, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+     -99.9000     -99.9000
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 100 in set_value_range: Routine must be
+   called with 2 positional parameters: min_val, max_val.</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>set_year_range</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns a time interval, defined by two Julian dates, containing complete common years, that includes the time interval specified by <code>jul_ini_date</code> and <code>jul_fin_date</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This routines returns an array of two Julian dates ranging from the 31st of December of the year before the specified initial date to the 1st of January of the year following the specified final date.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = set_year_range(jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>jul_ini_date {DOUBLE} [I]:</code> The initial Julian date.</p></li>
+<li><p><code>jul_fin_date {DOUBLE} [I]:</code> The final Julian date.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>DOUBLE array</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the date interval that includes the time interval specified by <code>jul_ini_date</code> and <code>jul_fin_date</code> and comprises full common years. The output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns the dummy range <code>res = [-99.9D, -99.9D]</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input positional parameters <code>jul_ini_date</code> and <code>jul_fin_date</code> must both be posterior to 4 October 1582.</p></li>
+<li><p>Error 300: Julian date <code>jul_ini_date</code> must precede Julian date <code>jul_fin_date</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function is useful to set the time axis on time series plots so that the graphic display includes full civilian years.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; jul1 = JULDAY(2, 24, 2000)
+IDL&gt; jul2 = JULDAY(6, 13, 2015)
+IDL&gt; PRINT, jul1, jul2
+     2451599     2457187
+IDL&gt; res = set_year_range(jul1, jul2, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+     2451544     2457389
+IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+excpt_cond = &gt;&lt;
+IDL&gt; CALDAT, 2451544, mo1, dy1, yr1
+IDL&gt; CALDAT, 2457389, mo2, dy2, yr2
+IDL&gt; PRINT, mo1, dy1, yr1
+          12          31        1999
+IDL&gt; PRINT, mo2, dy2, yr2
+           1           1        2016
+
+IDL&gt; res = set_year_range(jul2, jul1, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+     -99.9000     -99.9000
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 1000 in set_date_range:
+   Julian date &#39;jul_ini_date&#39; = 2457187 must precede
+   Julian date &#39;jul_fin_date&#39; = 2451599.</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>sha256</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns the SHA-2 (256 bits) hash signature of the input file <code>file_spec</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function spawns a Bash shell script using the Linux command <code>shasum -a 256</code> and returns the signature to the calling routine.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = sha256(file_spec, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>file_spec {STRING} [I]:</code> The file specification (optional path and mandatory name) of the file to characterize.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the SHA-2 (256 bits) hash signature of the input file, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>&#8217;-1&#8217;</code>, and the keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: File <code>file_spec</code> is not found or unreadable.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_readable.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function may or may not work in a MS Windows environment, depending on whether a <code>shasum -a 256</code> command is available from the operating system.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; PRINT, sha256(&#39;/Users/.../dummy.txt&#39;, $
+   EXCPT_COND = excpt_cond)
+4ea226bae70b6dc623a62314486f7846ed5e458a0718082964925e735f2823ea</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>Web page: <code>https://en.wikipedia.org/wiki/SHA-2</code></p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>strcat</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> array argument <code>str_array</code> as input and returns the <code>STRING</code> scalar obtained by concatenating all array elements in their original order, with a single blank space between successive elements.</p></li>
+<li><p><strong>Algorithm:</strong> This function concatenates all elements of <code>str_array</code> into a single <code>STRING</code> which is returned to the calling routine.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = strcat(str_array, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>str_array {STRING} [I]:</code> A string array.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns a string scalar and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>str_array</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>str_array</code> is not an array.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_array.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The input argument <code>str_array</code> can be multi-dimensional. In the case of a 2D array, the elements are concatenated line by line.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; a = [&#39;Hello&#39;, &#39;World&#39;]
+IDL&gt; res = strcat(a)
+IDL&gt; PRINT, &#39;&gt;&#39; + res + &#39;&lt;&#39;
+&gt;Hello World&lt;
+
+IDL&gt; str_array = [[&#39;This&#39;, &#39;is&#39;, &#39;a&#39;], [&#39;2D&#39;, &#39;string&#39;, &#39;array&#39;]]
+IDL&gt; res = strcat(str_array, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+This is a 2D string array</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;18: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>strrepeat</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns a <code>STRING</code> containing <code>n_rep</code> times the input argument <code>str</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function generates and returns an output string containing <code>n_rep</code> times the input argument <code>str</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = strrepeat(str, n_rep, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>str {STRING} [I]:</code> A string expression.</p></li>
+<li><p><code>n_rep {INTEGER} [I]:</code> The total number of times the input string <code>str</code> needs to be replicated in the output string.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns a string scalar and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>str</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>n_rep</code> is not of type <code>INTEGER</code>.</p></li>
+<li><p>Error 130: Positional parameter <code>n_rep</code> is less than 1.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_integer.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = strrepeat(&#39;--123--&#39;, 4, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, res
+--123----123----123----123--
+
+IDL&gt; title = &#39;This is a title&#39;
+IDL&gt; PRINT, title, STRING(10B), strrepeat(&#39;-&#39;, STRLEN(title), $
+   EXCPT_COND = excpt_cond)
+This is a title
+---------------</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;08&#8211;01: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>strstr</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function converts the value of the alphanumeric positional parameter <code>arg</code> into a string without any white space in the front or at the back.</p></li>
+<li><p><strong>Algorithm:</strong> This routine checks that arg is of type alphanumeric before converting it to a string and removing any white space in the front or back.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = strstr(arg, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>arg {alphanumeric} [I]:</code> The alphanumeric input argument.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the string representation of argument <code>arg</code> to the calling routine, and the keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string and the keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>arg</code> is not of type alphanumeric.</p></li>
+<li><p>Error 1000: Unexpected condition, check the type of argument <code>arg</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_alphanum.pro</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> Argument <code>arg</code> can be an array, in which case each array element is converted into a string without any blank space in the front or at the back.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>[IDL&gt; pi = 3.14159
+IDL&gt; PRINT, pi
+      3.14159
+IDL&gt; res = strstr(pi)
+IDL&gt; PRINT, res
+3.14159
+
+IDL&gt; a = &#39;   Hello   &#39;
+IDL&gt; PRINT, a
+   Hello
+IDL&gt; res = strstr(a)
+IDL&gt; PRINT, res
+Hello
+
+IDL&gt; a = CREATE_STRUCT(&#39;A&#39;, 1, &#39;B&#39;, &#39;xxx&#39;)
+IDL&gt; res = strstr(a, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;&gt;&#39; + res + &#39;&lt;&#39;
+&gt;&lt;
+IDL&gt; PRINT, excpt_cond
+Error 110 in routine STRSTR: Argument arg is not an alphanumeric
+expression.
+
+IDL&gt; b = [&#39;   Hello   &#39;, &#39;   World   &#39;]
+IDL&gt; res = strstr(b)
+IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt;&#39; + res[1] + &#39;&lt;&#39;
+&gt;Hello&lt; &gt;World&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>today</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function returns today&#8217;s date and time as a string in one of the following formats: default (keyword <code>FMT</code> not set), <code>iso</code>, <code>nice</code>, <code>usa</code> or <code>ymd</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This routine implements some of the recommendations by World Wide Web Consortium (W3C) regarding simplified formats to represent dates and times, as provided originally by the ISO 8601 standard. It relies on the IDL function SYSTIME to generate the information (in IDL&#8217;s format) and reformats the result as described below.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = today(FMT = fmt)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong> None.</p></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>FMT = fmt {STRING} [I]:</code> Set this optional keyword to <code>iso</code>, <code>nice</code>, <code>usa</code> or <code>ymd</code> to generate the return value in a format different from the default. If the value of this keyword is not set or unrecognized, the result will be formatted according to the default format.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>This function returns today&#8217;s date to the calling routine in one of the following formats:</p>
+<ul>
+<li><p>If the keyword <code>FMT</code> is NOT set (default), or if its value is unrecognized, the current date and time are provided as a string formatted like <code>YYYY-MM-DD_hh:mm:ss</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is set to <code>iso</code>, the current date and time are provided as a string formatted like <code>YYYY-MM-DDThh:mm:ss</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is set to <code>nice</code>, the current date and time are provided as a string formatted like <code>YYYY-MM-DD at hh:mm:ss</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is set to <code>usa</code>, the current date is provided as a string formatted like <code>MM DD, YYYY</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is set to <code>ymd</code>, the current date is provided as a string formatted like <code>YYYY-MM-DD</code>.</p></li>
+</ul></li>
+<li><p>This routine does not provide diagnostic information on exception conditions.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong> None.</p></li>
+<li><p><strong>Dependencies:</strong> None.</p></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The format option <code>FMT</code> can be specified in either upper or lower (or even mixed) case.</p></li>
+<li><p><strong>Note 2:</strong> This routine does not (currently) attempt to report on the time zone.</p></li>
+<li><p><strong>Note 3:</strong> The output formats <code>nice</code> and <code>usa</code> may be less desirable for use in filenames because of the presence of blank characters.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = today()
+IDL&gt; PRINT, res
+2017-03-09_20-56-45
+
+IDL&gt; res = today(FMT = &#39;nice&#39;)
+IDL&gt; PRINT, res
+2017-03-09 at 20:57:14
+
+IDL&gt; res = today(FMT = &#39;ymd&#39;)
+IDL&gt; PRINT, res
+2017-03-09</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>Web page: <code>https://www.w3.org/TR/NOTE-datetime</code>.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+</body>
+</html>
