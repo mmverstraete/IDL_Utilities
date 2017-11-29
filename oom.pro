@@ -8,8 +8,8 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;  ALGORITHM: The input positional parameters arg and the input keyword
    ;  parameter base (if provided) must both be strictly positive numbers,
    ;  in which case this function returns FLOOR(alogb(arg, base)). If
-   ;  either is not strictly positive, the function returns ’NaN’ as well
-   ;  as an exception condition.
+   ;  either is not strictly positive, the function returns NaN as well as
+   ;  an exception condition.
    ;
    ;  SYNTAX: res = oom(arg, BASE = base, EXCPT_COND = excpt_cond)
    ;

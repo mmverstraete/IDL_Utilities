@@ -75,7 +75,6 @@ FUNCTION is_readable, file_spec, EXCPT_COND = excpt_cond
    ;         EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',  >' + excpt_cond + '<'
    ;      -1,  >Error 120 in IS_READABLE: Argument filespec is not found.<
-   ;      not found, not a regular file, or unreadable.<
    ;
    ;  REFERENCES: None.
    ;

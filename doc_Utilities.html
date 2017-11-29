@@ -321,7 +321,7 @@ defines the structure &#39;stats&#39;, calls &#39;cor_arrays&#39; and outputs:
 <li><p><strong>Note 1:</strong> The <code>IDL</code> built-in command <code>FILE_LINES</code> counts and returns the total number of lines in a text file. By contrast, routine <code>count_code_lines</code> reports on the number of active or effective code lines, i.e., without counting comments and empty lines.</p></li>
 <li><p><strong>Note 2:</strong> The <code>STRING</code> variable <code>comm_char</code> can be either a scalar or an array, in which case all elements of that array are used in succession to check all possible options. Each element of <code>comm_char</code> can include multiple characters (e.g., to deal with C or PL-1 language conventions such as /* comment */). And if <code>comm_char</code> is set to a null string, this function returns the total number of lines in the file.</p></li>
 <li><p><strong>Note 3:</strong> This routine may not yield the correct number of code lines if comments span multiple lines, each terminated by a <code>&lt;CR&gt;</code> and/or <code>&lt;LF&gt;</code>, without repeating the commenting character sequence on each line. However, a comment written on a single long line, which may appear on multiple lines on screen due to wrapping, would be treated correctly.</p></li>
-<li><p><strong>Note 4:</strong> This function is also usable in other contexts that uses a character string at the start of a line to indicate comments, such as in LaTeX, for instance.</p></li>
+<li><p><strong>Note 4:</strong> This function is also usable in other contexts that use a character string at the start of a line to indicate comments, such as in LaTeX, for instance.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; file_spec = $
@@ -336,6 +336,59 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <ul>
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
+<h2>date_of_year</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes the date (month and day) corresponding to the rank (day number) provided as input.</p></li>
+<li><p><strong>Algorithm:</strong> This function computes the date (month and day) corresponding to the rank (day number) provided as input, either for a common year (if the keyword parameter <code>YEAR</code> is not specified), or for that particular year if it is.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = date_of_year(day_of_year, month, day, YEAR = year, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>day_of_year {INT} [I]:</code> The rank (day number) of a day in a year, a value expected to be in the range [1, 365] for a common year, or [1, 366] for a leap year.</p></li>
+<li><p><code>month {INT} [O]:</code> The month in which this day falls.</p></li>
+<li><p><code>day {INT} [I]:</code> The day within that month.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>YEAR = year {INT} [I] (Default: None):</code> The optional year number.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function provides the month and day numbers corresponding to the input argument <code>day_of_year</code> to the calling routine through its output positional parameters, returns <code>0</code> and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input positional parameter <code>day_of_year</code> is not of numeric type.</p></li>
+<li><p>Error 120: Input positional parameter <code>day_of_year</code> is invalid.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function cannot test and adjust for leap year if the year is not specified, so in the absence of the input keyword parameter <code>YEAR = year</code>, or if the specified year is not a leap year, the value <code>day_of_year = 366</code> is considered in error.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = date_of_year(60, month, day, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;month = &#39;, month, &#39; and day = &#39;, day
+month =        3 and day =        1
+
+IDL&gt; res = date_of_year(60, month, day, YEAR = 2004, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;month = &#39;, month, &#39; and day = &#39;, day
+month =        2 and day =       29</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2017&#8211;11&#8211;10: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2017&#8211;-11&#8211;-20: Version 1.0 &#8212;&#8211; Initial public release.</p></li>
 </ul></li>
 </ul>
 <h2>day_of_year</h2>
@@ -365,9 +418,9 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <li><p>Error 110: Positional parameter <code>month</code> is not a scalar variable of type numeric.</p></li>
 <li><p>Error 120: Positional parameter <code>month</code> is invalid: Must be contained in [1, 12].</p></li>
 <li><p>Error 130: Keyword parameter <code>year</code> is not a scalar variable of type numeric.</p></li>
-<li><p>Error 140: Keyword parameter <code>year</code> is invalid: Must be contained within [1582, 10000].</p></li>
+<li><p>Error 140: Keyword parameter <code>year</code> is invalid: Must be contained within [1582, 2050].</p></li>
 <li><p>Error 150: Positional parameter <code>day</code> is not a scalar variable of type numeric.</p></li>
-<li><p>Error 160: Positional parameter <code>day</code> is invalid: Must be contained in [1, num_days[month]].</p></li>
+<li><p>Error 160: Positional parameter <code>day</code> is invalid: Must be contained in the interval [1, num_days[month]].</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -479,7 +532,7 @@ excpt_cond = Error 110 in FIRST_CHAR: Argument must be of type STRING.</code></p
 <ul>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
-<li><p><strong>Returned value type:</strong> <code>INTEGER</code> [or N/A].</p></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
 <li><p>If no exception condition has been detected, this function returns the argument <code>dir_spec</code> duly terminated by the appropriate path separator, and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
@@ -498,7 +551,7 @@ excpt_cond = Error 110 in FIRST_CHAR: Argument must be of type STRING.</code></p
 </ul></li>
 <li><p><strong>Remarks:</strong> None.</p></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; PRINT, force_pathsep(&#39;~/Desktop&#39;)
+<pre><code>IDL&gt; PRINT, force_pathsep(&#39;   ~/Desktop   &#39;)
 ~/Desktop/
 
 IDL&gt; PRINT, force_pathsep(&#39;~/Desktop/&#39;)
@@ -814,8 +867,7 @@ is not of type string.&lt;
 IDL&gt; rc = is_readable(&#39;~/Desktop/junkfile&#39;, $
    EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,  &gt;&#39; + excpt_cond + &#39;&lt;&#39;
--1,  &gt;Error 120 in IS_READABLE: Argument filespec is not found.&lt;
-not found, not a regular file, or unreadable.&lt;</code></pre></li>
+-1,  &gt;Error 120 in IS_READABLE: Argument filespec is not found.&lt;</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -969,8 +1021,10 @@ IDL&gt; PRINT, last_char(conc)
 d
 
 IDL&gt; pi = 3.14
-IDL&gt; PRINT, last_char(pi)
-0
+IDL&gt; res = last_char(pi, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &gt;&#39; + res + &#39;&lt; and excpt_cond = &#39; + excpt_cond
+res = &gt;&lt; and excpt_cond = Error 110 in LAST_CHAR: Argument must be
+of type STRING.
 
 IDL&gt; PRINT, last_char(xyz)
 % STRLEN: Variable is undefined: ARG_STR.
@@ -985,7 +1039,7 @@ IDL&gt; PRINT, last_char(xyz)
 <h2>oom</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This routine returns an integer value representing the order of magnitude of the argument <code>arg</code> in the optional logarithmic base <code>base</code> (10 by default).</p></li>
-<li><p><strong>Algorithm:</strong> The input positional parameters <code>arg</code> and the input keyword parameter <code>base</code> (if provided) must both be strictly positive numbers, in which case this function returns <code>FLOOR(alogb(arg, base))</code>. If either is not strictly positive, the function returns &#8217;NaN&#8217; as well as an exception condition.</p></li>
+<li><p><strong>Algorithm:</strong> The input positional parameters <code>arg</code> and the input keyword parameter <code>base</code> (if provided) must both be strictly positive numbers, in which case this function returns <code>FLOOR(alogb(arg, base))</code>. If either is not strictly positive, the function returns <code>NaN</code> as well as an exception condition.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = oom(arg, BASE = base, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
@@ -1054,23 +1108,25 @@ strictly positive.</code></pre></li>
 <h2>percentile</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function estimates the sample value <code>thresh</code> of the specified percentile <code>per</code> in the input <code>array</code> and returns some basic statistical information on that <code>array</code>, which may contain missing values and may but does not need to be sorted in ascending order.</p></li>
-<li><p><strong>Algorithm:</strong> This function determines the sample value corresponding to the desired percentile <code>per</code> by either selecting a particular item of <code>array</code>, if it corresponds exactly, or interpolates between two <code>array</code> sample values otherwise. If missing values may be present in <code>array</code> (i.e., input keyword parameter AMISS is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function determines the sample value corresponding to the desired percentile <code>per</code> by either selecting a particular item of <code>array</code>, if it corresponds exactly, or interpolates between two <code>array</code> sample values otherwise. If missing values may be present in <code>array</code> (i.e., input keyword parameter <code>AMISS</code> is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = percentile(per, array, amin, amax, thresh, AMISS = amiss, IGN_BEL_STR = ign_bel_str, IGN_ABO_STR = ign_abo_str, ASORT = asort, COUNT = count, DOUBLE = double, EXCPT_COND = excpt_cond</code>)</p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>per {FLOAT} [I]:</code> The desired percentile, a decimal number between 0.0 and 1.0.</p></li>
 <li><p><code>array {FLOAT array} [I]:</code> The statistical sample from which the percentile needs to be estimated.</p></li>
-<li><p><code>amin {FLOAT} [O]:</code> The minimum value of array, within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
-<li><p><code>amax {FLOAT} [O]:</code> The maximum value of array, within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
+<li><p><code>amin {FLOAT} [O]:</code> The minimum value of array, within the allowed range<br />
+<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
+<li><p><code>amax {FLOAT} [O]:</code> The maximum value of array, within the allowed range<br />
+<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these arguments are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
 <li><p><code>thresh {FLOAT} [O]:</code> The threshold value in the given array, within the allowed range <code>[FLOAT(ign_bel_str),FLOAT(ign_abo_str)]</code>, if specified, such that <code>per</code> percents of the sorted array are below or equal to thresh.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>AMISS = amiss {INTEGER} [I]:</code> Flag indicating whether the array contains (<code>1</code>) or does not contain (<code>0</code>) missing values. If missing values are present in <code>array</code>, they are assumed to be strictly smaller than the numerical equivalent of <code>ign_bel_str</code> or strictly larger than the numerical equivalent of <code>ign_abo_str</code>.</p></li>
-<li><p><code>IGN_BEL_STR = ign_bel_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>amiss</code> keyword has been set, this keyword is mandatory and all array values strictly lower than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>amiss</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
-<li><p><code>IGN_ABO_STR = ign_abo_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>amiss</code> keyword has been set, this keyword is mandatory and all array values strictly higher than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>amiss</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
+<li><p><code>IGN_BEL_STR = ign_bel_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly lower than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>AMISS</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
+<li><p><code>IGN_ABO_STR = ign_abo_str {STRING} [I]:</code> Threshold value, provided as a string: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly higher than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>AMISS</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
 <li><p><code>ASORT = asort {INTEGER} [I]:</code> Flag indicating whether <code>array</code> is already sorted in ascending order (<code>1</code>) or not (<code>0</code>).</p></li>
-<li><p><code>COUNT = count {LONG} [O]:</code> If the keyword parameter <code>AMISS = amiss</code> is not set, <code>count</code> is the number of elements of <code>array</code>. If the keyword parameter <code>AMISS = amiss</code> is set, <code>count</code> reports on the number of non-missing elements in <code>array</code> that were considered in the estimation of the percentile <code>thresh</code> (i.e., the number of <code>array</code> elements within the range<br />
+<li><p><code>COUNT = count {LONG} [O]:</code> If the keyword parameter <code>AMISS</code> is not set, <code>count</code> is the number of elements of <code>array</code>. If the keyword parameter <code>AMISS</code> is set, <code>count</code> reports on the number of non-missing elements in <code>array</code> that were considered in the estimation of the percentile <code>thresh</code> (i.e., the number of <code>array</code> elements within the range<br />
 <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>.</p></li>
 <li><p><code>DOUBLE = double {INTEGER} [I]:</code> Flag requesting explicitly (<code>1</code>) that computations be carried out in double precision or not (<code>0</code>).</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
@@ -1089,8 +1145,8 @@ strictly positive.</code></pre></li>
 <li><p>Error 110: The requested percentile is not within [0.0, 1.0].</p></li>
 <li><p>Error 120: Input argument <code>array</code> is not an array or not numeric.</p></li>
 <li><p>Error 130: Input argument <code>array</code> contains less than 4 elements.</p></li>
-<li><p>Error 140: Keyword AMISS was set but keyword IGN_BEL_STR was not.</p></li>
-<li><p>Error 150: Keyword AMISS was set but keyword IGN_ABO_STR was not.</p></li>
+<li><p>Error 140: Keyword AMISS was set but keyword <code>IGN_BEL_STR</code> was not.</p></li>
+<li><p>Error 150: Keyword AMISS was set but keyword <code>IGN_ABO_STR</code> was not.</p></li>
 <li><p>Error 160: Input <code>array</code> contains less than 2 non-missing values.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
@@ -1302,7 +1358,7 @@ excpt_cond = Error 100 in set_value_range: Routine must be
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> This function is useful to set the time axis on time series plots so that the graphic display includes full civilian years.</p></li>
+<li><p><strong>Note 1:</strong> This function is useful to set the time axis on time series plots so that the graphic display includes full common years.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; jul1 = JULDAY(2, 24, 2000)
@@ -1374,7 +1430,7 @@ excpt_cond = Error 1000 in set_date_range:
 4ea226bae70b6dc623a62314486f7846ed5e458a0718082964925e735f2823ea</code></pre></li>
 <li><p><strong>References:</strong></p>
 <ul>
-<li><p>Web page: <code>https://en.wikipedia.org/wiki/SHA-2</code></p></li>
+<li><p>Web page: <code>https://en.wikipedia.org/wiki/SHA-2</code>.</p></li>
 </ul></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -1488,7 +1544,7 @@ This is a title
 <h2>strstr</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function converts the value of the alphanumeric positional parameter <code>arg</code> into a string without any white space in the front or at the back.</p></li>
-<li><p><strong>Algorithm:</strong> This routine checks that arg is of type alphanumeric before converting it to a string and removing any white space in the front or back.</p></li>
+<li><p><strong>Algorithm:</strong> This routine checks that the input positional parameter <code>arg</code> is of type alphanumeric before converting it to a string and removing any white space in the front or back.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = strstr(arg, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
@@ -1522,7 +1578,7 @@ This is a title
 <li><p><strong>Note 1:</strong> Argument <code>arg</code> can be an array, in which case each array element is converted into a string without any blank space in the front or at the back.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>[IDL&gt; pi = 3.14159
+<pre><code>IDL&gt; pi = 3.14159
 IDL&gt; PRINT, pi
       3.14159
 IDL&gt; res = strstr(pi)
@@ -1558,7 +1614,7 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt
 <h2>today</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function returns today&#8217;s date and time as a string in one of the following formats: default (keyword <code>FMT</code> not set), <code>iso</code>, <code>nice</code>, <code>usa</code> or <code>ymd</code>.</p></li>
-<li><p><strong>Algorithm:</strong> This routine implements some of the recommendations by World Wide Web Consortium (W3C) regarding simplified formats to represent dates and times, as provided originally by the ISO 8601 standard. It relies on the IDL function SYSTIME to generate the information (in IDL&#8217;s format) and reformats the result as described below.</p></li>
+<li><p><strong>Algorithm:</strong> This routine implements some of the recommendations by World Wide Web Consortium (W3C) regarding simplified formats to represent dates and times, as provided originally by the ISO 8601 standard. It relies on the <code>IDL</code> function <code>SYSTIME</code> to generate the information (in <code>IDL</code>&#8217;s format) and reformats the result as described below.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = today(FMT = fmt)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong> None.</p></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>

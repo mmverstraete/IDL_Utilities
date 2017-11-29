@@ -30,14 +30,16 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      percentile needs to be estimated.
    ;
    ;  *   amin {FLOAT} [O]: The minimum value of array, within the allowed
-   ;      range [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these
-   ;      arguments are provided, or within the whole array otherwise.
-   ;      DOUBLE precision equivalents are used if required.
+   ;      range
+   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these arguments are
+   ;      provided, or within the whole array otherwise. DOUBLE precision
+   ;      equivalents are used if required.
    ;
    ;  *   amax {FLOAT} [O]: The maximum value of array, within the allowed
-   ;      range [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these
-   ;      arguments are provided, or within the whole array otherwise.
-   ;      DOUBLE precision equivalents are used if required.
+   ;      range
+   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these arguments are
+   ;      provided, or within the whole array otherwise. DOUBLE precision
+   ;      equivalents are used if required.
    ;
    ;  *   thresh {FLOAT} [O]: The threshold value in the given array,
    ;      within the allowed range
@@ -53,30 +55,30 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      larger than the numerical equivalent of ign_abo_str.
    ;
    ;  *   IGN_BEL_STR = ign_bel_str {STRING} [I]: Threshold value,
-   ;      provided as a string: If the amiss keyword has been set, this
+   ;      provided as a string: If the AMISS keyword has been set, this
    ;      keyword is mandatory and all array values strictly lower than
    ;      the numerical equivalent to that string are ignored for the
-   ;      purpose of computing statistics and thresh. If the amiss keyword
+   ;      purpose of computing statistics and thresh. If the AMISS keyword
    ;      has not been set, this keyword is ignored. See the notes below
    ;      for additional information.
    ;
    ;  *   IGN_ABO_STR = ign_abo_str {STRING} [I]: Threshold value,
-   ;      provided as a string: If the amiss keyword has been set, this
+   ;      provided as a string: If the AMISS keyword has been set, this
    ;      keyword is mandatory and all array values strictly higher than
    ;      the numerical equivalent to that string are ignored for the
-   ;      purpose of computing statistics and thresh. If the amiss keyword
+   ;      purpose of computing statistics and thresh. If the AMISS keyword
    ;      has not been set, this keyword is ignored. See the notes below
    ;      for additional information.
    ;
    ;  *   ASORT = asort {INTEGER} [I]: Flag indicating whether array is
    ;      already sorted in ascending order (1) or not (0).
    ;
-   ;  *   COUNT = count {LONG} [O]: If the keyword parameter AMISS = amiss
-   ;      is not set, count is the number of elements of array. If the
-   ;      keyword parameter AMISS = amiss is set, count reports on the
-   ;      number of non-missing elements in array that were considered in
-   ;      the estimation of the percentile thresh (i.e., the number of
-   ;      array elements within the range
+   ;  *   COUNT = count {LONG} [O]: If the keyword parameter AMISS is not
+   ;      set, count is the number of elements of array. If the keyword
+   ;      parameter AMISS is set, count reports on the number of
+   ;      non-missing elements in array that were considered in the
+   ;      estimation of the percentile thresh (i.e., the number of array
+   ;      elements within the range
    ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)].
    ;
    ;  *   DOUBLE = double {INTEGER} [I]: Flag requesting explicitly (1)

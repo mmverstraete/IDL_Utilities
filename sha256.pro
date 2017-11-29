@@ -60,7 +60,7 @@ FUNCTION sha256, file_spec, EXCPT_COND = excpt_cond
    ;
    ;  REFERENCES:
    ;
-   ;  *   Web page: https://en.wikipedia.org/wiki/SHA-2
+   ;  *   Web page: https://en.wikipedia.org/wiki/SHA-2.
    ;
    ;  VERSIONING:
    ;

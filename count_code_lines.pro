@@ -89,7 +89,7 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;      which may appear on multiple lines on screen due to wrapping,
    ;      would be treated correctly.
    ;
-   ;  *   NOTE 4: This function is also usable in other contexts that uses
+   ;  *   NOTE 4: This function is also usable in other contexts that use
    ;      a character string at the start of a line to indicate comments,
    ;      such as in LaTeX, for instance.
    ;

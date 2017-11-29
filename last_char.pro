@@ -64,8 +64,10 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;      d
    ;
    ;      IDL> pi = 3.14
-   ;      IDL> PRINT, last_char(pi)
-   ;      0
+   ;      IDL> res = last_char(pi, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'res = >' + res + '< and excpt_cond = ' + excpt_cond
+   ;      res = >< and excpt_cond = Error 110 in LAST_CHAR: Argument must be
+   ;      of type STRING.
    ;
    ;      IDL> PRINT, last_char(xyz)
    ;      % STRLEN: Variable is undefined: ARG_STR.

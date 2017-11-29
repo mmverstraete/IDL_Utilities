@@ -24,7 +24,7 @@ FUNCTION force_path_sep, dir_spec, EXCPT_COND = excpt_cond
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER [or N/A].
+   ;  RETURNED VALUE TYPE: STRING.
    ;
    ;  OUTCOME:
    ;
@@ -56,7 +56,7 @@ FUNCTION force_path_sep, dir_spec, EXCPT_COND = excpt_cond
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> PRINT, force_pathsep('~/Desktop')
+   ;      IDL> PRINT, force_pathsep('   ~/Desktop   ')
    ;      ~/Desktop/
    ;
    ;      IDL> PRINT, force_pathsep('~/Desktop/')

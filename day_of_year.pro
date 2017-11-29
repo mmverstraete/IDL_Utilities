@@ -62,13 +62,13 @@ FUNCTION day_of_year, month, day, YEAR = year, EXCPT_COND = excpt_cond
    ;      type numeric.
    ;
    ;  *   Error 140: Keyword parameter year is invalid: Must be contained
-   ;      within [1582, 10000].
+   ;      within [1582, 2050].
    ;
    ;  *   Error 150: Positional parameter day is not a scalar variable of
    ;      type numeric.
    ;
    ;  *   Error 160: Positional parameter day is invalid: Must be
-   ;      contained in [1, num_days[month]].
+   ;      contained in the interval [1, num_days[month]].
    ;
    ;  DEPENDENCIES:
    ;
@@ -241,7 +241,7 @@ FUNCTION day_of_year, month, day, YEAR = year, EXCPT_COND = excpt_cond
       ;  Return to the calling routine with an error message if year is not
       ;  within the allowed range, restricted by is_leap and a reasonable
       ;  maximum value for year:
-      IF ((year LT 1582) OR (year GT 10000)) THEN BEGIN
+      IF ((year LT 1582) OR (year GT 2050)) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 140

@@ -57,7 +57,7 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;  REMARKS:
    ;
    ;  *   NOTE 1: This function is useful to set the time axis on time
-   ;      series plots so that the graphic display includes full civilian
+   ;      series plots so that the graphic display includes full common
    ;      years.
    ;
    ;  EXAMPLES:

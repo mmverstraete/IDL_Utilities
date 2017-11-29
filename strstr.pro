@@ -5,9 +5,9 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;  positional parameter arg into a string without any white space in
    ;  the front or at the back.
    ;
-   ;  ALGORITHM: This routine checks that arg is of type alphanumeric
-   ;  before converting it to a string and removing any white space in the
-   ;  front or back.
+   ;  ALGORITHM: This routine checks that the input positional parameter
+   ;  arg is of type alphanumeric before converting it to a string and
+   ;  removing any white space in the front or back.
    ;
    ;  SYNTAX: res = strstr(arg, EXCPT_COND = excpt_cond)
    ;
@@ -61,7 +61,7 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;
    ;  EXAMPLES:
    ;
-   ;      [IDL> pi = 3.14159
+   ;      IDL> pi = 3.14159
    ;      IDL> PRINT, pi
    ;            3.14159
    ;      IDL> res = strstr(pi)

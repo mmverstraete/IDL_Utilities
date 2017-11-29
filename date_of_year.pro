@@ -13,12 +13,12 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
 
    ;Sec-Doc
    ;  PURPOSE: This function computes the date (month and day)
-   ;  corresponding to the the rank (day number) provided as input
+   ;  corresponding to the rank (day number) provided as input.
    ;
    ;  ALGORITHM: This function computes the date (month and day)
-   ;  corresponding to the the rank (day number) provided as input, either
-   ;  for a common year (if the keyword parameter YEAR is not specified),
-   ;  or for that particular year if it is.
+   ;  corresponding to the rank (day number) provided as input, either for
+   ;  a common year (if the keyword parameter YEAR is not specified), or
+   ;  for that particular year if it is.
    ;
    ;  SYNTAX:
    ;  rc = date_of_year(day_of_year, month, day, YEAR = year, EXCPT_COND = excpt_cond)
@@ -82,7 +82,13 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;
    ;  EXAMPLES:
    ;
-   ;      [Insert the command and its outcome]
+   ;      IDL> res = date_of_year(60, month, day, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'month = ', month, ' and day = ', day
+   ;      month =        3 and day =        1
+   ;
+   ;      IDL> res = date_of_year(60, month, day, YEAR = 2004, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'month = ', month, ' and day = ', day
+   ;      month =        2 and day =       29
    ;
    ;  REFERENCES: None.
    ;
