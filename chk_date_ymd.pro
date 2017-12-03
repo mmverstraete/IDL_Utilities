@@ -1,9 +1,9 @@
 FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function takes the input STRING argument date,
-   ;  formatted as YYYY-MM-DD, and provides the year, month and day values
-   ;  as output numeric arguments.
+   ;  PURPOSE: This function takes the STRING argument date, formatted as
+   ;  YYYY-MM-DD, and provides the year, month and day values as output
+   ;  numeric arguments.
    ;
    ;  ALGORITHM: This function checks whether the input argument date is a
    ;  10-character long variable of type STRING, splits it on character -,

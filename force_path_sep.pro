@@ -8,8 +8,8 @@ FUNCTION force_path_sep, dir_spec, EXCPT_COND = excpt_cond
    ;  terminated by that character, the function returns the input
    ;  argument.
    ;
-   ;  ALGORITHM: This function relies on the IDL built-in functions
-   ;  STRTRIM() and PATH_SEP().
+   ;  ALGORITHM: This function relies on IDL built-in functions STRTRIM()
+   ;  and PATH_SEP() to deliver its outcome.
    ;
    ;  SYNTAX: res = force_path_sep(dir_spec, EXCPT_COND = excpt_cond)
    ;

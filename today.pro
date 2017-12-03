@@ -31,9 +31,9 @@ FUNCTION today, FMT = fmt
    ;  *   This function returns today’s date to the calling routine in one
    ;      of the following formats:
    ;
-   ;      -   If the keyword FMT is NOT set (default), or if its value is
-   ;          unrecognized, the current date and time are provided as a
-   ;          string formatted like YYYY-MM-DD_hh:mm:ss.
+   ;      -   If the keyword FMT is NOT set (default), or unrecognized,
+   ;          the current date and time are provided as a string formatted
+   ;          like YYYY-MM-DD_hh:mm:ss.
    ;
    ;      -   If the keyword FMT is set to iso, the current date and time
    ;          are provided as a string formatted like YYYY-MM-DDThh:mm:ss.

@@ -129,7 +129,7 @@ arg_str = south africa</code></pre></li>
 </ul>
 <h2>chk_date_ymd</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function takes the input <code>STRING</code> argument <code>date</code>, formatted as <code>YYYY-MM-DD</code>, and provides the <code>year</code>, <code>month</code> and <code>day</code> values as output numeric arguments.</p></li>
+<li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> argument <code>date</code>, formatted as <code>YYYY-MM-DD</code>, and provides the <code>year</code>, <code>month</code> and <code>day</code> values as output numeric arguments.</p></li>
 <li><p><strong>Algorithm:</strong> This function checks whether the input argument <code>date</code> is a 10-character long variable of type <code>STRING</code>, splits it on character <code>-</code>, and checks the numerical validity of the 3 elements: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2050, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than 31.</p></li>
 <li><p><strong>Syntax:</strong> <code>rc = chk_date_ymd(date, year, month, day, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -522,7 +522,7 @@ excpt_cond = Error 110 in FIRST_CHAR: Argument must be of type STRING.</code></p
 <h2>force_path_sep</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function trims the argument <code>dir_spec</code> of any white space at the front or at the end of the string and ensures that it is terminated by the path segment separator character for the current operating system. If the argument <code>dir_spec</code> is already terminated by that character, the function returns the input argument.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in functions <code>STRTRIM()</code> and <code>PATH_SEP()</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in functions <code>STRTRIM()</code> and <code>PATH_SEP()</code> to deliver its outcome.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = force_path_sep(dir_spec, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
@@ -1182,7 +1182,9 @@ Warning 20 in PERCENTILE: Keyword IGN_ABO_STR, provided as
 numerical value was converted to a STRING. Processing continues.</code></pre></li>
 <li><p><strong>References:</strong></p>
 <ul>
-<li><p>Web page <code>http://www.itl.nist.gov/div898/handbook/prc/section2/prc252.htm</code>, visited on 30 Oct 2017.</p></li>
+<li><p>Web page<br />
+<code>http://www.itl.nist.gov/div898/handbook/prc/section2/prc252.htm</code>,<br />
+visited on 30 Oct 2017.</p></li>
 </ul></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -1626,7 +1628,7 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt
 <ul>
 <li><p>This function returns today&#8217;s date to the calling routine in one of the following formats:</p>
 <ul>
-<li><p>If the keyword <code>FMT</code> is NOT set (default), or if its value is unrecognized, the current date and time are provided as a string formatted like <code>YYYY-MM-DD_hh:mm:ss</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is NOT set (default), or unrecognized, the current date and time are provided as a string formatted like <code>YYYY-MM-DD_hh:mm:ss</code>.</p></li>
 <li><p>If the keyword <code>FMT</code> is set to <code>iso</code>, the current date and time are provided as a string formatted like <code>YYYY-MM-DDThh:mm:ss</code>.</p></li>
 <li><p>If the keyword <code>FMT</code> is set to <code>nice</code>, the current date and time are provided as a string formatted like <code>YYYY-MM-DD at hh:mm:ss</code>.</p></li>
 <li><p>If the keyword <code>FMT</code> is set to <code>usa</code>, the current date is provided as a string formatted like <code>MM DD, YYYY</code>.</p></li>
