@@ -1442,15 +1442,16 @@ excpt_cond = Error 1000 in set_date_range:
 </ul>
 <h2>strcat</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> array argument <code>str_array</code> as input and returns the <code>STRING</code> scalar obtained by concatenating all array elements in their original order, with a single blank space between successive elements.</p></li>
-<li><p><strong>Algorithm:</strong> This function concatenates all elements of <code>str_array</code> into a single <code>STRING</code> which is returned to the calling routine.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = strcat(str_array, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> array argument <code>str_array</code> as input and returns the <code>STRING</code> scalar obtained by concatenating all array elements in their original order, using the optional <code>sep_char</code> character as separator between successive elements.</p></li>
+<li><p><strong>Algorithm:</strong> This function concatenates all elements of <code>str_array</code>, separated by the optional character <code>sep_char</code>, into a single <code>STRING</code> which is returned to the calling routine.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = strcat(str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>str_array {STRING} [I]:</code> A string array.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
+<li><p><code>SEP_CHAR = sep_char {STRING} [I] (Default value: &#8217; &#8217;):</code> Character used to separate the array elements in the output string.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
 <li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
@@ -1464,10 +1465,13 @@ excpt_cond = Error 1000 in set_date_range:
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>str_array</code> is not of type <code>STRING</code>.</p></li>
 <li><p>Error 120: Positional parameter <code>str_array</code> is not an array.</p></li>
+<li><p>Error 130: Keyword parameter <code>sep_char</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 140: Keyword parameter <code>sep_char</code> is not a scalar.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>is_array.pro</code></p></li>
+<li><p><code>is_scalar.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
@@ -1484,7 +1488,13 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res + &#39;&lt;&#39;
 IDL&gt; str_array = [[&#39;This&#39;, &#39;is&#39;, &#39;a&#39;], [&#39;2D&#39;, &#39;string&#39;, &#39;array&#39;]]
 IDL&gt; res = strcat(str_array, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, res
-This is a 2D string array</code></pre></li>
+This is a 2D string array
+
+IDL&gt; str_array = [&#39;P168&#39;, &#39;O068050&#39;, &#39;B110&#39;]
+IDL&gt; sep_char = &#39;_&#39;
+IDL&gt; res = strcat(str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &gt;&#39; + res + &#39;&lt;&#39;
+res = &gt;P168_O068050_B110&lt;</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
