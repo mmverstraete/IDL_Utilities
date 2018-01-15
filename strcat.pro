@@ -1,4 +1,5 @@
-FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
+FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function takes the STRING array argument str_array as
@@ -7,11 +8,12 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;  character as separator between successive elements.
    ;
    ;  ALGORITHM: This function concatenates all elements of str_array,
-   ;  separated by the optional character sep_char, into a single STRING
-   ;  which is returned to the calling routine.
+   ;  separated by the optional character sep_char or a single blank
+   ;  space, into a single STRING which is returned to the calling
+   ;  routine.
    ;
-   ;  SYNTAX:
-   ;  res = strcat(str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = strcat(str_array, SEP_CHAR = sep_char, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -21,6 +23,9 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;
    ;  *   SEP_CHAR = sep_char {STRING} [I] (Default value: ’ ’): Character
    ;      used to separate the array elements in the output string.
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -32,12 +37,16 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;
    ;  *   If no exception condition has been detected, this function
    ;      returns a string scalar and the output keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null string and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -75,13 +84,14 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;      >Hello World<
    ;
    ;      IDL> str_array = [['This', 'is', 'a'], ['2D', 'string', 'array']]
-   ;      IDL> res = strcat(str_array, EXCPT_COND = excpt_cond)
+   ;      IDL> res = strcat(str_array, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;      This is a 2D string array
    ;
    ;      IDL> str_array = ['P168', 'O068050', 'B110']
    ;      IDL> sep_char = '_'
-   ;      IDL> res = strcat(str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond)
+   ;      IDL> res = strcat(str_array, SEP_CHAR = sep_char, $
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'res = >' + res + '<'
    ;      res = >P168_O068050_B110<
    ;
@@ -92,6 +102,8 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;  *   2017–07–18: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -129,63 +141,78 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return string and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_string = ''
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): str_array.'
-      RETURN, return_string
-   ENDIF
-
-   ;  Check that the argument 'str_array' is of type STRING:
-   IF (is_string(str_array) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument str_array is not of type STRING.'
-      RETURN, return_string
-   ENDIF
-
-   ;  Check that the argument 'str_array' is an array:
-   IF (is_array(str_array) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument str_array is not an array.'
-      RETURN, return_string
-   ENDIF
-
-   IF KEYWORD_SET(sep_char) THEN BEGIN
-   ;  Check that the optional keyword argument 'sep_char' is of type STRING:
-      IF (is_string(sep_char) NE 1) THEN BEGIN
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         error_code = 130
+         error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Keyword parameter sep_char is not of type STRING.'
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): str_array.'
          RETURN, return_string
       ENDIF
 
-   ;  Check that the optional keyword argument 'sep_char' is a scalar:
-      IF (is_scalar(sep_char) NE 1) THEN BEGIN
+   ;  Return to the calling routine with an error message if argument
+   ;  'str_array' is not of type STRING:
+      IF (is_string(str_array) NE 1) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         error_code = 140
+         error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Keyword parameter sep_char is not a scalar.'
+            ': Argument str_array is not of type STRING.'
          RETURN, return_string
+      ENDIF
+
+   ;  Return to the calling routine with an error message if argument
+   ;  'str_array' is not an array:
+      IF (is_array(str_array) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument str_array is not an array.'
+         RETURN, return_string
+      ENDIF
+   ENDIF
+
+   IF KEYWORD_SET(sep_char) THEN BEGIN
+
+      IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if the optional
+   ;  keyword argument 'sep_char' is not of type STRING:
+         IF (is_string(sep_char) NE 1) THEN BEGIN
+            info = SCOPE_TRACEBACK(/STRUCTURE)
+            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+            error_code = 130
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': Keyword parameter sep_char is not of type STRING.'
+            RETURN, return_string
+         ENDIF
+
+   ;  Return to the calling routine with an error message if the optional
+   ;  keyword argument 'sep_char' is not a scalar:
+         IF (is_scalar(sep_char) NE 1) THEN BEGIN
+            info = SCOPE_TRACEBACK(/STRUCTURE)
+            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+            error_code = 140
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': Keyword parameter sep_char is not a scalar.'
+            RETURN, return_string
+         ENDIF
       ENDIF
    ENDIF ELSE BEGIN
 
@@ -203,6 +230,7 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, EXCPT_COND = excpt_cond
 
    ;  Otherwise, assemble the result by concatenating all elements of
    ;  'str_array', separated by the specified or default separation character:
+      return_string = ''
       FOR i = 0, n_str - 2 DO BEGIN
          return_string = return_string + str_array[i] + sep_char
       ENDFOR

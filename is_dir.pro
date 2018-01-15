@@ -1,19 +1,25 @@
-FUNCTION is_dir, dir_spec, EXCPT_COND = excpt_cond
+FUNCTION is_dir, dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns 1 if argument dir_spec is a
-   ;  directory, and 0 otherwise.
+   ;  directory, and 0 if that argument is not a directory, and -1 if an
+   ;  exception condition has been encountered, but only if the optional
+   ;  input keyword parameter DEBUG has been set.
    ;
    ;  ALGORITHM: This function relies on the IDL built-in function
    ;  FILEINFO().
    ;
-   ;  SYNTAX: res = is_dir(dir_spec, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = is_dir(dir_spec, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   dir_spec {STRING} [I]: An arbitrary file specification.
+   ;  *   dir_spec {STRING} [I]: An arbitrary directory specification.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -26,11 +32,15 @@ FUNCTION is_dir, dir_spec, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected, this function
    ;      returns 1 if the argument dir_spec is a directory, or 0 if it is
    ;      not, and the output keyword parameter excpt_cond is set to a
-   ;      null string.
+   ;      null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns -1, and the output keyword parameter excpt_cond contains
-   ;      a message about the exception condition encountered.
+   ;      a message about the exception condition encountered, if the
+   ;      optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -51,16 +61,16 @@ FUNCTION is_dir, dir_spec, EXCPT_COND = excpt_cond
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> dir_spec = '/Users/mmverstraete/Desktop'
+   ;      IDL> dir_spec = '~/Desktop'
    ;      IDL> PRINT, is_dir(dir_spec)
    ;             1
    ;
-   ;      IDL> dir_spec = '/Users/mmverstraete/Pictures/Scan_1.jpeg'
-   ;      IDL> PRINT, is_dir(dir_spec)
+   ;      IDL> dir_spec = '~/Documents/MySoftware/Test_dir/Test_file.txt'
+   ;      IDL> PRINT, is_dir(dir_spec, /DEBUG, EXCPT_COND = excpt_cond)
    ;             0
    ;
    ;      IDL> dir_spec = '/Volumes/MISR_Data*/P*/'
-   ;      IDL> PRINT, is_dir(dir_spec)
+   ;      IDL> PRINT, is_dir(dir_spec, DEBUG = 1, EXCPT_COND = excpt_cond)
    ;             1
    ;
    ;  REFERENCES: None.
@@ -68,6 +78,8 @@ FUNCTION is_dir, dir_spec, EXCPT_COND = excpt_cond
    ;  VERSIONING:
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -105,32 +117,40 @@ FUNCTION is_dir, dir_spec, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and error message of the function:
-   ret_code = -1
+   ;  Initialize the default return code and the exception condition message:
+   return_code = -1
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): dir_spec.'
-      RETURN, ret_code
-   ENDIF
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): dir_spec.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  'dir_spec' is not of type STRING:
-   IF (is_string(dir_spec) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + 'Argument must be of type STRING.'
-      RETURN, ret_code
+      IF (is_string(dir_spec) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + 'Argument must be of type STRING.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  Assess whether the argument 'dir_spec' is a directory or not:

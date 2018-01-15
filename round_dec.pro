@@ -1,4 +1,4 @@
-FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
+FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function rounds the argument arg to a new
@@ -28,7 +28,8 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;      expression, its INT value, as returned by the FIX built-in
    ;      function is used.
    ;
-   ;  SYNTAX: res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+   ;  SYNTAX:
+   ;  res = round_dec(arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -42,6 +43,9 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -53,17 +57,23 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected and the input
    ;      argument arg is of one of the INTEGER types, this function
    ;      return the value arg itself and the output keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If no exception condition has been detected and the input
    ;      argument arg is either of type FLOAT or DOUBLE, this function
    ;      returns a numeric approximation of the input argument arg,
    ;      rounded to n_dec significant decimals, and the output keyword
-   ;      parameter excpt_cond is set to a null string.
+   ;      parameter excpt_cond is set to a null string, if the optional
+   ;      input keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns NaN, and the output keyword parameter excpt_cond
-   ;      contains a message about the exception condition encountered.
+   ;      contains a message about the exception condition encountered, if
+   ;      the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -96,21 +106,21 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;
    ;      IDL> arg = 12.345678
    ;      IDL> n_dec = 2
-   ;      IDL> res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+   ;      IDL> res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'arg = ', arg, 'n_dec = ', n_dec, 'res = ', res, $
    ;      > FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)'
    ;      arg = 12.3456783   n_dec = 2   res = 12.3500004
    ;
    ;      IDL> arg = 12.987654
    ;      IDL> n_dec = 1
-   ;      IDL> res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+   ;      IDL> res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'arg = ', arg, 'n_dec = ', n_dec, 'res = ', res, $
    ;      > FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)'
    ;      arg = 12.9876537   n_dec = 1   res = 13.0000000
    ;
    ;      IDL> arg = [1.23456, 2.34567]
    ;      IDL> n_dec = 1
-   ;      IDL> res = round_dec(arg, n_dec, EXCPT_COND = excpt_cond)
+   ;      IDL> res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, arg
    ;            1.23456      2.34567
    ;      IDL> PRINT, res
@@ -121,6 +131,8 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;  VERSIONING:
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -158,31 +170,40 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the error message:
+   ;  Initialize the default return code and the exception condition message:
+   return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 2
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): arg, n_dec.'
-      RETURN, !VALUES.F_NAN
-   ENDIF
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): arg, n_dec.'
+         RETURN, !VALUES.F_NAN
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  n_dec is not of a numeric type:
-   IF (is_numeric(n_dec) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input positional parameter n_dec must be numeric.'
-      RETURN, !VALUES.F_NAN
+      IF (is_numeric(n_dec) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter n_dec must be numeric.'
+         RETURN, !VALUES.F_NAN
+      ENDIF
    ENDIF
 
    ;  Ensure that the argument n_dec is of type INT:
@@ -219,11 +240,13 @@ FUNCTION round_dec, arg, n_dec, EXCPT_COND = excpt_cond
    ;  In all other cases (e.g., COMPLEX, STRUCT, etc.), the input argument
    ;  arg is not numeric or cannot be simply rounded to a set number of
    ;  decimals:
-   info = SCOPE_TRACEBACK(/STRUCTURE)
-   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-   error_code = 120
-   excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-      ': Input argument arg must be either FLOAT or DOUBLE.'
+   IF (debug) THEN BEGIN
+      info = SCOPE_TRACEBACK(/STRUCTURE)
+      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+      error_code = 120
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': Input argument arg must be either FLOAT or DOUBLE.'
+   ENDIF
    RETURN, !VALUES.F_NAN
 
 END

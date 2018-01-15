@@ -1,21 +1,23 @@
-FUNCTION strstr, arg, EXCPT_COND = excpt_cond
+FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function converts the value of the alphanumeric
    ;  positional parameter arg into a string without any white space in
    ;  the front or at the back.
    ;
-   ;  ALGORITHM: This routine checks that the input positional parameter
-   ;  arg is of type alphanumeric before converting it to a string and
-   ;  removing any white space in the front or back.
+   ;  ALGORITHM: This routine converts the input positional parameter arg
+   ;  to a STRING and strips any white space in the front or back.
    ;
-   ;  SYNTAX: res = strstr(arg, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = strstr(arg, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   arg {alphanumeric} [I]: The alphanumeric input argument.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -28,11 +30,14 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected, this function
    ;      returns the string representation of argument arg to the calling
    ;      routine, and the keyword parameter excpt_cond is set to a null
-   ;      string.
+   ;      string, if the optional input keyword parameter DEBUG is set and
+   ;      if the optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null string and the keyword parameter excpt_cond
-   ;      contains a message about the exception condition encountered.
+   ;      contains a message about the exception condition encountered, if
+   ;      the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -76,7 +81,7 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;      Hello
    ;
    ;      IDL> a = CREATE_STRUCT('A', 1, 'B', 'xxx')
-   ;      IDL> res = strstr(a, EXCPT_COND = excpt_cond)
+   ;      IDL> res = strstr(a, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, '>' + res + '<'
    ;      ><
    ;      IDL> PRINT, excpt_cond
@@ -95,6 +100,8 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;  *   2017–07–05: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -132,31 +139,38 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = ''
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      excpt_cond = 'Error 100 in routine ' + rout_name + $
-         ': Routine must be called with ' + $
-         STRTRIM(STRING(n_reqs), 2) + ' positional parameter(s): arg.'
-     RETURN, return_code
-   ENDIF
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         excpt_cond = 'Error 100 in routine ' + rout_name + $
+            ': Routine must be called with ' + $
+            STRTRIM(STRING(n_reqs), 2) + ' positional parameter(s): arg.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if arg is not an
    ;  alphanumeric expression:
-   IF (is_alphanum(arg) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      excpt_cond = 'Error 110 in routine ' + rout_name + $
-         ': Argument arg is not an alphanumeric expression.'
-      RETURN, return_code
+      IF (is_alphanum(arg) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         excpt_cond = 'Error 110 in routine ' + rout_name + $
+            ': Argument arg is not an alphanumeric expression.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  If arg is a string, return it without any extraneous white space:
@@ -169,7 +183,8 @@ FUNCTION strstr, arg, EXCPT_COND = excpt_cond
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
    excpt_cond = 'Error 1000 in ' + rout_name + $
-      ': Unexpected condition, check the type of argument arg.'
+      ': Unexpected condition, check the type of argument arg ' + $
+      'as function strstr only accepts alphanumeric arguments.'
    RETURN, return_code
 
 END

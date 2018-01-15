@@ -1,4 +1,5 @@
-FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
+FUNCTION set_value_range, min_val, max_val, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns an ‘optimal’ value range to be used
@@ -11,8 +12,8 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;  increased by about 1/10th of the range between those values, and
    ;  appropriately rounded.
    ;
-   ;  SYNTAX:
-   ;  res = set_value_range(min_val, max_val, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = set_value_range(min_val, max_val, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -23,6 +24,9 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;      dataset, i.e., not considering special codes for missing values.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -35,12 +39,16 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected, this function
    ;      returns the optimal range to plot values within
    ;      [min_val, max_val], and the output keyword parameter excpt_cond
-   ;      is set to a null string.
+   ;      is set to a null string, if the optional input keyword parameter
+   ;      DEBUG is set and if the optional output keyword parameter
+   ;      EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns the dummy range res = [-99.9, -99.9], and the output
    ;      keyword parameter excpt_cond contains a message about the
-   ;      exception condition encountered.
+   ;      exception condition encountered, if the optional input keyword
+   ;      parameter DEBUG is set and if the optional output keyword
+   ;      parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -65,19 +73,22 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> res = set_value_range(0.12, 0.62, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_value_range(0.12, 0.62, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;            0.00000     0.700000
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
    ;      excpt_cond = ><
    ;
-   ;      IDL> res = set_value_range(-2.5, 12.7, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_value_range(-2.5, 12.7, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           -10.0000      20.0000
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
    ;      excpt_cond = ><
    ;
-   ;      IDL> res = set_value_range(15.0, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_value_range(15.0, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           -99.9000     -99.9000
    ;      IDL> PRINT, 'excpt_cond = ' + excpt_cond
@@ -91,6 +102,8 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;  *   2017–07–05: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -128,44 +141,51 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = [-99.9, -99.9]
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 2
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): min_val, max_val.'
-      RETURN, return_code
-   ENDIF
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): min_val, max_val.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if either of the
    ;  arguments min_val or max_val is not numeric:
-   IF ((is_numeric(min_val) NE 1) OR (is_numeric(max_val) NE 1)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Either min_val or max_val is not of numeric type.'
-      RETURN, return_code
-   ENDIF
+      IF ((is_numeric(min_val) NE 1) OR (is_numeric(max_val) NE 1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Either min_val or max_val is not of numeric type.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the actual range
    ;  max_val - min_val is nul:
-   IF (max_val - min_val EQ 0.0) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': The actual range max_val - min_val is nul.'
-      RETURN, return_code
+      IF (max_val - min_val EQ 0.0) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': The actual range max_val - min_val is nul.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  Set the logarithm base to use:
@@ -174,8 +194,9 @@ FUNCTION set_value_range, min_val, max_val, EXCPT_COND = excpt_cond
    ;  Set the increment to expand the new range by 1/10 of the actual range
    ;  on either side of the actual range:
    actual_range = max_val - min_val
-   oom_act_rng = oom(actual_range, EXCPT_COND = excpt_cond)
-   IF (excpt_cond NE '') THEN BEGIN
+   oom_act_rng = oom(actual_range, DEBUG = debug, EXCPT_COND = excpt_cond)
+
+   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 130

@@ -1,4 +1,4 @@
-FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
+FUNCTION strrepeat, str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns a STRING containing n_rep times the
@@ -7,7 +7,8 @@ FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
    ;  ALGORITHM: This function generates and returns an output string
    ;  containing n_rep times the input argument str.
    ;
-   ;  SYNTAX: res = strrepeat(str, n_rep, EXCPT_COND = excpt_cond)
+   ;  SYNTAX:
+   ;  res = strrepeat(str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -43,7 +44,7 @@ FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 120: Positional parameter n_rep is not of type INTEGER.
    ;
-   ;  *   Error 130: Positional parameter n_rep is less than 1.
+   ;  *   Error 130: Positional parameter n_rep is negative.
    ;
    ;  DEPENDENCIES:
    ;
@@ -53,17 +54,23 @@ FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
    ;
    ;  *   strstr.pro
    ;
-   ;  REMARKS: None.
+   ;  REMARKS:
+   ;
+   ;  *   NOTE 1: If the argument n_rep is 1, this function returns a null
+   ;      string.
+   ;
+   ;  *   NOTE 2: If the argument n_rep is 1, this function returns the
+   ;      input argument str.
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> res = strrepeat('--123--', 4, EXCPT_COND = excpt_cond)
+   ;      IDL> res = strrepeat('--123--', 4, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;      --123----123----123----123--
    ;
    ;      IDL> title = 'This is a title'
    ;      IDL> PRINT, title, STRING(10B), strrepeat('-', STRLEN(title), $
-   ;         EXCPT_COND = excpt_cond)
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      This is a title
    ;      ---------------
    ;
@@ -74,6 +81,8 @@ FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
    ;  *   2017–08–01: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -111,52 +120,62 @@ FUNCTION strrepeat, str, n_rep, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = ''
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 2
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): str, n_rep.'
-      RETURN, return_code
-   ENDIF
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): str, n_rep.'
+         RETURN, return_code
+      ENDIF
 
-   ;  Check that the argument 'str' is of type STRING:
-   IF (is_string(str) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument str is not of type STRING.'
-      RETURN, return_code
-   ENDIF
+   ;  Return to the calling routine with an error message if the argument
+   ;  'str' is not of type STRING:
+      IF (is_string(str) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument str is not of type STRING.'
+         RETURN, return_code
+      ENDIF
 
-   ;  Check that the argument 'n_rep' is of one of the INTEGER types:
-   IF (is_integer(n_rep) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument n_rep is not of type INTEGER.'
-      RETURN, return_code
-   ENDIF
+   ;  Return to the calling routine with an error message if the argument
+   ;  'n_rep' is not of one of the INTEGER types:
+      IF (is_integer(n_rep) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument n_rep is not of type INTEGER.'
+         RETURN, return_code
+      ENDIF
 
-   ;  Check that the argument 'n_rep' is strictly positive:
-   IF (n_rep LE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 130
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument n_rep must be larger than 0.'
-      RETURN, return_code
+   ;  Return to the calling routine with an error message if the argument
+   ;  'n_rep' is negative:
+      IF (n_rep LT 0) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument n_rep must not be negative.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  Generate the output string:

@@ -1,21 +1,28 @@
-FUNCTION capitalize, arg_str, EXCPT_COND = excpt_cond
+FUNCTION capitalize, arg_str, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function returns a copy of the input positional
-   ;  parameter with the first character in upper case. The input argument
-   ;  itself is unmodified.
+   ;  PURPOSE: This function returns a copy of the input (scalar or array)
+   ;  positional parameter with the first character in upper case. The
+   ;  input argument itself is unmodified.
    ;
-   ;  ALGORITHM: This function checks the validity of the input positional
-   ;  parameter arg_str and ensures that its first character is upper
-   ;  case.
+   ;  ALGORITHM: This function ensures that the first character of the
+   ;  input (scalar or array) positional parameter arg_str is upper case.
+   ;  If this argument is a string array, each element will be
+   ;  capitalized, and if the argument is a null string or if the first
+   ;  character cannot be capitalized, it is returned unmodified.
    ;
-   ;  SYNTAX: rc = capitalize(arg_str, EXCPT_COND = excpt_cond)
+   ;  SYNTAX:
+   ;  rc = capitalize(arg_str, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   arg_str {STRING} [I]: The string that needs to be capitalized.
+   ;  *   arg_str {STRING} [I]: The (scalar or array) string that needs to
+   ;      be capitalized.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -26,14 +33,18 @@ FUNCTION capitalize, arg_str, EXCPT_COND = excpt_cond
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns a copy of the input argument arg_str with the first
-   ;      character capitalized, and the output keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      returns a copy of the input (scalar or array) argument arg_str
+   ;      with the first character capitalized, and the output keyword
+   ;      parameter excpt_cond is set to a null string, if the optional
+   ;      input keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null STRING, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -41,10 +52,9 @@ FUNCTION capitalize, arg_str, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 110: Positional parameter arg_str is not of type STRING.
    ;
-   ;  *   Error 120: Positional parameter arg_str does not contain at
-   ;      least 1 character.
-   ;
    ;  DEPENDENCIES:
+   ;
+   ;  *   is_array.pro
    ;
    ;  *   is_string.pro
    ;
@@ -53,25 +63,46 @@ FUNCTION capitalize, arg_str, EXCPT_COND = excpt_cond
    ;  REMARKS:
    ;
    ;  *   NOTE 1: This function only modifies the case of the first
-   ;      character of a copy of the input string; the rest of the string
-   ;      is copied verbatim. Hence, if multiple words need to be
-   ;      capitalized, the function needs to be called separately for each
-   ;      word.
+   ;      character of a copy of the input (scalar or array) argument; the
+   ;      rest of the argument is copied verbatim. Hence, if multiple
+   ;      words need to be capitalized in a single string, the function
+   ;      needs to be called separately for each word.
+   ;
+   ;  *   NOTE 2: If the optional keyword parameter DEBUG is set, the
+   ;      function will generate an error message if the input argument
+   ;      arg_str is not of type STRING. However, if that option is not
+   ;      set, the function will return the string representation of the
+   ;      numeric input: see the last example below.
    ;
    ;  EXAMPLES:
    ;
    ;      IDL> arg_str = 'south africa'
-   ;      IDL> res = capitalize(arg_str, EXCPT_COND = excpt_cond)
+   ;      IDL> res = capitalize(arg_str, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'res = ', res, ' and excpt_cond = >' + excpt_cond + '<'
    ;      res = South africa and excpt_cond = ><
    ;      IDL> PRINT, 'arg_str = ', arg_str
    ;      arg_str = south africa
    ;
+   ;      IDL> arg_str = ['united states', 'san francisco']
+   ;      IDL> res = capitalize(arg_str)
+   ;      IDL> PRINT, 'res = >' + res + '<'
+   ;      res = >United states< res = >San francisco<
+   ;
+   ;      IDL> arg_str = 456
+   ;      IDL> res = capitalize(arg_str)
+   ;      IDL> PRINT, 'res = >' + res + '<'
+   ;      res = >     456<
+   ;      IDL> rc = type_of(res, type_code, type_name)
+   ;      IDL> PRINT, type_code, '   ', type_name
+   ;                 7   STRING
+   ;
    ;  REFERENCES: None.
    ;
    ;  VERSIONING:
    ;
-   ;  *   2017–11–20: Version 1.0 — Initial release.
+   ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -109,53 +140,52 @@ FUNCTION capitalize, arg_str, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and error message of the function:
+   ;  Initialize the default return code and the exception condition message:
    return_code = ''
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): arg_str.'
-      RETURN, return_code
-   ENDIF
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): arg_str.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'arg_str' is not of type STRING:
-   IF (is_string(arg_str) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input positional parameter must be of type STRING.'
-      RETURN, return_code
+      IF (is_string(arg_str) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter must be of type STRING.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
-   ;  Return to the calling routine with an error message if the input
-   ;  positional parameter 'arg_str' does not contain at least 1 arg_stracter:
-   IF (STRLEN(arg_str) LT 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input positional parameter must contain at least 1 character.'
-      RETURN, return_code
-   ENDIF
+   ;  Capitalize the argument:
+   IF (is_array(arg_str)) THEN BEGIN
+      res = STRARR(N_ELEMENTS(arg_str))
+      FOR i = 0, N_ELEMENTS(arg_str) - 1 DO BEGIN
+         res[i] = STRUPCASE(STRMID(arg_str[i], 0, 1)) + STRMID(arg_str[i], 1)
+      ENDFOR
+   ENDIF ELSE BEGIN
+      res = STRUPCASE(STRMID(arg_str, 0, 1)) + STRMID(arg_str, 1)
+   ENDELSE
 
-   ;  Split the input argument in two parts: the first character and the
-   ;  rest of the string:
-   tmp1 = STRMID(arg_str, 0, 1)
-   tmp2 = STRMID(arg_str, 1)
-
-   ;  Ensure the first character is upper case and reassemble the original
-   ;  string:
-   tmp1 = STRUPCASE(tmp1)
-   RETURN, tmp1 + tmp2
+   RETURN, res
 
 END

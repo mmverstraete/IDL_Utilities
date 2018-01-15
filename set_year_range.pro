@@ -1,4 +1,5 @@
-FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
+FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns a time interval, defined by two
@@ -10,8 +11,8 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;  initial date to the 1st of January of the year following the
    ;  specified final date.
    ;
-   ;  SYNTAX:
-   ;  res = set_year_range(jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = set_year_range(jul_ini_date, jul_fin_date, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -20,6 +21,9 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;  *   jul_fin_date {DOUBLE} [I]: The final Julian date.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -33,18 +37,25 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;      returns the date interval that includes the time interval
    ;      specified by jul_ini_date and jul_fin_date and comprises full
    ;      common years. The output keyword parameter excpt_cond is set to
-   ;      a null string.
+   ;      a null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns the dummy range res = [-99.9D, -99.9D], and the output
    ;      keyword parameter excpt_cond contains a message about the
-   ;      exception condition encountered.
+   ;      exception condition encountered, if the optional input keyword
+   ;      parameter DEBUG is set and if the optional output keyword
+   ;      parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
    ;  *   Error 110: Input positional parameters jul_ini_date and
+   ;      jul_fin_date must both be of type DOUBLE.
+   ;
+   ;  *   Error 120: Input positional parameters jul_ini_date and
    ;      jul_fin_date must both be posterior to 4 October 1582.
    ;
    ;  *   Error 300: Julian date jul_ini_date must precede Julian date
@@ -66,7 +77,7 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;      IDL> jul2 = JULDAY(6, 13, 2015)
    ;      IDL> PRINT, jul1, jul2
    ;           2451599     2457187
-   ;      IDL> res = set_year_range(jul1, jul2, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_year_range(jul1, jul2, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           2451544     2457389
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
@@ -78,7 +89,7 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;      IDL> PRINT, mo2, dy2, yr2
    ;                 1           1        2016
    ;
-   ;      IDL> res = set_year_range(jul2, jul1, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_year_range(jul2, jul1, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           -99.9000     -99.9000
    ;      IDL> PRINT, 'excpt_cond = ' + excpt_cond
@@ -93,6 +104,8 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;  *   2017–07–05: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -130,49 +143,73 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = [-99.9D, -99.9D]
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 2
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): jul_ini_date, jul_fin_date.'
-      RETURN, return_code
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): jul_ini_date, jul_fin_date.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the Julian dates
+   ;  provided are not double precision numbers:
+      IF ((is_double(jul_ini_date) NE 1) OR $
+         (is_double(jul_fin_date) NE 1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
+            ' and jul_fin_date = ' + strstr(jul_fin_date) + $
+            ' must both be of type DOUBLE.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the Julian dates
+   ;  provided are anterior to 4 October 1582:
+      start_date = JULDAY(10, 4, 1582)
+      IF ((jul_ini_date LT start_date) OR $
+         (jul_fin_date LT start_date)) THEN  BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
+            ' and jul_fin_date = ' + strstr(jul_fin_date) + $
+            ' must both be posterior to ' + strstr(start_date) + '.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if 'jul_ini_date'
+   ;  follows 'jul_fin_date':
+      IF (jul_ini_date GT jul_fin_date) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 300
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Julian date jul_ini_date = ' + strstr(jul_ini_date) + $
+            ' must precede Julian date jul_fin_date = ' + $
+            strstr(jul_fin_date) + '.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
-   ;  Check that the Julian dates provided are posterior to 4 October 1582:
-   start_date = JULDAY(10, 4, 1582)
-   IF ((jul_ini_date LT start_date) OR (jul_fin_date LT start_date)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
-         ' and jul_fin_date = ' + strstr(jul_fin_date) + $
-         ' must both be posterior to ' + strstr(start_date) + '.'
-      RETURN, return_code
-   ENDIF
-
-   ;  Check that 'jul_ini_date' precedes 'jul_fin_date':
-   IF (jul_ini_date GT jul_fin_date) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 300
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Julian date jul_ini_date = ' + strstr(jul_ini_date) + $
-         ' must precede Julian date jul_fin_date = ' + strstr(jul_fin_date) + $
-         '.'
-      RETURN, return_code
-
-   ENDIF
    ;  Retrieve the common years of the initial and final dates:
    CALDAT, jul_ini_date, mon1, day1, year1
    CALDAT, jul_fin_date, mon2, day2, year2

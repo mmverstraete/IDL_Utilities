@@ -1,4 +1,5 @@
-FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
+FUNCTION cor_arrays, array_1, array_2, stats, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function computes various statistics to describe the
@@ -9,8 +10,8 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    ;  ALGORITHM: This function relies on IDL built-in routines to compute
    ;  the desired statistics.
    ;
-   ;  SYNTAX:
-   ;  rc = cor_arrays(array_1, array_2, stats, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = cor_arrays(array_1, array_2, stats, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -46,6 +47,9 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -57,12 +61,16 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected, this function
    ;      returns 0, the desired statistics are contained in the output
    ;      structure stats, and the output keyword parameter excpt_cond is
-   ;      set to a null string.
+   ;      set to a null string, if the optional input keyword parameter
+   ;      DEBUG is set and if the optional output keyword parameter
+   ;      EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, the output structure is not
    ;      filled and the output keyword parameter excpt_cond contains a
-   ;      message about the exception condition encountered.
+   ;      message about the exception condition encountered, if the
+   ;      optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -131,6 +139,8 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
    ;
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
@@ -167,61 +177,73 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code:
-   ret_code = 0
-   err_mess = ''
+   ;  Initialize the default return code and the exception condition message:
+   return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
+   excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 3
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): array_1, array_2, stats.'
-      RETURN, error_code
-   ENDIF
+      n_reqs = 3
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): array_1, array_2, stats.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if either argument
    ;  'array_1' or 'array_2' is not of a numeric type:
-   IF ((is_numeric(array_1) NE 1) OR (is_numeric(array_2) NE 1)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': At least one of the arguments array_1 or array_2 is not of ' + $
-         'a numeric type.'
-      RETURN, error_code
+      IF ((is_numeric(array_1) NE 1) OR (is_numeric(array_2) NE 1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': At least one of the arguments array_1 or array_2 is not of ' + $
+            'a numeric type.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
-   ;  Return to the calling routine with an error message if either argument
-   ;  'array_1' or 'array_2' is not of a vector (1D array):
    siz_1 = SIZE(array_1)
    n_dims_1 = siz_1[0]
    n_elms_1 = siz_1[1]
    siz_2 = SIZE(array_2)
    n_dims_2 = siz_2[0]
    n_elms_2 = siz_2[1]
-   IF ((n_dims_1 NE 1) OR (n_dims_2 NE 1)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Either array_1 or array_2 is not a vector (1D array).'
-      RETURN, error_code
-   ENDIF
+
+   IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if either argument
+   ;  'array_1' or 'array_2' is not of a vector (1D array):
+      IF ((n_dims_1 NE 1) OR (n_dims_2 NE 1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Either array_1 or array_2 is not a vector (1D array).'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if arguments
    ;  'array_1' and 'array_2' are of different sizes:
-   IF (n_elms_1 NE n_elms_2) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 130
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': The arguments array_1 and array_2 are not of the same size.'
-      RETURN, error_code
+      IF (n_elms_1 NE n_elms_2) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': The arguments array_1 and array_2 are not of the same size.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Record the number of points in the input arrays:
@@ -260,6 +282,6 @@ FUNCTION cor_arrays, array_1, array_2, stats, EXCPT_COND = excpt_cond
    stats.Linfit_CHISQR_2 = chisqr
    stats.Linfit_PROB_2 = prob
 
-   RETURN, ret_code
+   RETURN, return_code
 
 END

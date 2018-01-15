@@ -1,6 +1,7 @@
 FUNCTION percentile, per, array, amin, amax, thresh, $
    AMISS = amiss, IGN_BEL_STR = ign_bel_str, IGN_ABO_STR = ign_abo_str, $
-   ASORT = asort, COUNT = count, DOUBLE = double, EXCPT_COND = excpt_cond
+   ASORT = asort, COUNT = count, DOUBLE = double, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function estimates the sample value thresh of the
@@ -18,8 +19,11 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  [FLOAT(ign_bel_str), FLOAT(ign_abo_str)]; otherwise amin and amax
    ;  report the minimum and maximum values within the entire array.
    ;
-   ;  SYNTAX:
-   ;  res = percentile(per, array, amin, amax, thresh, AMISS = amiss, IGN_BEL_STR = ign_bel_str, IGN_ABO_STR = ign_abo_str, ASORT = asort, COUNT = count, DOUBLE = double, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = percentile(per, array, amin, amax, thresh, $
+   ;  AMISS = amiss, IGN_BEL_STR = ign_bel_str, $
+   ;  IGN_ABO_STR = ign_abo_str, ASORT = asort, $
+   ;  COUNT = count, DOUBLE = double, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -84,6 +88,9 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  *   DOUBLE = double {INTEGER} [I]: Flag requesting explicitly (1)
    ;      that computations be carried out in double precision or not (0).
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -93,14 +100,19 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 0, the desired percentile is provided in output argument
-   ;      thresh, and the output keyword parameter excpt_cond is set to a
-   ;      null string.
+   ;      returns 0, provides the desired percentile thresh, the minimum
+   ;      and maximum values of array in output arguments, and the output
+   ;      keyword parameter excpt_cond is set to a null string, if the
+   ;      optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a non-zero value and the output keyword parameter
-   ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      returns a non-zero value, the output arguments thresh, amin and
+   ;      amax are set to !VALUES.F_INFINITY, and the output keyword
+   ;      parameter excpt_cond contains a message about the exception
+   ;      condition encountered, if the optional input keyword parameter
+   ;      DEBUG is set and if the optional output keyword parameter
+   ;      EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -158,7 +170,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;                11     -99       9
    ;      IDL> res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
    ;         IGN_BEL_STR = '0', IGN_ABO_STR = '100', COUNT = count, $
-   ;         EXCPT_COND = excpt_cond)
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res, '   >' + excpt_cond + '<'
    ;             0   ><
    ;      IDL> PRINT, thresh, count, amin, amax
@@ -166,7 +178,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;      IDL> res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
    ;      IDL>    IGN_BEL_STR = '0', IGN_ABO_STR = 100, COUNT = count, $
-   ;      >    EXCPT_COND = excpt_cond)
+   ;      >    /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, thresh, count, amin, amax
    ;             5           9       1       9
    ;      IDL> PRINT, excpt_cond
@@ -198,6 +210,8 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      incorrect interpretation of a null value.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -235,57 +249,67 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message, as well as the threshold value returned in case of error:
+   ;  Initialize the default return code and the exception condition message:
    error_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
-   err_thresh = -9999.9
+
+   ;  Initialize the output positional parameters to invalid values:
+   amin = -!VALUES.F_INFINITY
+   amax = !VALUES.F_INFINITY
+   thresh = !VALUES.F_INFINITY
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 5
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): per, array, amin, amax, thresh.'
-      thresh = err_thresh
-      RETURN, error_code
-   ENDIF
+      n_reqs = 5
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): per, array, amin, amax, thresh.'
+         RETURN, error_code
+      ENDIF
 
-   ;  Check the validity of the requested percentile value:
-   IF ((per LT 0.0) OR (per GT 1.0)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Requested percentile is not within [0.0, 1.0].'
-      thresh = err_thresh
-      RETURN, error_code
-   ENDIF
+   ;  Return to the calling routine with an error message if this function is
+   ;  called with an invalid percentile value:
+      IF ((per LT 0.0) OR (per GT 1.0)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Requested percentile is not within [0.0, 1.0].'
+         RETURN, error_code
+      ENDIF
 
-   ;  Check the validity of the input array:
-   IF ((is_array(array) NE 1) OR (is_numeric(array) NE 1)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument array is not an array or not numeric.'
-      thresh = err_thresh
-      RETURN, error_code
-   ENDIF
+   ;  Return to the calling routine with an error message if this function is
+   ;  called with an invalid input array:
+      IF ((is_array(array) NE 1) OR (is_numeric(array) NE 1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument array is not an array or not numeric.'
+         RETURN, error_code
+      ENDIF
 
-   ;  Check that argument 'array' contains at least 3 elements:
-   IF (N_ELEMENTS(array) LT 3) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 130
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument array contains less than 3 elements.'
-      thresh = err_thresh
-      RETURN, error_code
+   ;  Return to the calling routine with an error message if the input argument
+   ;  'array' does not contain at least 3 elements:
+      IF (N_ELEMENTS(array) LT 3) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument array contains less than 3 elements.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Manage possible exception conditions linked to keyword parameters.
@@ -298,7 +322,6 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Keyword AMISS was set but keyword IGN_BEL_STR was not.'
-         thresh = err_thresh
          RETURN, error_code
       ENDIF ELSE BEGIN
          IF (is_numeric(ign_bel_str)) THEN BEGIN
@@ -320,7 +343,6 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
          error_code = 150
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Keyword AMISS was set but keyword IGN_ABO_STR was not.'
-         thresh = err_thresh
          RETURN, error_code
       ENDIF ELSE BEGIN
          IF (is_numeric(ign_abo_str)) THEN BEGIN
@@ -354,24 +376,29 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ENDELSE
 
    ;  If the keyword AMISS has been set, create a new array containing no
-   ;  missing values, and compute the number of elements in that new array:
+   ;  missing values, and compute the number of elements in that new array;
+   ;  otherwise count the number of elements in the original array:
    IF (KEYWORD_SET(amiss)) THEN BEGIN
       inomiss = WHERE((array GE ignore_below) AND (array LE ignore_above))
       anomiss = array[inomiss]
+      count = N_ELEMENTS(anomiss)
    ENDIF ELSE BEGIN
       anomiss = array
+      count = N_ELEMENTS(array)
    ENDELSE
-   nnomiss = LONG(N_ELEMENTS(anomiss))
 
-   ;  Check that this new array itself contains at least 3 elements:
-   IF (nnomiss LT 3) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 160
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Array of non-missing values contains less than 3 elements.'
-      thresh = err_thresh
-      RETURN, error_code
+   IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if this new array
+   ;  itself does not contain at least 3 elements:
+      IF (count LT 3) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 160
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Array of non-missing values contains less than 3 elements.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  If the original array is unsorted or if there are missing values,
@@ -383,10 +410,6 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
       sanomiss = anomiss
    ENDELSE
 
-   ;  Set the value of the optional keyword parameter COUNT:
-   IF (KEYWORD_SET(amiss)) THEN count = LONG(nnomiss) $
-      ELSE count = N_ELEMENTS(array)
-
    ;  Compute the minimum and the maximum values of array within the allowable
    ;  range:
    amin = MIN(sanomiss)
@@ -395,9 +418,9 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  Compute the rank of the observation in array corresponding to the
    ;  desired percentile:
    IF (KEYWORD_SET(double)) THEN BEGIN
-      rank = per * DOUBLE(nnomiss + 1)
+      rank = per * DOUBLE(count + 1)
    ENDIF ELSE BEGIN
-      rank = per * FLOAT(nnomiss + 1)
+      rank = per * FLOAT(count + 1)
    ENDELSE
 
    ;  Check for extreme cases arising with small arrays:
@@ -405,8 +428,8 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
       thresh = sanomiss[0]
       RETURN, error_code
    ENDIF
-   IF (rank GT FLOAT(nnomiss)) THEN BEGIN
-      thresh = sanomiss[nnomiss - 1]
+   IF (rank GT FLOAT(count)) THEN BEGIN
+      thresh = sanomiss[count - 1]
       RETURN, error_code
    ENDIF
 

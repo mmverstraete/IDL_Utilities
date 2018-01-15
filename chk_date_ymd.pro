@@ -1,19 +1,21 @@
-FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
+FUNCTION chk_date_ymd, date, year, month, day, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function takes the STRING argument date, formatted as
    ;  YYYY-MM-DD, and provides the year, month and day values as output
    ;  numeric arguments.
    ;
-   ;  ALGORITHM: This function checks whether the input argument date is a
-   ;  10-character long variable of type STRING, splits it on character -,
-   ;  and checks the numerical validity of the 3 elements: the year number
-   ;  YYYY must be larger than 1582 and smaller than 2050, the month
-   ;  number MM must be larger than 0 and smaller than 13, while the day
-   ;  number DD must be larger than 0 and smaller than 31.
+   ;  ALGORITHM: This function splits the input argument date on character
+   ;  * and sets the output arguments year, month and day to their
+   ;  numerical values. If the input keyword parameter DEBUG is set, this
+   ;  function checks the validity of date and of its 3 components: the
+   ;  year number YYYY must be larger than 1582 and smaller than 2050, the
+   ;  month number MM must be larger than 0 and smaller than 13, while the
+   ;  day number DD must be larger than 0 and smaller than 31.
    ;
-   ;  SYNTAX:
-   ;  rc = chk_date_ymd(date, year, month, day, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = chk_date_ymd(date, year, month, day, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -27,6 +29,9 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -38,13 +43,17 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;  *   If no exception condition has been detected, the desired numeric
    ;      information is provided through the output positional
    ;      parameters, the function returns 0, and the keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, the values of the
    ;      invalid output positional parameters is set to 0, the function
    ;      returns a non-zero error code, and the keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -54,13 +63,22 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 120: Positional parameter date is not of length 10.
    ;
-   ;  *   Error 130: Positional parameter date is not properly formatted.
+   ;  *   Error 130: Positional parameter date does not contain a dash
+   ;      character.
    ;
-   ;  *   Error 140: Positional parameter date specifies an invalid year.
+   ;  *   Error 140: Positional parameter date does not contain 2 dash
+   ;      characters.
    ;
-   ;  *   Error 150: Positional parameter date specifies an invalid month.
+   ;  *   Error 150: Positional parameter date does not contain 3 elements
+   ;      separated by 2 dashes.
    ;
-   ;  *   Error 160: Positional parameter date specifies an invalid day.
+   ;  *   Error 160: Positional parameter date specifies an invalid year.
+   ;
+   ;  *   Error 170: Positional parameter date specifies an invalid month.
+   ;
+   ;  *   Error 180: An exception condition occurred in is_leap.pro.
+   ;
+   ;  *   Error 190: Positional parameter date specifies an invalid day.
    ;
    ;  DEPENDENCIES:
    ;
@@ -79,16 +97,16 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;  EXAMPLES:
    ;
    ;      IDL> rc = chk_date_ymd('2010-01-01', year, month, day, $
-   ;         EXCPT_COND = excpt_cond)
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, '   >' + excpt_cond + '<'
    ;             0   ><
    ;      IDL> PRINT, year, month, day
    ;          2010       1       1
    ;
    ;      IDL> rc = chk_date_ymd('2100-01-01', year, month, day, $
-   ;         EXCPT_COND = excpt_cond)
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, '   >' + excpt_cond + '<'
-   ;           140   >Error 140 in CHK_DATE_YMD: Year 2100 is invalid
+   ;           160   >Error 160 in CHK_DATE_YMD: Year 2100 is invalid
    ;           (must be 4 digits long and lie within [1582, 2050]).<
    ;
    ;  REFERENCES: None.
@@ -98,6 +116,8 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;  *   2017–09–07: Version 1.0 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -135,89 +155,128 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
 
-   ;  Initialize the output positional parameters:
+   ;  Initialize the output positional parameters to invalid values:
    year = 0
    month = 0
    day = 0
 
+   IF (debug) THEN BEGIN
+
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 4
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): date, year, month, day.'
-      RETURN, error_code
-   ENDIF
+      n_reqs = 4
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): date, year, month, day.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input argument
    ;  'date' is not of type STRING:
-   IF (is_string(date) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument date is not of type STRING.'
-      RETURN, error_code
-   ENDIF
+      IF (is_string(date) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument date is not of type STRING.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input argument
    ;  'date' is not of length 10:
-   IF (STRLEN(date) NE 10) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument date does not contain 10 characters.'
-      RETURN, error_code
+      IF (STRLEN(date) NE 10) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument date does not contain 10 characters.'
+         RETURN, error_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the input argument
+   ;  'date' does not contain 2 dashes:
+      pos1 = STRPOS(date, '-')
+      IF (pos1 LE 0) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument date does not contain a dash character.'
+         RETURN, error_code
+      ENDIF ELSE BEGIN
+         pos2 = STRPOS(date, '-', pos1 + 1)
+         IF (pos2 LE 0) THEN BEGIN
+            info = SCOPE_TRACEBACK(/STRUCTURE)
+            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+            error_code = 140
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': Argument date does not contain 2 dash characters.'
+            RETURN, error_code
+         ENDIF
+      ENDELSE
    ENDIF
+
+   ;  Isolate the nominal year and month of the date:
+   parts = STRSPLIT(date, '-', COUNT = nparts, /EXTRACT)
+   year = FIX(parts[0])
+   month = FIX(parts[1])
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if the input argument
    ;  'date' is not formatted as a sequence of three elements separated by
    ;  dashes:
-   parts = STRSPLIT(date, '-', COUNT = nparts, /EXTRACT)
-   IF (nparts NE 3) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 130
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument date does not contain 3 elements separated by dashes.'
-      RETURN, error_code
-   ENDIF
+      IF (nparts NE 3) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 150
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument date does not contain 3 elements separated by 2 dashes.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the year is
-   ;  invalid:
-   year = FIX(parts[0])
-   IF (((STRLEN(parts[0]) NE 4)) OR (year LT 1582) OR (year GT 2050)) THEN BEGIN
-;   IF ((year LT 1582) OR (year GT 2050)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 140
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Year ' + strstr(year) + ' is invalid (must be 4 digits long ' + $
-         'and lie within [1582, 2050]).'
-      RETURN, error_code
-   ENDIF
+   ;  invalid (year must be within [1582, 2050]):
+      IF (((STRLEN(parts[0]) NE 4)) OR $
+         (year LT 1582) OR $
+         (year GT 2050)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 160
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Year ' + strstr(year) + ' is invalid (must be 4 digits long ' + $
+            'and lie within [1582, 2050]).'
+         year = 0
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the month is
    ;  invalid:
-   month = FIX(parts[1])
-   IF (((STRLEN(parts[1]) NE 2)) OR (month LT 1) OR (month GT 12)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 150
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Month ' + strstr(month) + ' is invalid (must be 2 digits long ' + $
-         'and lie within [1, 12]).'
-      RETURN, error_code
+      IF (((STRLEN(parts[1]) NE 2)) OR $
+         (month LT 1) OR $
+         (month GT 12)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 170
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Month ' + strstr(month) + $
+            ' is invalid (must be 2 digits long and lie within [1, 12]).'
+         month = 0
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Set the number of days per months in a common year; the initial element
@@ -238,19 +297,34 @@ FUNCTION chk_date_ymd, date, year, month, day, EXCPT_COND = excpt_cond
    num_days[12] = 31
 
    ;  Reset the number of days in February if this is a leap year:
-   IF (is_leap(year) EQ 1) THEN num_days[2] = 29
+   rc = is_leap(year, DEBUG = debug, EXCPT_COND = excpt_cond)
+   IF (rc EQ 1) THEN num_days[2] = 29
+   IF ((debug) AND (rc EQ -1)) THEN BEGIN
+      info = SCOPE_TRACEBACK(/STRUCTURE)
+      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+      error_code = 180
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': ' + excpt_cond
+      RETURN, error_code
+   ENDIF
+   day = FIX(parts[2])
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if the day is
    ;  invalid:
-   day = FIX(parts[2])
-   IF (((STRLEN(parts[2]) NE 2)) OR (day LT 1) OR (day GT num_days[month])) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 160
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Day ' + strstr(day) + ' is invalid (must be 2 digits long ' + $
-         'and lie within [1, #days in the month]).'
-      RETURN, error_code
+      IF ((STRLEN(parts[2]) NE 2) OR $
+         (day LT 1) OR $
+         (day GT num_days[month])) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 180
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Day ' + strstr(day) + ' is invalid (must be 2 digits long ' + $
+            'and lie within [1, #days in the month]).'
+         day = 0
+         RETURN, error_code
+      ENDIF
    ENDIF
 
   RETURN, return_code

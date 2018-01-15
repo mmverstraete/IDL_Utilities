@@ -1,4 +1,4 @@
-FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
+FUNCTION last_char, arg_str, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns the last character of the input
@@ -7,13 +7,17 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;  ALGORITHM: This function relies on IDL built-in string functions to
    ;  extract the desired character.
    ;
-   ;  SYNTAX: res = last_char(arg_str)
+   ;  SYNTAX: res = last_char(arg_str, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   arg_str {STRING} [I]: An arbitrary string expression.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -25,12 +29,16 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;
    ;  *   If no exception condition has been detected, this function
    ;      returns the desired character, and the output keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null string, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -59,12 +67,8 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;      IDL> PRINT, last_char(path)
    ;      a
    ;
-   ;      IDL> conc = 'Hello' + ' World'
-   ;      IDL> PRINT, last_char(conc)
-   ;      d
-   ;
    ;      IDL> pi = 3.14
-   ;      IDL> res = last_char(pi, EXCPT_COND = excpt_cond)
+   ;      IDL> res = last_char(pi, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'res = >' + res + '< and excpt_cond = ' + excpt_cond
    ;      res = >< and excpt_cond = Error 110 in LAST_CHAR: Argument must be
    ;      of type STRING.
@@ -73,12 +77,18 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;      % STRLEN: Variable is undefined: ARG_STR.
    ;      % Execution halted at: LAST_CHAR...
    ;      %                      $MAIN$
+   ;      IDL> PRINT, last_char(xyz, /DEBUG, EXCPT_COND = excpt_cond)
+   ;
+   ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
+   ;      excpt_cond = >Error 110 in LAST_CHAR: Argument must be of type STRING.<
    ;
    ;  REFERENCES: None.
    ;
    ;  VERSIONING:
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -116,43 +126,51 @@ FUNCTION last_char, arg_str, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and error message of the function:
-   ret_code = ''
+   ;  Initialize the default return code and the exception condition message:
+   return_code = ''
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): arg_str.'
-      RETURN, ret_code
-   ENDIF
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): arg_str.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  'arg_str' is not of type STRING:
-   IF (is_string(arg_str) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + 'Argument must be of type STRING.'
-      RETURN, ret_code
-   ENDIF
+      IF (is_string(arg_str) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + 'Argument must be of type STRING.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  'arg_str' does not contain at least 1 character:
-   IF (STRLEN(arg_str) EQ 0) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 200
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + 'Argument must contain at least 1 character.'
-      RETURN, ret_code
+      IF (STRLEN(arg_str) EQ 0) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 200
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + 'Argument must contain at least 1 character.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  Extract the last character of arg_str:

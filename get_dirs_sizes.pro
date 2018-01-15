@@ -1,5 +1,5 @@
 FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
-   EXCPT_COND = excpt_cond
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function searches for directory names matching the
@@ -10,8 +10,8 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;  and spawns a Bash shell script using the Linux command du to report
    ;  on the size of directories matching dir_patt.
    ;
-   ;  SYNTAX:
-   ;  rc = get_dirs_sizes(dir_patt, dirs_names, dirs_sizes, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = get_dirs_sizes(dir_patt, dirs_names, dirs_sizes, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -25,6 +25,9 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -36,12 +39,16 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;  *   If no exception condition has been detected, this function
    ;      returns 0, the output arguments dirs_names and dirs_sizes
    ;      contain the desired information, and the output keyword
-   ;      parameter excpt_cond is set to a null string.
+   ;      parameter excpt_cond is set to a null string, if the optional
+   ;      input keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -71,7 +78,7 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;  EXAMPLES:
    ;
    ;      IDL> rc = get_dirs_sizes('/Volumes/MISR-HR/P16*', $
-   ;         dirs_names, dirs_sizes, EXCPT_COND = excpt_cond)
+   ;         dirs_names, dirs_sizes, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, dirs_names
    ;      /Volumes/MISR-HR/P167/ /Volumes/MISR-HR/P168/
    ;      /Volumes/MISR-HR/P169/
@@ -85,6 +92,8 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;  *   2017–07–06: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -122,69 +131,79 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   ;  Initialize the output positional parameters to invalid values:
+   dirs_names = []
+   dirs_sizes = []
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 4
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): dir_patt, n_dirs, dirs_names, dirs_sizes.'
-      RETURN, error_code
-   ENDIF
+      n_reqs = 4
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): dir_patt, n_dirs, dirs_names, dirs_sizes.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  'dir_patt' is not of type STRING:
-   IF (is_string(dir_patt) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-      ': Argument dir_patt is not of type STRING.'
-      RETURN, error_code
-   ENDIF
+      IF (is_string(dir_patt) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': Argument dir_patt is not of type STRING.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the argument
    ;  'dir_patt' is a null STRING:
-   IF (dir_patt EQ '') THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-      ': Argument dir_patt cannot be a null STRING.'
-      RETURN, error_code
+      IF (dir_patt EQ '') THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': Argument dir_patt cannot be a null STRING.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Locate the directories matching the given pattern:
    dirs_names = FILE_SEARCH(dir_patt, COUNT = n_dirs, /TEST_DIRECTORY, $
       /MARK_DIRECTORY)
 
-   IF (n_dirs EQ 0) THEN BEGIN
+   IF ((debug) AND (n_dirs EQ 0)) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 300
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': No directories match ' + dir_patt + '.'
-      dirs_sizes = ['']
       RETURN, error_code
-   ENDIF ELSE BEGIN
-      dirs_sizes = STRARR(n_dirs)
-      FOR i = 0, n_dirs - 1 DO BEGIN
-         bash_cmd_1 = 'du -c -d 0 -h ' + dirs_names[i]
-         SPAWN, bash_cmd_1, sd, /STDERR
-         white = set_white()
-         parts = STRSPLIT(sd[N_ELEMENTS(sd) - 1], white, $
-            COUNT = n_parts, /EXTRACT)
-         dirs_sizes[i] = parts[0]
-      ENDFOR
-   ENDELSE
+   ENDIF
+
+   dirs_sizes = STRARR(n_dirs)
+   FOR i = 0, n_dirs - 1 DO BEGIN
+      bash_cmd_1 = 'du -c -d 0 -h ' + dirs_names[i]
+      SPAWN, bash_cmd_1, sd, /STDERR
+      white = set_white()
+      parts = STRSPLIT(sd[N_ELEMENTS(sd) - 1], white, $
+         COUNT = n_parts, /EXTRACT)
+      dirs_sizes[i] = parts[0]
+   ENDFOR
 
    RETURN, return_code
 

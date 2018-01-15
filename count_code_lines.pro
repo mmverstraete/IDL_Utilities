@@ -1,10 +1,12 @@
-FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
+FUNCTION count_code_lines, file_spec, comm_char, $
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns the approximate number of code lines
-   ;  (as a LONG integer) contained in file file_spec, i.e., the number of
-   ;  lines that are neither blank (empty) nor beginning with a string
-   ;  expression denoting the start of a comment contained in comm_char.
+   ;  (as a LONG integer) contained in a single file file_spec, i.e., the
+   ;  number of lines that are neither blank (empty) nor beginning with a
+   ;  string expression denoting the start of a comment contained in
+   ;  comm_char.
    ;
    ;  ALGORITHM: This function inspects each and every line of file_spec
    ;  and counts those that are neither empty nor starting with one of the
@@ -16,8 +18,8 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;  (e.g., to deal with C or PL-1 language conventions such as /*
    ;  comment */).
    ;
-   ;  SYNTAX:
-   ;  res = count_code_lines(file_spec, comm_char, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = count_code_lines(file_spec, comm_char, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -30,6 +32,9 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
+   ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
@@ -40,20 +45,28 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;
    ;  *   If no exception condition has been detected, this function
    ;      returns the approximate number of code lines in file_spec, and
-   ;      the output keyword parameter excpt_cond is set to a null string.
+   ;      the output keyword parameter excpt_cond is set to a null string,
+   ;      if the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns -1L, and the output keyword parameter excpt_cond
-   ;      contains a message about the exception condition encountered.
+   ;      contains a message about the exception condition encountered, if
+   ;      the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: Positional parameter file_spec is not found or
+   ;  *   Error 110: Positional parameter file_spec is not of type STRING.
+   ;
+   ;  *   Error 120: Positional parameter file_spec is not a scalar.
+   ;
+   ;  *   Error 130: Positional parameter file_spec is not found or
    ;      unreadable.
    ;
-   ;  *   Error 120: Positional parameter comm_char is not of type STRING.
+   ;  *   Error 140: Positional parameter comm_char is not of type STRING.
    ;
    ;  DEPENDENCIES:
    ;
@@ -80,7 +93,7 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;      comm_char can include multiple characters (e.g., to deal with C
    ;      or PL-1 language conventions such as /* comment */). And if
    ;      comm_char is set to a null string, this function returns the
-   ;      total number of lines in the file.
+   ;      total number of lines in the file, as reported by FILE_LINES.
    ;
    ;  *   NOTE 3: This routine may not yield the correct number of code
    ;      lines if comments span multiple lines, each terminated by a <CR>
@@ -98,9 +111,9 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;      IDL> file_spec = $
    ;         '~/Documents/MySoftware/IDL/Utilities/is_leap/is_leap.pro'
    ;      IDL> PRINT, FILE_LINES(file_spec)
-   ;                  191
+   ;                  195
    ;      IDL> PRINT, count_code_lines(file_spec, ';', $
-   ;         EXCPT_COND = excpt_cond)
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;                  54
    ;
    ;  REFERENCES: None.
@@ -110,6 +123,8 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;  *   2017–07–05: Version 0.9 — Initial release.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -147,57 +162,88 @@ FUNCTION count_code_lines, file_spec, comm_char, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default return code and the default exception condition
-   ;  message:
+   ;  Initialize the default return code and the exception condition message:
    return_code = -1L
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 2
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): file_spec, comm_char.'
-      RETURN, return_code
-   ENDIF
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): file_spec, comm_char.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the argument
+   ;  'file_spec' is not of type STRING:
+      IF (is_string(file_spec) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument file_spec is not of type STRING.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the argument
+   ;  'file_spec' is not a scalar:
+      IF (is_scalar(file_spec) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument file_spec is not a scalar.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the file
    ;  'file_spec' is not found or unreadable:
-   IF (is_readable(file_spec, EXCPT_COND = excpt_cond) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + excpt_cond
-      RETURN, return_code
-   ENDIF
+      IF (is_readable(file_spec, $
+         DEBUG = debug, EXCPT_COND = excpt_cond) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if argument
    ;  'comm_char' is not of type STRING:
-   res = is_string(comm_char)
-   IF (res NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Argument comm_char is not of type STRING.'
-      RETURN, return_code
+      res = is_string(comm_char)
+      IF (res NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 140
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Argument comm_char is not of type STRING.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
+   ;  If the input argument comm_char is a scalar empty string, return the
+   ;  actual number of lines in the file, as reported by IDL's FILE_LINES
+   ;  function:
    ;  WARNING: The following test must be performed as two independent IF
    ;  statements because the second IF would cause an error when comm_char is
    ;  an array.
-   ;  If the argument 'comm_char' is a string constant with a null string
-   ;  value, return the result of IDL's FILE_LINES function:
    IF (is_scalar(comm_char) EQ 1) THEN BEGIN
       IF (comm_char EQ '') THEN  RETURN, FILE_LINES(file_spec)
    ENDIF
 
-  ;  Check whether argument comm_char is an array, and if so assess the number
+   ;  Check whether argument comm_char is an array, and if so assess the number
    ;  of elements:
    res = is_array(comm_char)
    IF (res EQ 1) THEN BEGIN

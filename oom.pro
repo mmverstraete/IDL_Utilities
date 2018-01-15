@@ -1,4 +1,4 @@
-FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
+FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This routine returns an integer value representing the
@@ -11,7 +11,8 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;  either is not strictly positive, the function returns NaN as well as
    ;  an exception condition.
    ;
-   ;  SYNTAX: res = oom(arg, BASE = base, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = oom(arg, BASE = base, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -21,6 +22,9 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;
    ;  *   BASE = base {Numeric} [I] (Default value: 10.0): An arbitrary
    ;      but strictly positive numeric expression.
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -32,11 +36,15 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;
    ;  *   If no exception condition has been detected, this function
    ;      returns the order of magnitude of argument arg, and the output
-   ;      keyword parameter excpt_cond is set to a null string.
+   ;      keyword parameter excpt_cond is set to a null string, if the
+   ;      optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns NaN, and the output keyword parameter excpt_cond
-   ;      contains a message about the exception condition encountered.
+   ;      contains a message about the exception condition encountered, if
+   ;      the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -86,7 +94,7 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;                 4
    ;
    ;      IDL> f = -12
-   ;      IDL> PRINT, oom(f, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, oom(f, /DEBUG, EXCPT_COND = excpt_cond)
    ;                NaN
    ;      IDL> PRINT, excpt_cond
    ;      Error 110 in routine OOM: Argument arg is not
@@ -98,10 +106,12 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;
    ;  *   2017–07–05: Version 0.8 — Initial release.
    ;
-   ;  *   2017–07–11: Version 0.9 — Moved former argument base into an
-   ;      optional keyword.
+   ;  *   2017–07–11: Version 0.9 — Moved former input positional
+   ;      parameter base into an optional keyword parameter.
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -139,71 +149,85 @@ FUNCTION oom, arg, BASE = base, EXCPT_COND = excpt_cond
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the default exception condition message:
+   ;  Initialize the default return code and the exception condition message:
+   return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   res = MACHAR()
+   smallest = res.XMIN
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 1
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): arg.'
-      RETURN, !VALUES.F_NAN
-   ENDIF
-
-   ;  Ensure that argument 'arg' is of a numeric type:
-   rc = is_numeric(arg)
-   IF (rc EQ 0) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      excpt_cond = 'Error 110 in routine ' + rout_name + $
-         ': Argument arg is not numeric.'
-      RETURN, !VALUES.F_NAN
-   ENDIF
-
-   ;  Ensure that argument 'arg' is strictly positive:
-   res = MACHAR()
-   smallest = res.XMIN
-   IF (arg LT smallest) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      excpt_cond = 'Error 120 in routine ' + rout_name + $
-         ': Argument arg is not strictly positive.'
-      RETURN, !VALUES.F_NAN
-   ENDIF
-
-   IF (KEYWORD_SET(base)) THEN BEGIN
-      ;  Ensure that the keyword parameter 'base' is of a numeric type:
-      rc = is_numeric(base)
-      IF (rc EQ 0) THEN BEGIN
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         excpt_cond = 'Error 130 in routine ' + rout_name + $
-            ': Argument base is not numeric.'
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): arg.'
          RETURN, !VALUES.F_NAN
       ENDIF
 
-      ;  Ensure that the keyword parameter 'base' is strictly positive:
-      res = MACHAR()
-      smallest = res.XMIN
-      IF (base LT smallest) THEN BEGIN
+   ;  Return to the calling routine with an error message if the argument 'arg'
+   ;  is not of a numeric type:
+      IF (is_numeric(arg) EQ 0) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         excpt_cond = 'Error 140 in routine ' + rout_name + $
-            ': Argument base is not strictly positive.'
+         excpt_cond = 'Error 110 in routine ' + rout_name + $
+            ': Argument arg is not numeric.'
          RETURN, !VALUES.F_NAN
       ENDIF
-   ENDIF ELSE BEGIN
-      base = 10.0
-   ENDELSE
+
+   ;  Return to the calling routine with an error message if the argument 'arg'
+   ;  is not strictly positive:
+      IF (arg LT smallest) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         excpt_cond = 'Error 120 in routine ' + rout_name + $
+            ': Argument arg is not strictly positive.'
+         RETURN, !VALUES.F_NAN
+      ENDIF
+   ENDIF
+
+      IF (KEYWORD_SET(base)) THEN BEGIN
+
+         IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if the keyword
+   ;  parameter 'base' is of a numeric type:
+            IF (is_numeric(base) EQ 0) THEN BEGIN
+               info = SCOPE_TRACEBACK(/STRUCTURE)
+               rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+               excpt_cond = 'Error 130 in routine ' + rout_name + $
+                  ': Argument base is not numeric.'
+               RETURN, !VALUES.F_NAN
+            ENDIF
+
+   ;  Return to the calling routine with an error message if the keyword
+   ;  parameter 'base' is not strictly positive:
+            IF (base LT smallest) THEN BEGIN
+               info = SCOPE_TRACEBACK(/STRUCTURE)
+               rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+               excpt_cond = 'Error 140 in routine ' + rout_name + $
+                  ': Argument base is not strictly positive.'
+               RETURN, !VALUES.F_NAN
+            ENDIF
+         ENDIF
+      ENDIF ELSE BEGIN
+         base = 10.0
+      ENDELSE
 
    ;  Compute the order of magnitude of 'arg':
-   res = FLOOR(alogb(arg, base, EXCPT_COND = excpt_cond))
-   IF (excpt_cond NE '') THEN BEGIN
+   res = FLOOR(alogb(arg, base, DEBUG = debug, EXCPT_COND = excpt_cond))
+
+   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       excpt_cond = 'Error 200 in routine ' + rout_name + $

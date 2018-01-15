@@ -43,7 +43,8 @@ FUNCTION today, FMT = fmt
    ;          YYYY-MM-DD at hh:mm:ss.
    ;
    ;      -   If the keyword FMT is set to usa, the current date is
-   ;          provided as a string formatted like MM DD, YYYY.
+   ;          provided as a string formatted like Mo DD, YYYY, where Mon
+   ;          is a 3-character string abreviation of the month name.
    ;
    ;      -   If the keyword FMT is set to ymd, the current date is
    ;          provided as a string formatted like YYYY-MM-DD.
@@ -91,6 +92,8 @@ FUNCTION today, FMT = fmt
    ;
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
    ;
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
@@ -127,7 +130,6 @@ FUNCTION today, FMT = fmt
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the return code and the error message:
    ;  Get the current system date and time:
    result = SYSTIME()
 
@@ -174,7 +176,7 @@ FUNCTION today, FMT = fmt
       CASE fmt OF
          'iso': ymdhms = yyyy + '-' + mm + '-' + dd + 'T' + sres[3]
          'nice': ymdhms = yyyy + '-' + mm + '-' + dd + ' at ' + sres[3]
-         'usa': ymdhms = mm + ' ' + dd + ', ' + yyyy
+         'usa': ymdhms = sres[1] + ' ' + dd + ', ' + yyyy
          'ymd': ymdhms = yyyy + '-' + mm + '-' + dd
          ELSE: BEGIN
             ymdhms = yyyy + '-' + mm + '-' + dd + '_' + $

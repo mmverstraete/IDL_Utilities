@@ -1,27 +1,17 @@
 FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
-   EXCPT_COND = excpt_cond
-
-   ;  Purpose:
-   ;     This function converts the rank number 'day_of_year' (a value expected
-   ;     to be in the range [1, 365] or [1, 366]) into a date, either for a
-   ;     common year, or for the particular year specified in the optional
-   ;     keyword parameter 'year', which can be a leap year.
-
-   ;  Remark: the function cannot test and adjust for leap year if the year is not
-   ;  specified, so in the absence of the keyword year, or if the year is not a
-   ;  leap year, the day_of_year 366 is considered in error
+   DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function computes the date (month and day)
-   ;  corresponding to the rank (day number) provided as input.
+   ;  corresponding to the rank number day_of_year provided as input.
    ;
    ;  ALGORITHM: This function computes the date (month and day)
    ;  corresponding to the rank (day number) provided as input, either for
    ;  a common year (if the keyword parameter YEAR is not specified), or
    ;  for that particular year if it is.
    ;
-   ;  SYNTAX:
-   ;  rc = date_of_year(day_of_year, month, day, YEAR = year, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = date_of_year(day_of_year, month, day, $
+   ;  YEAR = year, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -31,11 +21,14 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;
    ;  *   month {INT} [O]: The month in which this day falls.
    ;
-   ;  *   day {INT} [I]: The day within that month.
+   ;  *   day {INT} [O]: The day within that month.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   YEAR = year {INT} [I] (Default: None): The optional year number.
+   ;
+   ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
+   ;      or skip (0) debugging tests.
    ;
    ;  *   EXCPT_COND = excpt_cond {STRING} [O] (Default value: ”):
    ;      Description of the exception condition if one has been
@@ -49,12 +42,16 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      provides the month and day numbers corresponding to the input
    ;      argument day_of_year to the calling routine through its output
    ;      positional parameters, returns 0 and the output keyword
-   ;      parameter excpt_cond is set to a null string.
+   ;      parameter excpt_cond is set to a null string, if the optional
+   ;      input keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a non-zero error code, and the output keyword parameter
-   ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      returns a non-zero error code, the output arguments month and
+   ;      day are set to -1, and the output keyword parameter excpt_cond
+   ;      contains a message about the exception condition encountered, if
+   ;      the optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -63,7 +60,12 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  *   Error 110: Input positional parameter day_of_year is not of
    ;      numeric type.
    ;
-   ;  *   Error 120: Input positional parameter day_of_year is invalid.
+   ;  *   Error 120: Exception condition encountered in is_leap.
+   ;
+   ;  *   Error 130: Input positional parameter day_of_year is invalid.
+   ;
+   ;  *   Error 200: Exception condition encountered in CASE statement,
+   ;      probably when optional keyword parameter DEBUG is not set.
    ;
    ;  DEPENDENCIES:
    ;
@@ -82,11 +84,13 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> res = date_of_year(60, month, day, EXCPT_COND = excpt_cond)
+   ;      IDL> res = date_of_year(60, month, day, $
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'month = ', month, ' and day = ', day
    ;      month =        3 and day =        1
    ;
-   ;      IDL> res = date_of_year(60, month, day, YEAR = 2004, EXCPT_COND = excpt_cond)
+   ;      IDL> res = date_of_year(60, month, day, YEAR = 2004, $
+   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'month = ', month, ' and day = ', day
    ;      month =        2 and day =       29
    ;
@@ -97,6 +101,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  *   2017–11–10: Version 0.9 — Initial release.
    ;
    ;  *   2017–-11–-20: Version 1.0 —– Initial public release.
+   ;
+   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;
    ;Sec-Lic
@@ -134,33 +140,44 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;
    ;
    ;Sec-Cod
-   ;  Initialize the return code and the error message:
-   ret_code = 0
+   ;  Initialize the default return code and the exception condition message:
+   return_code = 0
+   IF KEYWORD_SET(debug) THEN BEGIN
+      debug = 1
+   ENDIF ELSE BEGIN
+      debug = 0
+   ENDELSE
    excpt_cond = ''
+
+   ;  Initialize the output positional parameters to invalid values:
+   month = -1
+   day = -1
+
+   IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with the wrong number of required positional parameters:
-   n_reqs = 3
-   IF (N_PARAMS() NE n_reqs) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 100
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Routine must be called with ' + strstr(n_reqs) + $
-         ' positional parameter(s): day_of_year, month, day.'
-      RETURN, error_code
-   ENDIF
+      n_reqs = 3
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): day_of_year, month, day.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  argument 'day_of_year' is not of numeric type:
-   n_reqs = 3
-   IF (is_numeric(day_of_year) NE 1) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input positional parameter day_of_year must be of numeric type.'
-      RETURN, error_code
+      IF (is_numeric(day_of_year) NE 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter day_of_year must be of numeric type.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Set the number of days per months in a common year; the initial element
@@ -187,24 +204,34 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  leap year, and if so adjust the number of days in February and the
    ;  maximum number of days in a leap year:
    IF (KEYWORD_SET(year)) THEN BEGIN
-      rc = is_leap(year, EXCPT_COND = excpt_cond)
+      rc = is_leap(year, DEBUG = debug, EXCPT_COND = excpt_cond)
       IF (rc EQ 1) THEN BEGIN
-         num_days[2] = 28
+         num_days[2] = 29
          max_day_of_year = 366
+      ENDIF
+      IF ((debug) AND (rc EQ -1)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, error_code
       ENDIF
    ENDIF
 
+   IF (debug) THEN BEGIN
+
    ;  Return to the calling routine with an error message if this function is
    ;  called with an invalid input argument 'day_of_year':
-   n_reqs = 1
-   IF ((day_of_year LT 1) OR (day_of_year GT max_day_of_year)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input argument day_of_year must be within the range [1, ' + $
-         strstr(max_day_of_year) + '].'
-      RETURN, error_code
+      IF ((day_of_year LT 1) OR (day_of_year GT max_day_of_year)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input argument day_of_year must be within the range [1, ' + $
+            strstr(max_day_of_year) + '].'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
    ;  Set the cumulative number of days from the start of the year until the
@@ -286,8 +313,13 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
          month = 12
          day = day_of_year - cum_num_days[11]
       END
+      ELSE: BEGIN
+         error_code = 200
+         excpt_cond = 'Unrecognized day_of_year.'
+         RETURN, error_code
+      END
    ENDCASE
 
-   RETURN, ret_code
+   RETURN, return_code
 
 END
