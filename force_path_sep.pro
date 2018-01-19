@@ -52,7 +52,10 @@ FUNCTION force_path_sep, dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 110: Positional parameter dir_spec is not of type STRING.
    ;
-   ;  *   Error 120: An exception condition occurred in last_char.pro.
+   ;  *   Error 120: Positional parameter dir_spec must contain at least 1
+   ;      character.
+   ;
+   ;  *   Error 200: An exception condition occurred in last_char.pro.
    ;
    ;  DEPENDENCIES:
    ;
@@ -153,15 +156,25 @@ FUNCTION force_path_sep, dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond
             ': ' + 'Argument must be of type STRING.'
          RETURN, return_code
       ENDIF
+
+   ;  Return to the calling routine with an error message if the argument
+   ;  'dir_spec' does not contain at least 1 character:
+      IF (STRLEN(dir_spec) LT 1) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + 'Argument must contain at least 1 character.''
+      ENDIF
    ENDIF
 
    ;  Append the path separator if necessary:
    dir_spec = STRTRIM(dir_spec, 2)
    res = last_char(dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
-   IF ((debug) AND (res = '')) THEN BEGIN
+   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 120
+      error_code = 200
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': ' + excpt_cond
       RETURN, return_code
