@@ -28,13 +28,17 @@ FUNCTION strrepeat, str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns a string scalar and the output keyword parameter
-   ;      excpt_cond is set to a null string.
+   ;      returns a string scalar, and the output keyword parameter
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG was set and if the optional output
+   ;      keyword parameter EXCPT_COND was provided in the call.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null string and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
-   ;      encountered.
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;

@@ -34,10 +34,10 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  *   If no exception condition has been detected, this function
    ;      returns 1 if the argument file_spec points to a readable file or
-   ;      directory, or 0 if it is not readable, or -1 if it is not found,
-   ;      and the output keyword parameter excpt_cond is set to a null
-   ;      string, if the optional input keyword parameter DEBUG is set and
-   ;      if the optional output keyword parameter EXCPT_COND is provided.
+   ;      directory, or 0 if it is not readable, and the output keyword
+   ;      parameter excpt_cond is set to a null string, if the optional
+   ;      input keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns -1, and the output keyword parameter excpt_cond contains

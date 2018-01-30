@@ -184,8 +184,8 @@ IDL&gt; PRINT, type_code, &#39;   &#39;, type_name
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, the desired numeric information is provided through the output positional parameters, the function returns <code>0</code>, and the keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, the values of the invalid output positional parameters is set to <code>0</code>, the function returns a non-zero error code, and the keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>year</code>, <code>month</code> and <code>day</code> provide the desired numeric information.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters corresponding to invalid values are set to <code>0</code>.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
@@ -273,8 +273,8 @@ IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, the desired statistics are contained in the output structure <code>stats</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a non-zero error code, the output structure is not filled and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The desired statistics are contained in the output structure <code>stats</code>.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output structure may be empty, incomplete or useless.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
@@ -409,8 +409,8 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function provides the month and day numbers corresponding to the input argument <code>day_of_year</code> to the calling routine through its output positional parameters, returns <code>0</code> and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a non-zero error code, the output arguments <code>month</code> and <code>day</code> are set to <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>month</code> and <code>day</code> provide the month and day numbers corresponding to the input positional parameter <code>day_of_year</code>, for a non-leap year if the optional input keyword parameter is either absent or points to a non-leap year. If this optional input keyword parameter is present in the call and points to a leap year, the output positional parameters are specific for that year.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output arguments <code>month</code> and <code>day</code> are set to <code>-1</code>.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
@@ -653,7 +653,7 @@ Hello/</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, the output arguments <code>dirs_names</code> and <code>dirs_sizes</code> contain the desired information, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output arguments <code>dirs_names</code> and <code>dirs_sizes</code> contain the desired information.</p></li>
 <li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -761,7 +761,7 @@ IDL&gt; PRINT, is_dir(dir_spec, DEBUG = 1, EXCPT_COND = excpt_cond)
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>dir_spec</code> is a directory, or <code>0</code> if it is not, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> is a regular file, or <code>0</code> if it is not, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -913,7 +913,7 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory, or <code>0</code> if it is not readable, or <code>-1</code> if it is not found, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory, or <code>0</code> if it is not readable, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -1227,8 +1227,8 @@ strictly positive.</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, provides the desired percentile <code>thresh</code>, the minimum and maximum values of <code>array</code> in output arguments, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a non-zero value, the output arguments <code>thresh</code>, <code>amin</code> and <code>amax</code> are set to <code>!VALUES.F_INFINITY</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>amin</code>, <code>amax</code> and <code>thresh</code> provide the minimum and maximum values of the input argument <code>array</code> and the desired percentile, respectively.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero value, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters <code>thresh</code>, <code>amin</code> and <code>amax</code> are set to <code>!VALUES.F_INFINITY</code>.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
@@ -1631,8 +1631,8 @@ res = &gt;P168_O068050_B110&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns a string scalar and the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
-<li><p>If an exception condition has been detected, this function returns a null string and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
+<li><p>If no exception condition has been detected, this function returns a string scalar, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call.</p></li>
+<li><p>If an exception condition has been detected, this function returns a null string and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>

@@ -37,11 +37,11 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 0, the output arguments dirs_names and dirs_sizes
-   ;      contain the desired information, and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG was
+   ;      set and if the optional output keyword parameter EXCPT_COND was
+   ;      provided in the call. The output arguments dirs_names and
+   ;      dirs_sizes contain the desired information.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter

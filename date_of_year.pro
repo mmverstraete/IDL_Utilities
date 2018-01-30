@@ -39,19 +39,23 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      provides the month and day numbers corresponding to the input
-   ;      argument day_of_year to the calling routine through its output
-   ;      positional parameters, returns 0 and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG was
+   ;      set and if the optional output keyword parameter EXCPT_COND was
+   ;      provided in the call. The output positional parameters month and
+   ;      day provide the month and day numbers corresponding to the input
+   ;      positional parameter day_of_year, for a non-leap year if the
+   ;      optional input keyword parameter is either absent or points to a
+   ;      non-leap year. If this optional input keyword parameter is
+   ;      present in the call and points to a leap year, the output
+   ;      positional parameters are specific for that year.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a non-zero error code, the output arguments month and
-   ;      day are set to -1, and the output keyword parameter excpt_cond
-   ;      contains a message about the exception condition encountered, if
-   ;      the optional input keyword parameter DEBUG is set and if the
-   ;      optional output keyword parameter EXCPT_COND is provided.
+   ;      returns a non-zero error code, and the output keyword parameter
+   ;      excpt_cond contains a message about the exception condition
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided. The output arguments month and day are set to -1.
    ;
    ;  EXCEPTION CONDITIONS:
    ;

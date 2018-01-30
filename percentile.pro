@@ -100,19 +100,20 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 0, provides the desired percentile thresh, the minimum
-   ;      and maximum values of array in output arguments, and the output
-   ;      keyword parameter excpt_cond is set to a null string, if the
-   ;      optional input keyword parameter DEBUG is set and if the
-   ;      optional output keyword parameter EXCPT_COND is provided.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG was
+   ;      set and if the optional output keyword parameter EXCPT_COND was
+   ;      provided in the call. The output positional parameters amin,
+   ;      amax and thresh provide the minimum and maximum values of the
+   ;      input argument array and the desired percentile, respectively.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a non-zero value, the output arguments thresh, amin and
-   ;      amax are set to !VALUES.F_INFINITY, and the output keyword
-   ;      parameter excpt_cond contains a message about the exception
-   ;      condition encountered, if the optional input keyword parameter
-   ;      DEBUG is set and if the optional output keyword parameter
-   ;      EXCPT_COND is provided.
+   ;      returns a non-zero value, and the output keyword parameter
+   ;      excpt_cond contains a message about the exception condition
+   ;      encountered, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided. The output positional parameters thresh, amin and amax
+   ;      are set to !VALUES.F_INFINITY.
    ;
    ;  EXCEPTION CONDITIONS:
    ;

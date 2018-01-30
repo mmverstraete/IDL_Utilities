@@ -28,9 +28,9 @@ FUNCTION is_file, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 1 if the argument dir_spec is a directory, or 0 if it is
-   ;      not, and the output keyword parameter excpt_cond is set to a
-   ;      null string, if the optional input keyword parameter DEBUG is
+   ;      returns 1 if the argument file_spec is a regular file, or 0 if
+   ;      it is not, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
    ;      provided.
    ;
