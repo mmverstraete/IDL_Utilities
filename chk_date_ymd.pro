@@ -6,13 +6,13 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  YYYY-MM-DD, and provides the year, month and day values as output
    ;  numeric arguments.
    ;
-   ;  ALGORITHM: This function splits the input argument date on character
-   ;  * and sets the output arguments year, month and day to their
-   ;  numerical values. If the input keyword parameter DEBUG is set, this
-   ;  function checks the validity of date and of its 3 components: the
-   ;  year number YYYY must be larger than 1582 and smaller than 2050, the
-   ;  month number MM must be larger than 0 and smaller than 13, while the
-   ;  day number DD must be larger than 0 and smaller than 31.
+   ;  ALGORITHM: This function splits the input argument date on the dash
+   ;  character (-) and sets the output arguments year, month and day to
+   ;  their numerical values. If the input keyword parameter DEBUG is set,
+   ;  this function checks the validity of date and of its 3 components:
+   ;  the year number YYYY must be larger than 1582 and smaller than 2050,
+   ;  the month number MM must be larger than 0 and smaller than 13, while
+   ;  the day number DD must be larger than 0 and smaller than 31.
    ;
    ;  SYNTAX: rc = chk_date_ymd(date, year, month, day, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -119,11 +119,11 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
-   ;
+   ;  *   2018–03–25: Version 1.2 — Updated documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -152,8 +152,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
-   ;
-   ;
    ;Sec-Cod
    ;  Initialize the default return code and the exception condition message:
    return_code = 0

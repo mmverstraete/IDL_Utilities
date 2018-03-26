@@ -125,12 +125,10 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
-   ;
-   ;
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -159,8 +157,6 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
-   ;
-   ;
    ;Sec-Cod
    ;  Initialize the default return code and the exception condition message:
    return_code = -1L

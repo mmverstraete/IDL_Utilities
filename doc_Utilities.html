@@ -11,7 +11,7 @@
 <ul>
 <li><p><strong>Purpose:</strong> This function returns the logarithm of a strictly positive numeric (but not complex) scalar or array <code>arg</code> to an arbitrary but strictly positive numeric (but not complex) scalar or array <code>base</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This function computes the logarithm of <code>arg</code> in base <code>base</code> as<br />
-<span class="math inline">log(<em>a</em><em>r</em><em>g</em>,&#8198;<em>b</em><em>a</em><em>s</em><em>e</em>)=log(<em>a</em><em>r</em><em>g</em>,&#8198;10)/log(<em>b</em><em>a</em><em>s</em><em>e</em>,&#8198;10)</span>,<br />
+<span class="math inline">log&#8198;(<em>a</em><em>r</em><em>g</em>,&#8198;<em>b</em><em>a</em><em>s</em><em>e</em>)&#8196;=&#8196;log&#8198;(<em>a</em><em>r</em><em>g</em>,&#8198;10)/log&#8198;(<em>b</em><em>a</em><em>s</em><em>e</em>,&#8198;10)</span>,<br />
 where both <code>arg</code> and <code>base</code> must be strictly positive, and neither can be complex numbers.</p>
 <ul>
 <li><p>If <code>arg</code> is an array and <code>base</code> is a scalar, then the logarithm of each element of <code>arg</code> is computed in base <code>base</code>.</p></li>
@@ -166,7 +166,7 @@ IDL&gt; PRINT, type_code, &#39;   &#39;, type_name
 <h2>chk_date_ymd</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> argument <code>date</code>, formatted as <code>YYYY-MM-DD</code>, and provides the <code>year</code>, <code>month</code> and <code>day</code> values as output numeric arguments.</p></li>
-<li><p><strong>Algorithm:</strong> This function splits the input argument <code>date</code> on character <code>-</code> and sets the output arguments <code>year</code>, <code>month</code> and <code>day</code> to their numerical values. If the input keyword parameter <code>DEBUG</code> is set, this function checks the validity of <code>date</code> and of its 3 components: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2050, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than 31.</p></li>
+<li><p><strong>Algorithm:</strong> This function splits the input argument <code>date</code> on the dash character (<code>-</code>) and sets the output arguments <code>year</code>, <code>month</code> and <code>day</code> to their numerical values. If the input keyword parameter <code>DEBUG</code> is set, this function checks the validity of <code>date</code> and of its 3 components: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2050, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than 31.</p></li>
 <li><p><strong>Syntax:</strong> <code>rc = chk_date_ymd(date, year, month, day, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -229,6 +229,7 @@ IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2017&#8211;09&#8211;07: Version 1.0 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+<li><p>2018&#8211;03&#8211;25: Version 1.2 &#8212; Updated documentation.</p></li>
 </ul></li>
 </ul>
 <h2>cor_arrays</h2>
@@ -322,7 +323,7 @@ defines the structure &#39;stats&#39;, calls &#39;cor_arrays&#39; and outputs:
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2017&#8211;02&#8211;28: Version 0.8 &#8212; Initial release under the name <code>cor_fields</code>.</p></li>
-<li><p>2017&#8211;07&#8211;20: Version 0.9 &#8212; Renamed function to <code>cor_arrays</code>, removed any reference to <span style="font-variant: small-caps;">MISR</span> or <span style="font-variant: small-caps;">MISR-HR</span> (generic utility routine), updated documentation.</p></li>
+<li><p>2017&#8211;07&#8211;20: Version 0.9 &#8212; Renamed function to <code>cor_arrays</code>, removed any reference to <span class="smallcaps">MISR</span> or <span class="smallcaps">MISR-HR</span> (generic utility routine), updated documentation.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 </ul></li>
@@ -526,6 +527,62 @@ excpt_cond = &gt;&lt;</code></pre></li>
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+</ul></li>
+</ul>
+<h2>discrete_integral</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes the integral of a mathematical function provided as a discrete set of <code>(x, y)</code> points.</p></li>
+<li><p><strong>Algorithm:</strong> This function calculates the &#8216;area under the curve&#8217; defined by the discrete set of <code>(x, y)</code> points, assuming a simple linear interpolation between those points (the so-called &#8220;trapezoidal rule&#8221;). The optional <code>BASELINE</code> keyword allows for adjusting the arbitrary constant inherent with the estimation of a definite integral.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = discrete_integral(x, y, BASELINE = baseline, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>x {FLOAT} [I]:</code> The array of independent variable values.</p></li>
+<li><p><code>y {FLOAT} [I]:</code> The array of dependent variable values.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>BASELINE = baseline {FLOAT} [I] (Default value: 0.0):</code> The reference dependent variable value from which the &#8216;area under the curve&#8217; will be computed.</p></li>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>FLOAT</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns the value of the definite integral of the function defined by the discrete set of <code>(x, y)</code> points, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-9999.00</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Routine arguments <code>x</code> and <code>y</code> must be numeric.</p></li>
+<li><p>Error 120: Routine arguments <code>x</code> and <code>y</code> must be arrays containing at least 2 elements.</p></li>
+<li><p>Error 130: Routine arguments <code>x</code> and <code>y</code> must be arrays of the same length.</p></li>
+<li><p>Error 140: Optional keyword <code>baseline</code> must be of numeric type.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function implements a strict trapezoidal rule to estimate the integral of the function provided as a discrete set of <code>(x, y)</code> points. If all <code>y</code> values are larger than the <code>baseline</code>, the result may underestimate the integral where the function is concave, and overestimate it where the function is convex, compared to the outcome of a more sophisticated approach, for instance by fitting a smooth curve through the points.</p></li>
+<li><p><strong>Note 2:</strong> This function performs all computations in <code>DOUBLE</code> precision, and returns the result as a single precision <code>FLOAT</code> value.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; x = [1.0, 2.0]
+IDL&gt; y = [4.0, 6.0]
+IDL&gt; res = discrete_integral(x, y, /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;res = &#39;, res
+res =       5.00000</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p><a href="https://en.wikipedia.org/wiki/Trapezoidal_rule" class="uri">https://en.wikipedia.org/wiki/Trapezoidal_rule</a>, accessed on 24 March 2018.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;03&#8211;24: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;03&#8211;25: Version 1.0 &#8212; Initial public release.</p></li>
 </ul></li>
 </ul>
 <h2>first_char</h2>
