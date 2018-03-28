@@ -163,10 +163,71 @@ IDL&gt; PRINT, type_code, &#39;   &#39;, type_name
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 </ul></li>
 </ul>
+<h2>chk_date_iso</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function checks the validity of the argument <code>date_iso</code> and computes the Julian day equivalent.</p></li>
+<li><p><strong>Algorithm:</strong> This function verifies that the argument <code>date_iso</code> is formatted as a string like <code>yy-mm-ddThh:nn:ss</code> where</p>
+<ul>
+<li><p><code>yy</code> is a 4-digit year number,</p></li>
+<li><p><code>mm</code> is a 2-digit month number,</p></li>
+<li><p><code>dd</code> is a 2-digit day number,</p></li>
+<li><p><code>hh</code> is a 2-digit hour number,</p></li>
+<li><p><code>nn</code> is a 2-digit minute number, and</p></li>
+<li><p><code>ss</code> is a 2-digit second number.</p></li>
+</ul>
+<p>If so, it computes the equivalent Julian day specification.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = chk_date_iso(date_iso, julian_iso, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>date_iso {STRING} [I]:</code> A string containing a date and time specification formatted as <code>yy-mm-ddThh:nn:ss</code>.</p></li>
+<li><p><code>julian_iso {DOUBLE} [O]:</code> The Julian day number corresponding to the <code>date_iso</code>.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameter <code>julian_iso</code> contains the Julian day number corresponding to <code>date_iso</code>.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameter <code>julian_iso</code> may be undefined or invalid.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input positional parameter <code>date_iso</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 200: The input positional parameter <code>date_iso</code> is incorrectly formatted: it must contain 2 strings separated by <code>T</code>.</p></li>
+<li><p>Error 210: The input positional parameter <code>date_iso</code> is incorrectly formatted: the date must contain 3 strings separated by <code>-</code>.</p></li>
+<li><p>Error 220: The input positional parameter <code>date_iso</code> is incorrectly formatted: the time must contain 3 strings separated by <code>:</code>.</p></li>
+<li><p>Error 300: The input positional parameter <code>date_iso</code> is invalid: the year must be within the range [1582, 2100].</p></li>
+<li><p>Error 310: The input positional parameter <code>date_iso</code> is invalid: the month must be within the range [1, 12].</p></li>
+<li><p>Error 320: The input positional parameter <code>date_iso</code> is invalid: the day must be within the range [1, number of days in the month].</p></li>
+<li><p>Error 330: The input positional parameter <code>date_iso</code> is invalid: the hour must be within the range [0, 23].</p></li>
+<li><p>Error 340: The input positional parameter <code>date_iso</code> is invalid: the minute must be within the range [0, 59].</p></li>
+<li><p>Error 350: The input positional parameter <code>date_iso</code> is invalid: the second must be within the range [0, 59].</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>days_per_month.pro</code></p></li>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>[Insert the command and its outcome]</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;03&#8211;25: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;13&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
 <h2>chk_date_ymd</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function takes the <code>STRING</code> argument <code>date</code>, formatted as <code>YYYY-MM-DD</code>, and provides the <code>year</code>, <code>month</code> and <code>day</code> values as output numeric arguments.</p></li>
-<li><p><strong>Algorithm:</strong> This function splits the input argument <code>date</code> on the dash character (<code>-</code>) and sets the output arguments <code>year</code>, <code>month</code> and <code>day</code> to their numerical values. If the input keyword parameter <code>DEBUG</code> is set, this function checks the validity of <code>date</code> and of its 3 components: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2050, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than 31.</p></li>
+<li><p><strong>Algorithm:</strong> This function splits the input argument <code>date</code> on character <code>-</code> and sets the output arguments <code>year</code>, <code>month</code> and <code>day</code> to their numerical values. If the input keyword parameter <code>DEBUG</code> is set, this function checks the validity of <code>date</code> and of its 3 components: the year number <code>YYYY</code> must be larger than 1582 and smaller than 2100, the month number <code>MM</code> must be larger than 0 and smaller than 13, while the day number <code>DD</code> must be larger than 0 and smaller than the number of days in that month, accounting for the possibility of a leap year.</p></li>
 <li><p><strong>Syntax:</strong> <code>rc = chk_date_ymd(date, year, month, day, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -197,12 +258,12 @@ IDL&gt; PRINT, type_code, &#39;   &#39;, type_name
 <li><p>Error 150: Positional parameter <code>date</code> does not contain 3 elements separated by 2 dashes.</p></li>
 <li><p>Error 160: Positional parameter <code>date</code> specifies an invalid year.</p></li>
 <li><p>Error 170: Positional parameter <code>date</code> specifies an invalid month.</p></li>
-<li><p>Error 180: An exception condition occurred in <code>is_leap.pro</code>.</p></li>
-<li><p>Error 190: Positional parameter <code>date</code> specifies an invalid day.</p></li>
+<li><p>Error 180: Positional parameter <code>date</code> specifies an invalid day.</p></li>
+<li><p>Error 200: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
-<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>days_per_month.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
@@ -218,18 +279,18 @@ IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 IDL&gt; PRINT, year, month, day
     2010       1       1
 
-IDL&gt; rc = chk_date_ymd(&#39;2100-01-01&#39;, year, month, day, $
+IDL&gt; rc = chk_date_ymd(&#39;2200-01-01&#39;, year, month, day, $
    DEBUG = 1, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-     160   &gt;Error 160 in CHK_DATE_YMD: Year 2100 is invalid
-     (must be 4 digits long and lie within [1582, 2050]).&lt;</code></pre></li>
+     160   &gt;Error 160 in CHK_DATE_YMD: Year 2200 is invalid
+     (must be 4 digits long and lie within [1582, 2100]).&lt;</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2017&#8211;09&#8211;07: Version 1.0 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;03&#8211;25: Version 1.2 &#8212; Updated documentation.</p></li>
+<li><p>2018&#8211;03&#8211;28: Version 1.2 &#8212; Update the code to use the new function <code>days_per_month.pro</code>.</p></li>
 </ul></li>
 </ul>
 <h2>cor_arrays</h2>
@@ -478,13 +539,14 @@ month =        2 and day =       29</code></pre></li>
 <li><p>Error 110: Positional parameter <code>month</code> is not a scalar variable of type numeric.</p></li>
 <li><p>Error 120: Positional parameter <code>month</code> is invalid: Must be contained in [1, 12].</p></li>
 <li><p>Error 130: Keyword parameter <code>year</code> is not a scalar variable of type numeric.</p></li>
-<li><p>Error 140: Keyword parameter <code>year</code> is invalid: Must be contained within [1582, 2050].</p></li>
+<li><p>Error 140: Keyword parameter <code>year</code> is invalid: Must be contained within [1582, 2100].</p></li>
 <li><p>Error 150: Positional parameter <code>day</code> is not a scalar variable of type numeric.</p></li>
 <li><p>Error 160: Positional parameter <code>day</code> is invalid: Must be contained in the interval [1, num_days[month]].</p></li>
+<li><p>Error 200: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
-<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>days_per_month.pro</code></p></li>
 <li><p><code>is_numeric.pro</code></p></li>
 <li><p><code>is_scalar.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
@@ -527,6 +589,49 @@ excpt_cond = &gt;&lt;</code></pre></li>
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+</ul></li>
+</ul>
+<h2>days_per_month</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function sets the number of days per month, for either a generic or a particular year (specified through the keyword <code>year</code>), in which case it adjusts the number of days in February if that year is a leap year.</p></li>
+<li><p><strong>Algorithm:</strong> This function defines the output positional parameter <code>num_days</code> as a 13-element <code>INT</code> array, sets <code>num_days[0]</code> to 365 and assigns the default number of days to each month of the year in array elements 1 to 12. If the keyword parameter <code>year</code> is provided, the function checks whether that year is a leap year and adjusts the number of days in February as well as the total number of days in the year accordingly.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = days_per_month(num_days, YEAR = year, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>num_days {INTEGER} [O]:</code> Array containing the number of days of each month, as well as the total number of days in the year.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>YEAR = year {INT} [I] (Default value: None):</code> Optional year number (between 1584 and 2100), for the purpose of determining if that year is a leap year.</p></li>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameter <code>num_days</code> contains the results generated by this function.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameter <code>num_days</code> may be undefined or useless.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input keyword parameter <code>year</code> is invalid: it must be within the range [1582, 2100].</p></li>
+<li><p>Error 120: An exception condition occurred in <code>is_leap.pro</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_leap.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>[Insert the command and its outcome]</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;03&#8211;24: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;03&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
 </ul></li>
 </ul>
 <h2>discrete_integral</h2>
