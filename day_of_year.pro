@@ -70,7 +70,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;      type numeric.
    ;
    ;  *   Error 140: Keyword parameter year is invalid: Must be contained
-   ;      within [1582, 2050].
+   ;      within [1582, 2100].
    ;
    ;  *   Error 150: Positional parameter day is not a scalar variable of
    ;      type numeric.
@@ -78,9 +78,12 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  *   Error 160: Positional parameter day is invalid: Must be
    ;      contained in the interval [1, num_days[month]].
    ;
+   ;  *   Error 200: An exception condition occurred in
+   ;      days_per_month.pro.
+   ;
    ;  DEPENDENCIES:
    ;
-   ;  *   is_leap.pro
+   ;  *   days_per_month.pro
    ;
    ;  *   is_numeric.pro
    ;
@@ -223,25 +226,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       ENDIF
    ENDIF
 
-   ;  Set the number of days per months in a common year; the initial element
-   ;  of this array will be used as an accumulator:
-   num_days = INTARR(13)
-   num_days[0] = 0
-   num_days[1] = 31
-   num_days[2] = 28
-   num_days[3] = 31
-   num_days[4] = 30
-   num_days[5] = 31
-   num_days[6] = 30
-   num_days[7] = 31
-   num_days[8] = 31
-   num_days[9] = 30
-   num_days[10] = 31
-   num_days[11] = 30
-   num_days[12] = 31
-
-   ;  Determine whether the optional keyword parameter year has been set and,
-   ;  in that case, whether it specifies a leap year:
+   ;  If the year is specified:
    IF (KEYWORD_SET(year)) THEN BEGIN
 
       IF (debug) THEN BEGIN
@@ -257,27 +242,45 @@ FUNCTION day_of_year, month, day, YEAR = year, $
             RETURN, return_code
          ENDIF
       ENDIF
+
       year = FIX(year)
 
-      IF (debug) THEN BEGIN
-
    ;  Return to the calling routine with an error message if year is not
-   ;  within the allowed range, restricted by is_leap and a reasonable
-   ;  maximum value for year:
-         IF ((year LT 1582) OR (year GT 2050)) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-            error_code = 140
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Keyword parameter year is invalid: Must be within ' + $
-               '[1582, 10000].'
-            RETURN, return_code
-         ENDIF
+   ;  withing the allowed range:
+      IF ((year LT 1582) OR (year GT 2100)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 140
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input argument year must be within [1582, 2100].'
+         RETURN, return_code
+
       ENDIF
 
-      ;  Adjust the number of days for February if necessary:
-      IF (is_leap(year)) THEN num_days[2] = 29
-   ENDIF
+   ;  Set the number of days per months in the year:
+      rc = days_per_month(num_days, YEAR = year, $
+         DEBUG = debug, EXCPT_COND = excpt_cond)
+      IF (debug AND (rc NE 0)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 200
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, error_code
+      ENDIF
+   ENDIF ELSE BEGIN
+      rc = days_per_month(num_days, $
+         DEBUG = debug, EXCPT_COND = excpt_cond)
+      IF (debug AND (rc NE 0)) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 200
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, error_code
+      ENDIF
+
+   ENDELSE
 
    IF (debug) THEN BEGIN
 
@@ -292,6 +295,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
          RETURN, return_code
       ENDIF
    ENDIF
+
    day = FIX(day)
 
    IF (debug) THEN BEGIN
@@ -312,6 +316,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Accumulate the number of days until the provided date (inclusive), noting
    ;  that the accumulation is taking place in num_days[0], and that the
    ;  indexing of num_days for actual months is 1-based:
+   num_days[0] = 0
    FOR i = 0, month - 1 DO BEGIN
       num_days[0] = num_days[0] + num_days[i]
    ENDFOR
