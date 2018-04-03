@@ -127,7 +127,9 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;
    ;  *   2018–03–25: Version 0.9 — Initial release.
    ;
-   ;  *   2018–13–28: Version 1.0 — Initial public release.
+   ;  *   2018–03–28: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–04–03: Version 1.1 — Updated error diagnostics.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
