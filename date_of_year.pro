@@ -64,7 +64,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  *   Error 110: Input positional parameter day_of_year is not of
    ;      numeric type.
    ;
-   ;  *   Error 120: Exception condition encountered in is_leap.
+   ;  *   Error 120: An exception condition occurred in
+   ;      days_per_month.pro.
    ;
    ;  *   Error 130: Input positional parameter day_of_year is invalid.
    ;
@@ -72,6 +73,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      probably when optional keyword parameter DEBUG is not set.
    ;
    ;  DEPENDENCIES:
+   ;
+   ;  *   days_per_month.pro
    ;
    ;  *   is_leap.pro
    ;
@@ -107,6 +110,10 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  *   2017–-11–-20: Version 1.0 —– Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–04–03: Version 1.2 — Update the code to use the new
+   ;      function
+   ;      days_per_month.pro.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -180,56 +187,31 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
       ENDIF
    ENDIF
 
-   ;  Set the number of days per months in a common year; the initial element
-   ;  of this array will be used as an accumulator:
-   num_days = INTARR(13)
-   num_days[0] = 0
-   num_days[1] = 31
-   num_days[2] = 28
-   num_days[3] = 31
-   num_days[4] = 30
-   num_days[5] = 31
-   num_days[6] = 30
-   num_days[7] = 31
-   num_days[8] = 31
-   num_days[9] = 30
-   num_days[10] = 31
-   num_days[11] = 30
-   num_days[12] = 31
-
-   ;  Set the maximum number of days in a common year:
-   max_day_of_year = 365
-
-   ;  If the keyword parameter 'year' is specified, check whether it is a
-   ;  leap year, and if so adjust the number of days in February and the
-   ;  maximum number of days in a leap year:
-   IF (KEYWORD_SET(year)) THEN BEGIN
-      rc = is_leap(year, DEBUG = debug, EXCPT_COND = excpt_cond)
-      IF (rc EQ 1) THEN BEGIN
-         num_days[2] = 29
-         max_day_of_year = 366
-      ENDIF
-      IF ((debug) AND (rc EQ -1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         error_code = 120
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': ' + excpt_cond
-         RETURN, error_code
-      ENDIF
+   ;  Set the number of days per months in a common year, or in the particular
+   ;  year if it has been specified (num_days[0] holds the total number of days
+   ;  in the year):
+   rc = days_per_month(num_days, YEAR = year, DEBUG = debug, $
+      EXCPT_COND = excpt_cond)
+   IF (rc NE 0) THEN BEGIN
+      info = SCOPE_TRACEBACK(/STRUCTURE)
+      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+      error_code = 120
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': ' + excpt_cond
+      RETURN, error_code
    ENDIF
 
    IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with an invalid input argument 'day_of_year':
-      IF ((day_of_year LT 1) OR (day_of_year GT max_day_of_year)) THEN BEGIN
+      IF ((day_of_year LT 1) OR (day_of_year GT num_days[0])) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input argument day_of_year must be within the range [1, ' + $
-            strstr(max_day_of_year) + '].'
+            strstr(num_days[0]) + '].'
          RETURN, error_code
       ENDIF
    ENDIF
@@ -239,19 +221,21 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    cum_num_days = INTARR(13)
    cum_num_days[0] = 0
    cum_num_days[1] = 31
-   cum_num_days[2] = TOTAL(num_days[0:2]) + (max_day_of_year EQ 366)
-   cum_num_days[3] = TOTAL(num_days[0:3]) + (max_day_of_year EQ 366)
-   cum_num_days[4] = TOTAL(num_days[0:4]) + (max_day_of_year EQ 366)
-   cum_num_days[5] = TOTAL(num_days[0:5]) + (max_day_of_year EQ 366)
-   cum_num_days[6] = TOTAL(num_days[0:6]) + (max_day_of_year EQ 366)
-   cum_num_days[7] = TOTAL(num_days[0:7]) + (max_day_of_year EQ 366)
-   cum_num_days[8] = TOTAL(num_days[0:8]) + (max_day_of_year EQ 366)
-   cum_num_days[9] = TOTAL(num_days[0:9]) + (max_day_of_year EQ 366)
-   cum_num_days[10] = TOTAL(num_days[0:10]) + (max_day_of_year EQ 366)
-   cum_num_days[11] = TOTAL(num_days[0:11]) + (max_day_of_year EQ 366)
-   cum_num_days[12] = TOTAL(num_days[0:12]) + (max_day_of_year EQ 366)
+   cum_num_days[2] = TOTAL(num_days[1:2])
+   cum_num_days[3] = TOTAL(num_days[1:3])
+   cum_num_days[4] = TOTAL(num_days[1:4])
+   cum_num_days[5] = TOTAL(num_days[1:5])
+   cum_num_days[6] = TOTAL(num_days[1:6])
+   cum_num_days[7] = TOTAL(num_days[1:7])
+   cum_num_days[8] = TOTAL(num_days[1:8])
+   cum_num_days[9] = TOTAL(num_days[1:9])
+   cum_num_days[10] = TOTAL(num_days[1:10])
+   cum_num_days[11] = TOTAL(num_days[1:11])
+   cum_num_days[12] = TOTAL(num_days[1:12])
 
-   ;  Determine the date corresponding to the input argument 'day_of_year':
+   ;  Determine the date corresponding to the input argument 'day_of_year' by
+   ;  identifying the month in which it falls and subtracting the number of
+   ;  days in all previous completed months:
    CASE 1 OF
       (day_of_year GT cum_num_days[0]) AND $
       (day_of_year LE cum_num_days[1]): BEGIN
