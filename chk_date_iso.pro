@@ -85,17 +85,20 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;  *   Error 310: The input positional parameter date_iso is invalid:
    ;      the month must be within the range [1, 12].
    ;
-   ;  *   Error 320: The input positional parameter date_iso is invalid:
+   ;  *   Error 320: An exception condition occurred in
+   ;      days_per_month.pro.
+   ;
+   ;  *   Error 330: The input positional parameter date_iso is invalid:
    ;      the day must be within the range [1, number of days in the
    ;      month].
    ;
-   ;  *   Error 330: The input positional parameter date_iso is invalid:
+   ;  *   Error 340: The input positional parameter date_iso is invalid:
    ;      the hour must be within the range [0, 23].
    ;
-   ;  *   Error 340: The input positional parameter date_iso is invalid:
+   ;  *   Error 350: The input positional parameter date_iso is invalid:
    ;      the minute must be within the range [0, 59].
    ;
-   ;  *   Error 350: The input positional parameter date_iso is invalid:
+   ;  *   Error 360: The input positional parameter date_iso is invalid:
    ;      the second must be within the range [0, 59].
    ;
    ;  DEPENDENCIES:
@@ -265,13 +268,22 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    IF (debug) THEN BEGIN
       rc = days_per_month(num_days, YEAR = yy, DEBUG = debug, $
          EXCPT_COND = excpt_cond)
-      IF ((dd LT 1) OR (dd GT num_days[mm])) THEN BEGIN
+      IF (rc NE 0) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 320
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, error_code
+      ENDIF
+      IF ((dd LT 1) OR (dd GT num_days[mm])) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 330
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter date_iso is invalid: ' + $
-            'the day must be within the range [1, number of days in the month].'
+            'the day must be within the range [1, ' + strstr(num_days[mm] + $
+            '].'
          RETURN, error_code
       ENDIF
    ENDIF
@@ -280,7 +292,7 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    IF (debug AND ((hh LT 0) OR (hh GT 23))) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 330
+      error_code = 340
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
          'the hour must be within the range [0, 23].'
@@ -291,7 +303,7 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    IF (debug AND ((nn LT 0) OR (nn GT 59))) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 340
+      error_code = 350
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
          'the minute must be within the range [0, 59].'
@@ -302,7 +314,7 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    IF (debug AND ((ss LT 0) OR (ss GT 59))) THEN BEGIN
       info = SCOPE_TRACEBACK(/STRUCTURE)
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-      error_code = 350
+      error_code = 360
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
          'the second must be within the range [0, 59].'
