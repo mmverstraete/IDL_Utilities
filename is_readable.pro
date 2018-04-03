@@ -11,8 +11,8 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  i.e., if the argument does not point to an existing file or
    ;  directory.
    ;
-   ;  SYNTAX:
-   ;  rc = is_readable(file_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = is_readable(file_spec, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -78,7 +78,8 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
    ;             0,   >Error 120 in IS_READABLE:Argument
-   ;      ~/Documents/MySoftware/Test_dir/unreadable.txt exists but is not readable.<
+   ;      ~/Documents/MySoftware/Test_dir/unreadable.txt exists
+   ;         but is not readable.<
    ;
    ;      IDL> rc = is_readable('~/Desktop/junkfile', $
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)

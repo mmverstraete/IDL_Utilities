@@ -11,8 +11,8 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  writable, and -1 otherwise, i.e., if the argument does not point to
    ;  an existing file or directory.
    ;
-   ;  SYNTAX:
-   ;  rc = is_writeable(file_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: rc = is_writeable(file_spec, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -87,12 +87,14 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
    ;      0,   >Error 120 in IS_WRITABLE: Argument
-   ;      ~/Documents/MySoftware/Test_dir/unwritable.txt exists but is not writable.<
+   ;      ~/Documents/MySoftware/Test_dir/unwritable.txt exists
+   ;         but is not writable.<
    ;
    ;      IDL> rc = is_writable('~/Desktop/junkfile', $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
-   ;      -1,   >Error 130 in IS_WRITABLE: Argument ~/Desktop/junkfile is not found.<
+   ;      -1,   >Error 130 in IS_WRITABLE: Argument ~/Desktop/junkfile
+   ;         is not found.<
    ;
    ;  REFERENCES: None.
    ;

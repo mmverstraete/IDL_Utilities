@@ -110,7 +110,13 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;
    ;  EXAMPLES:
    ;
-   ;      [Insert the command and its outcome]
+   ;      IDL> date_iso = '2018-06-13T12:00:00'
+   ;      IDL> rc = chk_date_iso(date_iso, julian_iso, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + excpt_cond + '<'
+   ;      rc = 0, excpt_cond = ><
+   ;      IDL> PRINT, 'julian_iso = ', julian_iso
+   ;      julian_iso =        2458283.0
    ;
    ;  REFERENCES: None.
    ;

@@ -26,7 +26,7 @@ FUNCTION days_per_month, num_days, YEAR = year, DEBUG = debug, $
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   YEAR = year {INT} [I] (Default value: None): Optional year
-   ;      number (between 1584 and 2100), for the purpose of determining
+   ;      number in the range [1584, 2100], for the purpose of determining
    ;      if that year is a leap year.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
@@ -74,7 +74,13 @@ FUNCTION days_per_month, num_days, YEAR = year, DEBUG = debug, $
    ;
    ;  EXAMPLES:
    ;
-   ;      [Insert the command and its outcome]
+   ;      IDL> year = 2016
+   ;      IDL> rc = days_per_month(num_days, YEAR = year, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + excpt_cond + '<'
+   ;      rc = 0, excpt_cond = ><
+   ;      IDL> PRINT, 'num_days = ', num_days, FORMAT = '(A, 13I5)'
+   ;      num_days = 366  31  29  31  30  31  30  31  31  30  31  30  31
    ;
    ;  REFERENCES: None.
    ;

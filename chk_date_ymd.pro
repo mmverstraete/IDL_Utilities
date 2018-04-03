@@ -122,7 +122,8 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–03–28: Version 1.2 — Update the code to use the new
-   ;      function days_per_month.pro.
+   ;      function
+   ;      days_per_month.pro.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;

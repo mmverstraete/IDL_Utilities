@@ -28,8 +28,8 @@ FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      expression, its INT value, as returned by the FIX built-in
    ;      function is used.
    ;
-   ;  SYNTAX:
-   ;  res = round_dec(arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = round_dec(arg, n_dec, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;

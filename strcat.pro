@@ -22,7 +22,7 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   SEP_CHAR = sep_char {STRING} [I] (Default value: ’ ’): Character
-   ;      used to separate the array elements in the output string.
+   ;      string used to separate the array elements in the output string.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
    ;      or skip (0) debugging tests.

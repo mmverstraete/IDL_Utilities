@@ -13,8 +13,8 @@ FUNCTION sha256, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   file_spec {STRING} [I]: The file specification (optional path
-   ;      and mandatory name) of the file to characterize.
+   ;  *   file_spec {STRING} [I]: The input file specification, with an
+   ;      optional path but a mandatory name, of the file to characterize.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;

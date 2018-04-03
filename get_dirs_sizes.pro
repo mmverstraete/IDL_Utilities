@@ -17,8 +17,8 @@ FUNCTION get_dirs_sizes, dir_patt, n_dirs, dirs_names, dirs_sizes, $
    ;
    ;  *   dir_patt {STRING} [I]: A pattern of directory names.
    ;
-   ;  *   dirs_names {STRING array} [O]: A string array containing the
-   ;      names of the matching directories.
+   ;  *   dirs_names {STRING array} [O]: The names of the matching
+   ;      directories.
    ;
    ;  *   dirs_sizes {STRING array} [O]: A string array containing the
    ;      sizes of the matching directories.

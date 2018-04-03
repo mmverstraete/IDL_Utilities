@@ -58,21 +58,21 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      smaller than the numerical equivalent of ign_bel_str or strictly
    ;      larger than the numerical equivalent of ign_abo_str.
    ;
-   ;  *   IGN_BEL_STR = ign_bel_str {STRING} [I]: Threshold value,
-   ;      provided as a string: If the AMISS keyword has been set, this
-   ;      keyword is mandatory and all array values strictly lower than
-   ;      the numerical equivalent to that string are ignored for the
-   ;      purpose of computing statistics and thresh. If the AMISS keyword
-   ;      has not been set, this keyword is ignored. See the notes below
-   ;      for additional information.
+   ;  *   IGN_BEL_STR = ign_bel_str {STRING} [I]: Threshold value provided
+   ;      as a string: If the AMISS keyword has been set, this keyword is
+   ;      mandatory and all array values strictly lower than the numerical
+   ;      equivalent to that string are ignored for the purpose of
+   ;      computing statistics and thresh. If the AMISS keyword has not
+   ;      been set, this keyword is ignored. See the notes below for
+   ;      additional information.
    ;
-   ;  *   IGN_ABO_STR = ign_abo_str {STRING} [I]: Threshold value,
-   ;      provided as a string: If the AMISS keyword has been set, this
-   ;      keyword is mandatory and all array values strictly higher than
-   ;      the numerical equivalent to that string are ignored for the
-   ;      purpose of computing statistics and thresh. If the AMISS keyword
-   ;      has not been set, this keyword is ignored. See the notes below
-   ;      for additional information.
+   ;  *   IGN_ABO_STR = ign_abo_str {STRING} [I]: Threshold value provided
+   ;      as a string: If the AMISS keyword has been set, this keyword is
+   ;      mandatory and all array values strictly higher than the
+   ;      numerical equivalent to that string are ignored for the purpose
+   ;      of computing statistics and thresh. If the AMISS keyword has not
+   ;      been set, this keyword is ignored. See the notes below for
+   ;      additional information.
    ;
    ;  *   ASORT = asort {INTEGER} [I]: Flag indicating whether array is
    ;      already sorted in ascending order (1) or not (0).
