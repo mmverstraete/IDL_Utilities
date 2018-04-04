@@ -203,10 +203,11 @@ IDL&gt; PRINT, type_code, &#39;   &#39;, type_name
 <li><p>Error 220: The input positional parameter <code>date_iso</code> is incorrectly formatted: the time must contain 3 strings separated by <code>:</code>.</p></li>
 <li><p>Error 300: The input positional parameter <code>date_iso</code> is invalid: the year must be within the range [1582, 2100].</p></li>
 <li><p>Error 310: The input positional parameter <code>date_iso</code> is invalid: the month must be within the range [1, 12].</p></li>
-<li><p>Error 320: The input positional parameter <code>date_iso</code> is invalid: the day must be within the range [1, number of days in the month].</p></li>
-<li><p>Error 330: The input positional parameter <code>date_iso</code> is invalid: the hour must be within the range [0, 23].</p></li>
-<li><p>Error 340: The input positional parameter <code>date_iso</code> is invalid: the minute must be within the range [0, 59].</p></li>
-<li><p>Error 350: The input positional parameter <code>date_iso</code> is invalid: the second must be within the range [0, 59].</p></li>
+<li><p>Error 320: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
+<li><p>Error 330: The input positional parameter <code>date_iso</code> is invalid: the day must be within the range [1, number of days in the month].</p></li>
+<li><p>Error 340: The input positional parameter <code>date_iso</code> is invalid: the hour must be within the range [0, 23].</p></li>
+<li><p>Error 350: The input positional parameter <code>date_iso</code> is invalid: the minute must be within the range [0, 59].</p></li>
+<li><p>Error 360: The input positional parameter <code>date_iso</code> is invalid: the second must be within the range [0, 59].</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -227,7 +228,8 @@ julian_iso =        2458283.0</code></pre></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2018&#8211;03&#8211;25: Version 0.9 &#8212; Initial release.</p></li>
-<li><p>2018&#8211;13&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2018&#8211;03&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2018&#8211;04&#8211;03: Version 1.1 &#8212; Updated error diagnostics.</p></li>
 </ul></li>
 </ul>
 <h2>chk_date_ymd</h2>
@@ -485,12 +487,13 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Input positional parameter <code>day_of_year</code> is not of numeric type.</p></li>
-<li><p>Error 120: Exception condition encountered in <code>is_leap</code>.</p></li>
+<li><p>Error 120: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
 <li><p>Error 130: Input positional parameter <code>day_of_year</code> is invalid.</p></li>
 <li><p>Error 200: Exception condition encountered in <code>CASE</code> statement, probably when optional keyword parameter <code>DEBUG</code> is not set.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>days_per_month.pro</code></p></li>
 <li><p><code>is_leap.pro</code></p></li>
 <li><p><code>is_numeric.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
@@ -515,6 +518,8 @@ month =        2 and day =       29</code></pre></li>
 <li><p>2017&#8211;11&#8211;10: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;-11&#8211;-20: Version 1.0 &#8212;&#8211; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+<li><p>2018&#8211;04&#8211;03: Version 1.2 &#8212; Update the code to use the new function<br />
+<code>days_per_month.pro</code>.</p></li>
 </ul></li>
 </ul>
 <h2>day_of_year</h2>
@@ -866,14 +871,17 @@ IDL&gt; PRINT, dirs_sizes
 </ul>
 <h2>get_disks_sizes</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function returns a 2-dimensional <code>STRING</code> array containing the name, total capacity, used space and available space for each of the currently mounted disks on the current computer. If the <code>PRINTIT</code> keyword is set, this information is also printed on the console.</p></li>
-<li><p><strong>Algorithm:</strong> This function spawns a Linux <code>df</code> command to the operating system, extracts the desired information from the outcome, and returns it to the calling routine.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = get_disks_sizes(DIR = dir, PRINTIT = printit, $</code><br />
+<li><p><strong>Purpose:</strong> This function retrieves the name, total capacity, used space and available space of each of the disks mounted on the current computer and matching the optional pattern <code>DIR</code>, and passes that information to the calling routine through the output positional parameter <code>disks_sizes</code>. If the optional keyword parameter <code>PRINTIT</code> is set, this information is also printed on the console.</p></li>
+<li><p><strong>Algorithm:</strong> This function spawns a Linux <code>df</code> command to the operating system, extracts the desired information from the outcome, and uses it to populate the 2-dimensional output array <code>disks_sizes</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>res = get_disks_sizes(disks_sizes, DIR = dir, PRINTIT = printit, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong> None.</p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>disks_sizes {STRING array} [O]:</code> A 2-dimensional array containing size information for each disk mounted on the current computer.</p></li>
+</ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>DIR = dir {STRING} [I] (Default: &#8221;):</code> The disk, partition or directory name to be documented.</p></li>
+<li><p><code>DIR = dir {STRING} [I] (Default: &#8221;):</code> The name pattern of the disk(s) to be documented.</p></li>
 <li><p><code>PRINTIT = printit {INT} [I] (Default: 0):</code> Flag to activate (1) or skip (0) the printing of the outcome on the console.</p></li>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
@@ -881,20 +889,22 @@ IDL&gt; PRINT, dirs_sizes
 <li><p><strong>Returned value type:</strong> <code>STRING array</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns the 2-dimensional <code>STRING</code> array <code>disks_info[n_disks, n_items]</code>, where</p>
+<li><p>If no exception condition has been detected, this function sets the 2-dimensional <code>STRING</code> array <code>disks_sizes[n_disks, n_items]</code> as follows:</p>
 <ul>
-<li><p><code>N_ELEMENTS(disks_info[*, 0])</code> is the number of currently mounted disks or partitions meeting the optional selection criterion <code>dir</code>,</p></li>
-<li><p><code>disks_info[i, 0]</code> contains the name of the mount point for disk <code>i</code>,</p></li>
-<li><p><code>disks_info[i, 1]</code> contains the total capacity of the disk <code>i</code>,</p></li>
-<li><p><code>disks_info[i, 2]</code> contains the space already used on disk <code>i</code>, and</p></li>
-<li><p><code>disks_info[i, 3]</code> contains the space remaining available on disk <code>i</code>.</p></li>
+<li><p><code>N_ELEMENTS(disks_sizes[*, 0])</code> is the number of currently mounted disks meeting the optional selection criterion <code>dir</code>,</p></li>
+<li><p><code>disks_sizes[i, 0]</code> contains the name of the mount point for disk <code>i</code>,</p></li>
+<li><p><code>disks_sizes[i, 1]</code> contains the total capacity of the disk <code>i</code>,</p></li>
+<li><p><code>disks_sizes[i, 2]</code> contains the space already used on disk <code>i</code>, and</p></li>
+<li><p><code>disks_sizes[i, 3]</code> contains the space remaining available on disk <code>i</code>.</p></li>
 </ul>
 <p>The output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call.</p></li>
 <li><p>If an exception condition has been detected, this function returns a null <code>STRING</code> array, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: The optional keyword parameter <code>dir</code> must be of type <code>STRING</code>.</p></li>
+<li><p>Error 120: An exception condition occurred in the spawning of the <code>df</code> command.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -902,17 +912,23 @@ IDL&gt; PRINT, dirs_sizes
 <li><p><code>set_white.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
-<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> This function relies on Linux&#8217;s <code>df</code> command, so it will only work within the macOS or Linux environments.</p></li>
+</ul></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; info = get_disks_sizes(/PRINTIT)
-There are 2 mounted disks on this computer:
-   /Volumes/MISR_Data3       3.6Ti       3.3Ti       379Gi
-                     /       932Gi        69Gi       859Gi</code></pre></li>
+<pre><code>IDL&gt; dir = &#39;MISR*&#39;
+IDL&gt; rc = get_disks_sizes(disks_sizes, DIR = dir, $
+   /PRINT, /DEBUG, EXCPT_COND = excpt_cond)
+There are 2 disks mounted on MicMac2:
+        /Volumes/MISR-HR       1.8Ti       1.8Ti       3.6Gi
+     /Volumes/MISR_Data3       3.6Ti       3.3Ti       379Gi</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2018&#8211;03&#8211;29: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;04&#8211;02: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2017&#8211;04&#8211;04: Version 1.1 &#8212; Update the code and documentation to provide the desired information through a positional parameter rather than the return value (now used for error reporting).</p></li>
 </ul></li>
 </ul>
 <h2>is_dir</h2>
@@ -1850,7 +1866,8 @@ res = &gt;P168_O068050_B110&lt;</code></pre></li>
 <ul>
 <li><p><strong>Purpose:</strong> This function returns a <code>STRING</code> containing <code>n_rep</code> times the input argument <code>str</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This function generates and returns an output string containing <code>n_rep</code> times the input argument <code>str</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = strrepeat(str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Syntax:</strong> <code>res = strrepeat(str, n_rep, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>str {STRING} [I]:</code> A string expression.</p></li>

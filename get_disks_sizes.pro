@@ -3,15 +3,15 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
 
    ;Sec-Doc
    ;  PURPOSE: This function retrieves the name, total capacity, used
-   ;  space and available space of each of the currently mounted disks on
-   ;  the current computer and passes that information to the calling
-   ;  routine through the the output positional parameter disks_sizes. If
-   ;  the PRINTIT keyword is set, this information is also printed on the
-   ;  console.
+   ;  space and available space of each of the disks mounted on the
+   ;  current computer and matching the optional pattern DIR, and passes
+   ;  that information to the calling routine through the output
+   ;  positional parameter disks_sizes. If the optional keyword parameter
+   ;  PRINTIT is set, this information is also printed on the console.
    ;
    ;  ALGORITHM: This function spawns a Linux df command to the operating
    ;  system, extracts the desired information from the outcome, and uses
-   ;  it to populate the 2-dimensional output STRING array.
+   ;  it to populate the 2-dimensional output array disks_sizes.
    ;
    ;  SYNTAX:
    ;  res = get_disks_sizes(disks_sizes, DIR = dir, PRINTIT = printit, $
@@ -24,8 +24,8 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   DIR = dir {STRING} [I] (Default: ”): The disk, partition or
-   ;      directory name to be documented.
+   ;  *   DIR = dir {STRING} [I] (Default: ”): The name pattern of the
+   ;      disk(s) to be documented.
    ;
    ;  *   PRINTIT = printit {INT} [I] (Default: 0): Flag to activate (1)
    ;      or skip (0) the printing of the outcome on the console.
@@ -41,23 +41,22 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;  OUTCOME:
    ;
-   ;  *   If no exception condition has been detected, this function
-   ;      returns the 2-dimensional STRING array
-   ;      disks_info[n_disks, n_items], where
+   ;  *   If no exception condition has been detected, this function sets
+   ;      the 2-dimensional STRING array disks_sizes[n_disks, n_items] as
+   ;      follows:
    ;
-   ;      -   N_ELEMENTS(disks_info[*, 0]) is the number of currently
-   ;          mounted disks or partitions meeting the optional selection
-   ;          criterion dir,
+   ;      -   N_ELEMENTS(disks_sizes[*, 0]) is the number of currently
+   ;          mounted disks meeting the optional selection criterion dir,
    ;
-   ;      -   disks_info[i, 0] contains the name of the mount point for
+   ;      -   disks_sizes[i, 0] contains the name of the mount point for
    ;          disk i,
    ;
-   ;      -   disks_info[i, 1] contains the total capacity of the disk i,
+   ;      -   disks_sizes[i, 1] contains the total capacity of the disk i,
    ;
-   ;      -   disks_info[i, 2] contains the space already used on disk i,
+   ;      -   disks_sizes[i, 2] contains the space already used on disk i,
    ;          and
    ;
-   ;      -   disks_info[i, 3] contains the space remaining available on
+   ;      -   disks_sizes[i, 3] contains the space remaining available on
    ;          disk i.
    ;
    ;      The output keyword parameter excpt_cond is set to a null string,
@@ -97,10 +96,12 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> info = get_disks_sizes(/PRINTIT)
-   ;      There are 2 mounted disks on this computer:
-   ;         /Volumes/MISR_Data3       3.6Ti       3.3Ti       379Gi
-   ;                           /       932Gi        69Gi       859Gi
+   ;      IDL> dir = 'MISR*'
+   ;      IDL> rc = get_disks_sizes(disks_sizes, DIR = dir, $
+   ;         /PRINT, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      There are 2 disks mounted on MicMac2:
+   ;              /Volumes/MISR-HR       1.8Ti       1.8Ti       3.6Gi
+   ;           /Volumes/MISR_Data3       3.6Ti       3.3Ti       379Gi
    ;
    ;  REFERENCES: None.
    ;
@@ -185,6 +186,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
       ENDIF
    ENDIF
 
+   ;  Identify the current computer:
+   SPAWN, 'hostname -s', computer
+   computer = computer[0]
+
    ;  Set the Linux command line:
    IF (KEYWORD_SET(dir)) THEN BEGIN
       command = 'df -h /Volumes/' + dir
@@ -212,10 +217,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
          IF (KEYWORD_SET(printit)) THEN BEGIN
             IF (KEYWORD_SET(dir)) THEN BEGIN
                PRINT, 'There are no disks matching the pattern ' + $
-                  dir + ' mounted on this computer.'
+                  dir + ' mounted on ' + computer + '.'
             ENDIF ELSE BEGIN
                PRINT, 'There are no disks matching the pattern ' + $
-                  '/Volumes/ mounted on this computer.'
+                  '/Volumes/ mounted on ' + computer + '.'
             ENDELSE
          ENDIF
          RETURN, return_code
@@ -266,10 +271,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  required information on the console:
    IF (KEYWORD_SET(printit)) THEN BEGIN
       CASE n_disks OF
-         0: PRINT, 'There are no mounted disks on this computer.'
-         1: PRINT, 'There is 1 mounted disk on this computer:'
+         0: PRINT, 'There are no disks mounted on ' + computer + '.'
+         1: PRINT, 'There is 1 disk mounted on ' + computer + ':'
          ELSE: PRINT, 'There are ' + strstr(n_disks) + $
-            ' mounted disks on this computer:'
+            ' disks mounted on ' + computer + ':'
       ENDCASE
       FOR j = 0, n_disks  - 1 DO BEGIN
          PRINT, disks_sizes[j, *], FORMAT = '(A24, 3A12)'

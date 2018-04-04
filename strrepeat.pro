@@ -7,8 +7,8 @@ FUNCTION strrepeat, str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  ALGORITHM: This function generates and returns an output string
    ;  containing n_rep times the input argument str.
    ;
-   ;  SYNTAX:
-   ;  res = strrepeat(str, n_rep, DEBUG = debug, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = strrepeat(str, n_rep, $
+   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
