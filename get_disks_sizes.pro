@@ -1,21 +1,26 @@
-FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
+FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function returns a 2-dimensional STRING array
-   ;  containing the name, total capacity, used space and available space
-   ;  for each of the currently mounted disks on the current computer. If
+   ;  PURPOSE: This function retrieves the name, total capacity, used
+   ;  space and available space of each of the currently mounted disks on
+   ;  the current computer and passes that information to the calling
+   ;  routine through the the output positional parameter disks_sizes. If
    ;  the PRINTIT keyword is set, this information is also printed on the
    ;  console.
    ;
    ;  ALGORITHM: This function spawns a Linux df command to the operating
-   ;  system, extracts the desired information from the outcome, and
-   ;  returns it to the calling routine.
+   ;  system, extracts the desired information from the outcome, and uses
+   ;  it to populate the 2-dimensional output STRING array.
    ;
-   ;  SYNTAX: res = get_disks_sizes(DIR = dir, PRINTIT = printit, $
+   ;  SYNTAX:
+   ;  res = get_disks_sizes(disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
-   ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]: None.
+   ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
+   ;
+   ;  *   disks_sizes {STRING array} [O]: A 2-dimensional array containing
+   ;      size information for each disk mounted on the current computer.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -69,8 +74,13 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;  EXCEPTION CONDITIONS:
    ;
+   ;  *   Error 100: One or more positional parameter(s) are missing.
+   ;
    ;  *   Error 110: The optional keyword parameter dir must be of type
    ;      STRING.
+   ;
+   ;  *   Error 120: An exception condition occurred in the spawning of
+   ;      the df command.
    ;
    ;  DEPENDENCIES:
    ;
@@ -80,7 +90,10 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;  *   strstr.pro
    ;
-   ;  REMARKS: None.
+   ;  REMARKS:
+   ;
+   ;  *   NOTE 1: This function relies on Linux’s df command, so it will
+   ;      only work within the macOS or Linux environments.
    ;
    ;  EXAMPLES:
    ;
@@ -96,6 +109,10 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  *   2018–03–29: Version 0.9 — Initial release.
    ;
    ;  *   2017–04–02: Version 1.0 — Initial public release.
+   ;
+   ;  *   2017–04–04: Version 1.1 — Update the code and documentation to
+   ;      provide the desired information through a positional parameter
+   ;      rather than the return value (now used for error reporting).
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -130,7 +147,7 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
    ;  Initialize the default return code and the exception condition message:
-   return_code = ''
+   return_code = 0
    IF KEYWORD_SET(debug) THEN BEGIN
       debug = 1
    ENDIF ELSE BEGIN
@@ -138,7 +155,23 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ENDELSE
    excpt_cond = ''
 
+   ;  Initialize the output positional parameters to invalid values:
+   par_1 = 0
+
    IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if this function is
+   ;  called with the wrong number of required positional parameters:
+      n_reqs = 1
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         info = SCOPE_TRACEBACK(/STRUCTURE)
+         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): disks_sizes.'
+         RETURN, error_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the optional
    ;  keyword parameter DIR is not of STRING type:
@@ -159,25 +192,48 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
       command = 'df -h /Volumes/*'
    ENDELSE
 
-   ;  Spawn the Linux command and retrieve the disk information.
+   ;  Spawn the Linux command and retrieve the disk information:
    ;  Note 1: The variable 'disk_space' returned by this spawned command is a
    ;  1-dimensional STRING array containing a header line and 1 additional
    ;  line per mounted disk.
    ;  Note 2: In the absence of the optional keyword parameter 'dir', this
-   ;  command will return the characteristics of the primary disk of the
-   ;  current computer.
+   ;  command will always return at least the characteristics of the primary
+   ;  disk ('/') of the current computer.
    ;  Note 3: If the optional keyword parameter 'dir' is set but no physical
    ;  disk meeting that name specification is mounted, the spawned 'df' command
    ;  returns an error message in the variable 'err_result'.
    SPAWN, command, disk_space, err_result
 
-   ;  Return to the calling routine if no mount points meet the search
-   ;  criterion of the spawned 'df' command:
+   ;  Return to the calling routine if no mount point meets the search
+   ;  criterion of the spawned 'df' command, or if another error occurred:
+   disks_sizes = ['', '']
    IF (err_result NE '') THEN BEGIN
-      IF (KEYWORD_SET(printit)) THEN PRINT, $
-         'The spawned df command returned the error message: ' + err_result
-      disks_info = ['']
-      RETURN, disks_info
+      IF (STRPOS(err_result, 'No such file or directory') GE 0) THEN BEGIN
+         IF (KEYWORD_SET(printit)) THEN BEGIN
+            IF (KEYWORD_SET(dir)) THEN BEGIN
+               PRINT, 'There are no disks matching the pattern ' + $
+                  dir + ' mounted on this computer.'
+            ENDIF ELSE BEGIN
+               PRINT, 'There are no disks matching the pattern ' + $
+                  '/Volumes/ mounted on this computer.'
+            ENDELSE
+         ENDIF
+         RETURN, return_code
+      ENDIF ELSE BEGIN
+         IF (KEYWORD_SET(printit)) THEN PRINT, $
+            'The spawned df command returned the error message: ' + $
+               err_result
+         IF (debug) THEN BEGIN
+            info = SCOPE_TRACEBACK(/STRUCTURE)
+            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+            error_code = 120
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': The spawned df command returned the error message: ' + $
+                  err_result
+            RETURN, error_code
+         ENDIF
+         RETURN, return_code
+      ENDELSE
    ENDIF
 
    ;  Set the character string to split the Linux command output to white
@@ -185,7 +241,7 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    white = set_white()
 
    ;  Extract the desired information from the STRING array 'disk_space' and
-   ;  store it in the 2-dimensional STRING array 'disks_info'.
+   ;  store it in the 2-dimensional STRING array 'disks_sizes'.
    ;  Note 1: The array element 'disk_space[0]' contains a header line, which
    ;  is currently ignored.
    ;  Note 2: The number of extracted items is currently hardwired to 4, to
@@ -193,17 +249,17 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  and the space remaining available. Additional information is available
    ;  from the OS, such as the device name: if that information should be
    ;  retrieved too, modify the variable 'n_items' accordingly and copy the
-   ;  relevant information from 'disk_space[i]' to 'disks_info[i - 1, n]':
+   ;  relevant information from 'disk_space[i]' to 'disks_sizes[i - 1, n]':
    n_items = 4
    n_lines = N_ELEMENTS(disk_space)
    n_disks = n_lines - 1
-   disks_info = STRARR(n_disks, n_items)
+   disks_sizes = STRARR(n_disks, n_items)
    FOR i = 1, n_disks DO BEGIN
       parts = STRSPLIT(disk_space[i], white, COUNT = n_parts, /EXTRACT)
-      disks_info[i - 1, 0] = parts[n_parts - 1]
-      disks_info[i - 1, 1] = parts[1]
-      disks_info[i - 1, 2] = parts[2]
-      disks_info[i - 1, 3] = parts[3]
+      disks_sizes[i - 1, 0] = parts[n_parts - 1]
+      disks_sizes[i - 1, 1] = parts[1]
+      disks_sizes[i - 1, 2] = parts[2]
+      disks_sizes[i - 1, 3] = parts[3]
    ENDFOR
 
    ;  If the optional keyword parameter 'PRINTIT' is set, output the
@@ -216,11 +272,11 @@ FUNCTION get_disks_sizes, DIR = dir, PRINTIT = printit, $
             ' mounted disks on this computer:'
       ENDCASE
       FOR j = 0, n_disks  - 1 DO BEGIN
-         PRINT, disks_info[j, *], FORMAT = '($, A24, 3A12)'
-         PRINT
+         PRINT, disks_sizes[j, *], FORMAT = '(A24, 3A12)'
       ENDFOR
+      PRINT
    ENDIF
 
-   RETURN, disks_info
+   RETURN, return_code
 
 END
