@@ -45,7 +45,9 @@ FUNCTION sha256, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: File file_spec is not found or unreadable.
+   ;  *   Error 110: File file_spec is unreadable.
+   ;
+   ;  *   Error 120: File file_spec is not found.
    ;
    ;  DEPENDENCIES:
    ;
@@ -76,6 +78,8 @@ FUNCTION sha256, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–04–24: Version 1.1 — Update debugging messages.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -141,7 +145,7 @@ FUNCTION sha256, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 110
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + excpt_cond
+         ': Input file_spec is unreadable.'
       RETURN, return_code
    ENDIF
    IF ((debug) AND (rc EQ -1)) THEN BEGIN
@@ -149,7 +153,7 @@ FUNCTION sha256, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 120
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + excpt_cond
+         ': Input file_spec is not found.'
       RETURN, return_code
    ENDIF
 

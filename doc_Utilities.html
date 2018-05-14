@@ -230,6 +230,7 @@ julian_iso =        2458283.0</code></pre></li>
 <li><p>2018&#8211;03&#8211;25: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2018&#8211;03&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;04&#8211;03: Version 1.1 &#8212; Updated error diagnostics.</p></li>
+<li><p>2018&#8211;04&#8211;23: Version 1.2 &#8212; Bug fix (missing parenthesis on line 287).</p></li>
 </ul></li>
 </ul>
 <h2>chk_date_ymd</h2>
@@ -1140,8 +1141,14 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 </ul>
 <h2>is_readable</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function indicates whether the input argument <code>file_spec</code> points to a file or directory that is accessible for reading.</p></li>
-<li><p><strong>Algorithm:</strong> This function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory in the file system, <code>0</code> if the argument points to a file that is not readable, and <code>-1</code> otherwise, i.e., if the argument does not point to an existing file or directory.</p></li>
+<li><p><strong>Purpose:</strong> This function indicates whether the input positional parameter <code>file_spec</code> exists or not, and if it exists, whether it points to a directory or file that is readable or not.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> internal functions to determine the status of the directory or file provided as input argument <code>file_spec</code>, and returns the following codes:</p>
+<ul>
+<li><p><code>1</code>: The directory or file exists and is readable.</p></li>
+<li><p><code>0</code>: The directory or file exists and is not readable.</p></li>
+<li><p><code>-1</code>: An exception condition occurred during execution of this function.</p></li>
+<li><p><code>-2</code>: The directory or file does not exist.</p></li>
+</ul></li>
 <li><p><strong>Syntax:</strong> <code>rc = is_readable(file_spec, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -1156,15 +1163,13 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the argument <code>file_spec</code> points to a readable file or directory, or <code>0</code> if it is not readable, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is readable, <code>0</code> if it exists but is not readable, and <code>-2</code> if the argument does not exist. The output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>file_spec</code> exists but is not readable.</p></li>
-<li><p>Error 130: Positional parameter <code>file_spec</code> is not found.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -1176,28 +1181,31 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Note 1:</strong> If the argument <code>file_spec</code> does not contain a path component (absolute or relative), the file is assumed to be located in the current working directory.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; rc = is_readable(&#39;~/Desktop&#39;, /DEBUG, EXCPT_COND = excpt_cond)
+<pre><code>IDL&gt; rc = is_readable(&#39;~/Desktop&#39;, $
+   /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 1,   &gt;&lt;
-
-IDL&gt; rc = is_readable(&#39;~/Documents/MySoftware/Test_dir/unreadable.txt&#39;, $
-   DEBUG = 1, EXCPT_COND = excpt_cond)
+IDL&gt; rc = is_readable(&#39;~/Codes/Test_dir/unreadable.txt&#39;, $
+   /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-       0,   &gt;Error 120 in IS_READABLE:Argument
-~/Documents/MySoftware/Test_dir/unreadable.txt exists
-   but is not readable.&lt;
-
-IDL&gt; rc = is_readable(&#39;~/Desktop/junkfile&#39;, $
-   DEBUG = 1, EXCPT_COND = excpt_cond)
+0,   &gt;&lt;
+IDL&gt; rc = is_readable(234, $
+   /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-      -1,   &gt;Error 130 in IS_READABLE: Argument
-~/Desktop/junkfile is not found.&lt;</code></pre></li>
+-1,   &gt;Error 110 in IS_READABLE: Argument file_spec
+   is not of type string.&lt;
+IDL&gt; rc = is_readable(&#39;~/Desktop/missing_file.txt&#39;, $
+   /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+-2,   &gt;&lt;</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+<li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the argument exists but is unreadable.</p></li>
+<li><p>2018&#8211;05&#8211;14: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 </ul></li>
 </ul>
 <h2>is_uppercase</h2>
@@ -1245,8 +1253,14 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 </ul>
 <h2>is_writable</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function indicates whether the input argument <code>file_spec</code> points to a file or directory that is accessible for writing.</p></li>
-<li><p><strong>Algorithm:</strong> This function returns <code>1</code> if the argument <code>file_spec</code> points to an existing and writable file or directory in the file system, <code>0</code> if the argument points to a file or directory that exists but is not writable, and <code>-1</code> otherwise, i.e., if the argument does not point to an existing file or directory.</p></li>
+<li><p><strong>Purpose:</strong> This function indicates whether the input positional parameter <code>file_spec</code> exists or not, and if it exists, whether it points to a directory or file that is writable or not.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> internal functions to determine the status of the directory or file provided as input argument <code>file_spec</code>, and returns the following codes:</p>
+<ul>
+<li><p><code>1</code>: The directory or file exists and is writable.</p></li>
+<li><p><code>0</code>: The directory or file exists and is not writable.</p></li>
+<li><p><code>-1</code>: An exception condition occurred during execution of this function.</p></li>
+<li><p><code>-2</code>: The directory or file does not exist.</p></li>
+</ul></li>
 <li><p><strong>Syntax:</strong> <code>rc = is_writeable(file_spec, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -1261,16 +1275,13 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, and if the argument <code>file_spec</code> points to an existing and writable file or directory, this function returns <code>1</code> and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If no exception condition has been detected, and if the argument <code>file_spec</code> points to an existing but unwritable file or directory, this function returns <code>0</code> and the output keyword parameter <code>excpt_cond</code> contains a message to that effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, specifically if the argument <code>file_spec</code> does not point to an existing file or directory, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable, <code>0</code> if it exists but is not writable, and <code>-2</code> if the argument does not exist. The output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If an exception condition has been detected, this function returns <code>-1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>file_spec</code> exists but is not writable.</p></li>
-<li><p>Error 130: Positional parameter <code>file_spec</code> is not found.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -1279,31 +1290,30 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> If the argument <code>file_spec</code> does not contain a path component (absolute or relative), the file will be assumed to be located in the current working directory.</p></li>
+<li><p><strong>Note 1:</strong> If the argument <code>file_spec</code> does not contain a path component (absolute or relative), the file is assumed to be located in the current working directory.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; rc = is_writable(&#39;~/Desktop&#39;, /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 1,   &gt;&lt;
 
-IDL&gt; rc = is_writable(&#39;~/Documents/MySoftware/Test_dir/unwritable.txt&#39;, $
+IDL&gt; rc = is_writable(&#39;~/Codes/Test_dir/unwritable.txt&#39;,
    /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-0,   &gt;Error 120 in IS_WRITABLE: Argument
-~/Documents/MySoftware/Test_dir/unwritable.txt exists
-   but is not writable.&lt;
+0,   &gt;&lt;
 
-IDL&gt; rc = is_writable(&#39;~/Desktop/junkfile&#39;, $
-   /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; rc = is_writable(3, /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
--1,   &gt;Error 130 in IS_WRITABLE: Argument ~/Desktop/junkfile
-   is not found.&lt;</code></pre></li>
+-1,   &gt;Error 110 in IS_WRITABLE: Argument file_spec is
+   not of type string.&lt;</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+<li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the argument exists but is unwritable.</p></li>
+<li><p>2018&#8211;05&#8211;13: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 </ul></li>
 </ul>
 <h2>last_char</h2>
@@ -1770,7 +1780,8 @@ excpt_cond = Error 1000 in set_date_range:
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: File <code>file_spec</code> is not found or unreadable.</p></li>
+<li><p>Error 110: File <code>file_spec</code> is unreadable.</p></li>
+<li><p>Error 120: File <code>file_spec</code> is not found.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -1794,6 +1805,7 @@ excpt_cond = Error 1000 in set_date_range:
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+<li><p>2018&#8211;04&#8211;24: Version 1.1 &#8212; Update debugging messages.</p></li>
 </ul></li>
 </ul>
 <h2>strcat</h2>
@@ -2043,6 +2055,56 @@ IDL&gt; PRINT, res
 <li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
+</ul></li>
+</ul>
+<h2>uniq2</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function sorts and sifts two one-dimensional arrays of identical type and dimensions, retaining only the couples of unique values while maintaining the correspondance between elements of the same rank in each input array.</p></li>
+<li><p><strong>Algorithm:</strong> This function combines the two input positional array arguments into a single <code>STRING</code> array, sorts and sifts it to eliminate duplicates, and then splits it back into arrays of the original type but containing only unique pairs of corresponding values.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>in_array_1 [I]:</code> An arbitrary array.</p></li>
+<li><p><code>in_array_2 [I]:</code> An arbitrary array of the same type and size as <code>in_array_1</code>.</p></li>
+<li><p><code>out_array_1 [O]:</code> An array of the same type and size as <code>in_array_1</code> containing the elements of <code>in_array_1</code> which are uniquely associated with elements of <code>in_array_2</code>.</p></li>
+<li><p><code>out_array_2 [O]:</code> An array of the same type and size as <code>in_array_1</code> containing the elements of <code>in_array_2</code> which are uniquely associated with elements of <code>in_array_1</code>.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns [<code>0</code>, or default returned value], and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>out_array_1</code> and <code>out_array_2</code> contain the unique combinations of values of the input arguments.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters may be undefined, inexistent, incomplete or useless.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Both input positional parameters <code>in_array_1</code> and <code>in_array_2</code> must be arrays.</p></li>
+<li><p>Error 120: The input positional parameters <code>in_array_1</code> and <code>in_array_2</code> must be of the same size.</p></li>
+<li><p>Error 130: The input positional parameters <code>in_array_1</code> and <code>in_array_2</code> must be of the same type.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_array.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+<li><p><code>type_of.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The input positional parameters <code>in_array_1</code> and <code>in_array_2</code> can be of any alphanumeric type, but must be defined.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>[Insert the command and its outcome]</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;04&#8211;29: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;05&#8211;14: Version 1.0 &#8212; Initial public release.</p></li>
 </ul></li>
 </ul>
 </body>

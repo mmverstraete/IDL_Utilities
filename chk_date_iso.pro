@@ -130,6 +130,9 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;  *   2018–03–28: Version 1.0 — Initial public release.
    ;
    ;  *   2018–04–03: Version 1.1 — Updated error diagnostics.
+   ;
+   ;  *   2018–04–23: Version 1.2 — Bug fix (missing parenthesis on line
+   ;      287).
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -284,7 +287,7 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
          error_code = 330
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter date_iso is invalid: ' + $
-            'the day must be within the range [1, ' + strstr(num_days[mm] + $
+            'the day must be within the range [1, ' + strstr(num_days[mm]) + $
             '].'
          RETURN, error_code
       ENDIF

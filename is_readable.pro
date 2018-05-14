@@ -1,15 +1,22 @@
 FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function indicates whether the input argument
-   ;  file_spec points to a file or directory that is accessible for
-   ;  reading.
+   ;  PURPOSE: This function indicates whether the input positional
+   ;  parameter file_spec exists or not, and if it exists, whether it
+   ;  points to a directory or file that is readable or not.
    ;
-   ;  ALGORITHM: This function returns 1 if the argument file_spec points
-   ;  to a readable file or directory in the file system, 0 if the
-   ;  argument points to a file that is not readable, and -1 otherwise,
-   ;  i.e., if the argument does not point to an existing file or
-   ;  directory.
+   ;  ALGORITHM: This function relies on IDL internal functions to
+   ;  determine the status of the directory or file provided as input
+   ;  argument file_spec, and returns the following codes:
+   ;
+   ;  *   1: The directory or file exists and is readable.
+   ;
+   ;  *   0: The directory or file exists and is not readable.
+   ;
+   ;  *   -1: An exception condition occurred during execution of this
+   ;      function.
+   ;
+   ;  *   -2: The directory or file does not exist.
    ;
    ;  SYNTAX: rc = is_readable(file_spec, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -33,14 +40,15 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 1 if the argument file_spec points to a readable file or
-   ;      directory, or 0 if it is not readable, and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;      returns 1 if the file or directory provided as the input
+   ;      positional parameter file_spec exists and is readable, 0 if it
+   ;      exists but is not readable, and -2 if the argument does not
+   ;      exist. The output keyword parameter excpt_cond is set to a null
+   ;      string, if the optional input keyword parameter DEBUG is set and
+   ;      if the optional output keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns -1, and the output keyword parameter excpt_cond contains
+   ;      returns -1 and the output keyword parameter excpt_cond contains
    ;      a message about the exception condition encountered, if the
    ;      optional input keyword parameter DEBUG is set and if the
    ;      optional output keyword parameter EXCPT_COND is provided.
@@ -50,11 +58,6 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
    ;  *   Error 110: Positional parameter file_spec is not of type STRING.
-   ;
-   ;  *   Error 120: Positional parameter file_spec exists but is not
-   ;      readable.
-   ;
-   ;  *   Error 130: Positional parameter file_spec is not found.
    ;
    ;  DEPENDENCIES:
    ;
@@ -70,22 +73,23 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> rc = is_readable('~/Desktop', /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> rc = is_readable('~/Desktop', $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
    ;      1,   ><
-   ;
-   ;      IDL> rc = is_readable('~/Documents/MySoftware/Test_dir/unreadable.txt', $
-   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
+   ;      IDL> rc = is_readable('~/Codes/Test_dir/unreadable.txt', $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
-   ;             0,   >Error 120 in IS_READABLE:Argument
-   ;      ~/Documents/MySoftware/Test_dir/unreadable.txt exists
-   ;         but is not readable.<
-   ;
-   ;      IDL> rc = is_readable('~/Desktop/junkfile', $
-   ;         DEBUG = 1, EXCPT_COND = excpt_cond)
+   ;      0,   ><
+   ;      IDL> rc = is_readable(234, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
-   ;            -1,   >Error 130 in IS_READABLE: Argument
-   ;      ~/Desktop/junkfile is not found.<
+   ;      -1,   >Error 110 in IS_READABLE: Argument file_spec
+   ;         is not of type string.<
+   ;      IDL> rc = is_readable('~/Desktop/missing_file.txt', $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
+   ;      -2,   ><
    ;
    ;  REFERENCES: None.
    ;
@@ -96,6 +100,12 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–04–24: Version 1.2 — Update the function to return 0 but no
+   ;      exception condition if the argument exists but is unreadable.
+   ;
+   ;  *   2018–05–14: Version 1.3 — Add return code to indicate the input
+   ;      argument does not exist, and update the documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -176,24 +186,10 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       IF (res.READ EQ 1) THEN BEGIN
          RETURN, 1
       ENDIF ELSE BEGIN
-         IF (debug) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-            error_code = 120
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Argument ' + file_spec + ' exists but is not readable.'
-         ENDIF
          RETURN, 0
       ENDELSE
    ENDIF ELSE BEGIN
-      IF (debug) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         error_code = 130
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument ' + file_spec + ' is not found.'
-      ENDIF
-      RETURN, -1
+      RETURN, -2
    ENDELSE
 
 END

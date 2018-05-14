@@ -1,15 +1,22 @@
 FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function indicates whether the input argument
-   ;  file_spec points to a file or directory that is accessible for
-   ;  writing.
+   ;  PURPOSE: This function indicates whether the input positional
+   ;  parameter file_spec exists or not, and if it exists, whether it
+   ;  points to a directory or file that is writable or not.
    ;
-   ;  ALGORITHM: This function returns 1 if the argument file_spec points
-   ;  to an existing and writable file or directory in the file system, 0
-   ;  if the argument points to a file or directory that exists but is not
-   ;  writable, and -1 otherwise, i.e., if the argument does not point to
-   ;  an existing file or directory.
+   ;  ALGORITHM: This function relies on IDL internal functions to
+   ;  determine the status of the directory or file provided as input
+   ;  argument file_spec, and returns the following codes:
+   ;
+   ;  *   1: The directory or file exists and is writable.
+   ;
+   ;  *   0: The directory or file exists and is not writable.
+   ;
+   ;  *   -1: An exception condition occurred during execution of this
+   ;      function.
+   ;
+   ;  *   -2: The directory or file does not exist.
    ;
    ;  SYNTAX: rc = is_writeable(file_spec, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -32,38 +39,25 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  OUTCOME:
    ;
-   ;  *   If no exception condition has been detected, and if the argument
-   ;      file_spec points to an existing and writable file or directory,
-   ;      this function returns 1 and the output keyword parameter
-   ;      excpt_cond is set to a null string, if the optional input
-   ;      keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;  *   If no exception condition has been detected, this function
+   ;      returns 1 if the file or directory provided as the input
+   ;      positional parameter file_spec exists and is writable, 0 if it
+   ;      exists but is not writable, and -2 if the argument does not
+   ;      exist. The output keyword parameter excpt_cond is set to a null
+   ;      string, if the optional input keyword parameter DEBUG is set and
+   ;      if the optional output keyword parameter EXCPT_COND is provided.
    ;
-   ;  *   If no exception condition has been detected, and if the argument
-   ;      file_spec points to an existing but unwritable file or
-   ;      directory, this function returns 0 and the output keyword
-   ;      parameter excpt_cond contains a message to that effect, if the
+   ;  *   If an exception condition has been detected, this function
+   ;      returns -1 and the output keyword parameter excpt_cond contains
+   ;      a message about the exception condition encountered, if the
    ;      optional input keyword parameter DEBUG is set and if the
    ;      optional output keyword parameter EXCPT_COND is provided.
-   ;
-   ;  *   If an exception condition has been detected, specifically if the
-   ;      argument file_spec does not point to an existing file or
-   ;      directory, this function returns -1, and the output keyword
-   ;      parameter excpt_cond contains a message about the exception
-   ;      condition encountered, if the optional input keyword parameter
-   ;      DEBUG is set and if the optional output keyword parameter
-   ;      EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
    ;  *   Error 110: Positional parameter file_spec is not of type STRING.
-   ;
-   ;  *   Error 120: Positional parameter file_spec exists but is not
-   ;      writable.
-   ;
-   ;  *   Error 130: Positional parameter file_spec is not found.
    ;
    ;  DEPENDENCIES:
    ;
@@ -74,7 +68,7 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  REMARKS:
    ;
    ;  *   NOTE 1: If the argument file_spec does not contain a path
-   ;      component (absolute or relative), the file will be assumed to be
+   ;      component (absolute or relative), the file is assumed to be
    ;      located in the current working directory.
    ;
    ;  EXAMPLES:
@@ -83,18 +77,15 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
    ;      1,   ><
    ;
-   ;      IDL> rc = is_writable('~/Documents/MySoftware/Test_dir/unwritable.txt', $
+   ;      IDL> rc = is_writable('~/Codes/Test_dir/unwritable.txt',
    ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
-   ;      0,   >Error 120 in IS_WRITABLE: Argument
-   ;      ~/Documents/MySoftware/Test_dir/unwritable.txt exists
-   ;         but is not writable.<
+   ;      0,   ><
    ;
-   ;      IDL> rc = is_writable('~/Desktop/junkfile', $
-   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> rc = is_writable(3, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, ',   >' + excpt_cond + '<'
-   ;      -1,   >Error 130 in IS_WRITABLE: Argument ~/Desktop/junkfile
-   ;         is not found.<
+   ;      -1,   >Error 110 in IS_WRITABLE: Argument file_spec is
+   ;         not of type string.<
    ;
    ;  REFERENCES: None.
    ;
@@ -105,6 +96,12 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–04–24: Version 1.2 — Update the function to return 0 but no
+   ;      exception condition if the argument exists but is unwritable.
+   ;
+   ;  *   2018–05–13: Version 1.3 — Add return code to indicate the input
+   ;      argument does not exist, and update the documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -169,7 +166,7 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument file_spec is not of type string.'
+            ': Argument file_spec is not of type STRING.'
          RETURN, -1
       ENDIF
    ENDIF
@@ -178,31 +175,17 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  'file_spec':
    file_spec = strstr(file_spec)
 
-   ;  Return to the calling routine with an error message if argument
-   ;  'file_spec' is not accessible for writing:
+   ;  Return to the calling routine with a return code indicating whether
+   ;  the input argument exists and is writable or not, or does not exist:
    res = FILE_INFO(file_spec)
    IF (res.EXISTS EQ 1) THEN BEGIN
       IF (res.WRITE EQ 1) THEN BEGIN
          RETURN, 1
       ENDIF ELSE BEGIN
-         IF (debug) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-            error_code = 120
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Argument ' + file_spec + ' exists but is not writable.'
-         ENDIF
          RETURN, 0
       ENDELSE
    ENDIF ELSE BEGIN
-      IF (debug) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
-         error_code = 130
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument ' + file_spec + ' is not found.'
-      ENDIF
-      RETURN, -1
+      RETURN, -2
    ENDELSE
 
 END
