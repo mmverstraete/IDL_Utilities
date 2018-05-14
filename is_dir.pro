@@ -57,7 +57,8 @@ FUNCTION is_dir, dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  REMARKS:
    ;
    ;  *   NOTE 1: The argument dir_spec can include wild characters
-   ;      (IDL-allowed regular expressions); see the third example below.
+   ;      (IDL-allowed regular expressions); see the third example below,
+   ;      but cannot be an explicit array of directories.
    ;
    ;  EXAMPLES:
    ;
