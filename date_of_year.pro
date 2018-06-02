@@ -114,6 +114,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;  *   2018–04–03: Version 1.2 — Update the code to use the new
    ;      function
    ;      days_per_month.pro.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -147,14 +149,17 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    ;  Initialize the output positional parameters to invalid values:
    month = -1
@@ -162,8 +167,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 3
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)

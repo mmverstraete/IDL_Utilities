@@ -102,6 +102,8 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  *   2018–03–24: Version 0.9 — Initial release.
    ;
    ;  *   2018–03–25: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -135,23 +137,24 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = -9999.00
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -162,8 +165,6 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  Return to the calling routine with an error message if this function is
    ;  called with non-numerical arguments:
       IF ((is_numeric(x) NE 1) OR (is_numeric(y) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine arguments x and y must be numeric.'
@@ -173,8 +174,6 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  Return to the calling routine with an error message if this function is
    ;  called with array arguments containing less then 2 points:
       IF ((N_ELEMENTS(x) LT 2) OR (N_ELEMENTS(y) LT 2)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine arguments x and y must be arrays containing ' + $
@@ -185,8 +184,6 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  Return to the calling routine with an error message if this function is
    ;  called with array arguments of different lengths:
       IF (N_ELEMENTS(x) NE N_ELEMENTS(y)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine arguments x and y must be arrays of the same length.'
@@ -196,8 +193,6 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  Return to the calling routine with an error message if this function is
    ;  called with a non-numeric BASELINE keyword:
       IF (KEYWORD_SET(baseline) AND (is_numeric(baseline) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Optional keyword baseline must be of numeric type.'

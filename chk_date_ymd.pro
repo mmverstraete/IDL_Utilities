@@ -124,6 +124,8 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  *   2018–03–28: Version 1.2 — Update the code to use the new
    ;      function
    ;      days_per_month.pro.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -157,14 +159,17 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    ;  Initialize the output positional parameters to invalid values:
    year = 0
@@ -173,12 +178,10 @@ FUNCTION chk_date_ymd, date, year, month, day, $
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 4
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -189,8 +192,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  Return to the calling routine with an error message if the input argument
    ;  'date' is not of type STRING:
       IF (is_string(date) NE 1) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument date is not of type STRING.'
@@ -200,8 +201,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  Return to the calling routine with an error message if the input argument
    ;  'date' is not of length 10:
       IF (STRLEN(date) NE 10) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument date does not contain 10 characters.'
@@ -212,8 +211,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  'date' does not contain 2 dashes:
       pos1 = STRPOS(date, '-')
       IF (pos1 LE 0) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument date does not contain a dash character.'
@@ -221,8 +218,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
       ENDIF ELSE BEGIN
          pos2 = STRPOS(date, '-', pos1 + 1)
          IF (pos2 LE 0) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 140
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Argument date does not contain 2 dash characters.'
@@ -243,8 +238,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
    ;  argument 'date' is not formatted as a sequence of 3 elements separated
    ;  by 2 dashes (e.g., contains more than 2 dashes):
       IF (nparts NE 3) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 150
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument date does not contain 3 elements separated by 2 dashes.'
@@ -256,8 +249,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
       IF (((STRLEN(parts[0]) NE 4)) OR $
          (year LT 1582) OR $
          (year GT 2100)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 160
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Year ' + strstr(year) + ' is invalid (must be 4 digits long ' + $
@@ -271,8 +262,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
       IF (((STRLEN(parts[1]) NE 2)) OR $
          (month LT 1) OR $
          (month GT 12)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 170
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Month ' + strstr(month) + $
@@ -285,8 +274,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
       rc = days_per_month(num_days, YEAR = year, $
          DEBUG = debug, EXCPT_COND = excpt_cond)
       IF (rc NE 0) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 200
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': ' + excpt_cond
@@ -298,8 +285,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
       IF ((STRLEN(parts[2]) NE 2) OR $
          (day LT 1) OR $
          (day GT num_days[month])) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 180
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Day ' + strstr(day) + ' is invalid (must be 2 digits long ' + $
@@ -307,7 +292,6 @@ FUNCTION chk_date_ymd, date, year, month, day, $
          day = 0
          RETURN, error_code
       ENDIF
-
    ENDIF
 
   RETURN, return_code

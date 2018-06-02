@@ -106,6 +106,8 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -139,23 +141,24 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = [-99.9D, -99.9D]
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -167,8 +170,6 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  provided are not double precision numbers:
       IF ((is_double(jul_ini_date) NE 1) OR $
          (is_double(jul_fin_date) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
@@ -182,8 +183,6 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
       start_date = JULDAY(10, 4, 1582)
       IF ((jul_ini_date LT start_date) OR $
          (jul_fin_date LT start_date)) THEN  BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
@@ -195,8 +194,6 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  Return to the calling routine with an error message if 'jul_ini_date'
    ;  follows 'jul_fin_date':
       IF (jul_ini_date GT jul_fin_date) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 300
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Julian date jul_ini_date = ' + strstr(jul_ini_date) + $

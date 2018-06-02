@@ -133,6 +133,8 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;
    ;  *   2018–04–23: Version 1.2 — Bug fix (missing parenthesis on line
    ;      287).
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -166,26 +168,27 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    ;  Initialize julian_iso to an invalid value:
    julian_iso = -1.0D
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -196,8 +199,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter date_iso is not of type STRING:
       IF (is_string(date_iso) NE 1) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter date_iso must be of type STRING.'
@@ -208,8 +209,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
    ;  Split the input argument into its components:
    parts1 = STRSPLIT(date_iso, 'T', COUNT = nparts1, /EXTRACT)
    IF (debug AND (nparts1 NE 2)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 200
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is incorrectly formatted: ' + $
@@ -219,8 +218,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    parts2 = STRSPLIT(parts1[0], '-', COUNT = nparts2, /EXTRACT)
    IF (debug AND (nparts2 NE 3)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 210
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is incorrectly formatted: ' + $
@@ -230,8 +227,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    parts3 = STRSPLIT(parts1[1], ':', COUNT = nparts3, /EXTRACT)
    IF (debug AND (nparts3 NE 3)) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 220
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is incorrectly formatted: ' + $
@@ -249,8 +244,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    ;  Check that the year is within the allowed range:
    IF (debug AND ((yy LT 1582) OR (yy GT 2100))) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 300
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
@@ -260,8 +253,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    ;  Check that the month is within the allowed range:
    IF (debug AND ((mm LT 1) OR (mm GT 12))) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 310
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
@@ -274,16 +265,12 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
       rc = days_per_month(num_days, YEAR = yy, DEBUG = debug, $
          EXCPT_COND = excpt_cond)
       IF (rc NE 0) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 320
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': ' + excpt_cond
          RETURN, error_code
       ENDIF
       IF ((dd LT 1) OR (dd GT num_days[mm])) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 330
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter date_iso is invalid: ' + $
@@ -295,8 +282,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    ;  Check that the hour is within the allowed range:
    IF (debug AND ((hh LT 0) OR (hh GT 23))) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 340
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
@@ -306,8 +291,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    ;  Check that the minute is within the allowed range:
    IF (debug AND ((nn LT 0) OR (nn GT 59))) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 350
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $
@@ -317,8 +300,6 @@ FUNCTION chk_date_iso, date_iso, julian_iso, DEBUG = debug, $
 
    ;  Check that the second is within the allowed range:
    IF (debug AND ((ss LT 0) OR (ss GT 59))) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 360
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date_iso is invalid: ' + $

@@ -150,6 +150,8 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -183,13 +185,17 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
-   ;  Initialize the default exception condition message:
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
+   ;  Initialize the default return code and the exception condition message:
+   return_code = 0
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
@@ -197,12 +203,10 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
       res = MACHAR()
       smallest = res.XMIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -213,8 +217,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  Return to the calling routine with an error message if argument 'arg' is
    ;  not of a numeric type:
       IF (is_numeric(arg) EQ 0) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument arg is not numeric.'
@@ -224,8 +226,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  Return to the calling routine with an error message if argument 'base' is
    ;  not of a numeric type:
       IF (is_numeric(base) EQ 0) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Argument base is not numeric.'
@@ -236,8 +236,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  'arg' or argument 'base' is of type COMPLEX:
       IF ((is_complex(arg)) OR (is_complex(base)) OR $
          (is_dcomplex(arg)) OR (is_dcomplex(base))) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Arguments arg and base cannot be of type COMPLEX.'
@@ -248,8 +246,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  not strictly positive:
       IF (is_array(arg) EQ 0) THEN BEGIN
          IF (arg LT smallest) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 140
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Argument arg is a scalar not strictly positive.'
@@ -258,8 +254,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
       ENDIF ELSE BEGIN
          FOR i = 0, N_ELEMENTS(arg) - 1 DO BEGIN
             IF (arg[i] LT smallest) THEN BEGIN
-               info = SCOPE_TRACEBACK(/STRUCTURE)
-               rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
                error_code = 150
                excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
                   rout_name + ': Argument arg is an array with at least ' + $
@@ -273,8 +267,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  not strictly positive:
       IF (is_array(base) EQ 0) THEN BEGIN
          IF (base LT smallest) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 160
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Argument base is a scalar not strictly positive.'
@@ -283,8 +275,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
       ENDIF ELSE BEGIN
          FOR i = 0, N_ELEMENTS(base) - 1 DO BEGIN
             IF (base[i] LT smallest) THEN BEGIN
-               info = SCOPE_TRACEBACK(/STRUCTURE)
-               rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
                error_code = 170
                excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
                   rout_name + ': Argument base is an array with at least ' + $
@@ -298,8 +288,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
    ;  equal to 1.0:
       IF (is_array(base) EQ 0) THEN BEGIN
          IF (base EQ 1.0) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 180
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Argument base is a scalar equal to 1.0.'
@@ -308,8 +296,6 @@ FUNCTION alogb, arg, base, DOUBLE = double, $
       ENDIF ELSE BEGIN
          FOR i = 0, N_ELEMENTS(base) - 1 DO BEGIN
             IF (base[i] EQ 1.0) THEN BEGIN
-               info = SCOPE_TRACEBACK(/STRUCTURE)
-               rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
                error_code = 190
                excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
                   rout_name + ': Argument base is an array with at least ' + $

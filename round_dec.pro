@@ -133,6 +133,8 @@ FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -166,23 +168,24 @@ FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -193,8 +196,6 @@ FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  Return to the calling routine with an error message if the argument
    ;  n_dec is not of a numeric type:
       IF (is_numeric(n_dec) NE 1) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter n_dec must be numeric.'
@@ -237,8 +238,6 @@ FUNCTION round_dec, arg, n_dec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  arg is not numeric or cannot be simply rounded to a set number of
    ;  decimals:
    IF (debug) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 120
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input argument arg must be either FLOAT or DOUBLE.'

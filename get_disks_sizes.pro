@@ -114,6 +114,8 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  *   2017–04–04: Version 1.1 — Update the code and documentation to
    ;      provide the desired information through a positional parameter
    ;      rather than the return value (now used for error reporting).
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -147,26 +149,27 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    ;  Initialize the output positional parameters to invalid values:
    par_1 = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 1
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -177,8 +180,6 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  Return to the calling routine with an error message if the optional
    ;  keyword parameter DIR is not of STRING type:
       IF (KEYWORD_SET(dir) AND (is_string(dir) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Optional keyword parameter dir must be of type STRING.'
@@ -229,8 +230,6 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
             'The spawned df command returned the error message: ' + $
                err_result
          IF (debug) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 120
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': The spawned df command returned the error message: ' + $

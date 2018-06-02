@@ -142,6 +142,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -175,23 +177,24 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
-   return_code = -1
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
+   return_code = 0
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -202,8 +205,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if month is not a
    ;  scalar numeric expression:
       IF ((is_numeric(month) NE 1) OR (is_scalar(month) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input argument month is not a scalar numeric expression.'
@@ -217,8 +218,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if month is not
    ;  within the allowed range:
       IF ((month LT 1) OR (month GT 12)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in day_of_year: ' + $
             'Input argument month is invalid: Must be contained in [1, 12].'
@@ -234,8 +233,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if year is not a
    ;  scalar numeric expression:
          IF ((is_numeric(year) NE 1) OR (is_scalar(year) NE 1)) THEN BEGIN
-            info = SCOPE_TRACEBACK(/STRUCTURE)
-            rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
             error_code = 130
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Input argument year is not a scalar numeric expression.'
@@ -248,8 +245,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if year is not
    ;  withing the allowed range:
       IF ((year LT 1582) OR (year GT 2100)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input argument year must be within [1582, 2100].'
@@ -261,8 +256,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       rc = days_per_month(num_days, YEAR = year, $
          DEBUG = debug, EXCPT_COND = excpt_cond)
       IF (debug AND (rc NE 0)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 200
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': ' + excpt_cond
@@ -272,8 +265,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       rc = days_per_month(num_days, $
          DEBUG = debug, EXCPT_COND = excpt_cond)
       IF (debug AND (rc NE 0)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 200
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': ' + excpt_cond
@@ -287,8 +278,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if day is not a
    ;  defined scalar expression:
       IF ((is_numeric(day) NE 1) OR (is_scalar(day) NE 1)) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 150
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input argument day is not a scalar numeric expression.'
@@ -303,8 +292,6 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  Return to the calling routine with an error message if day is not
    ;  within the allowed range:
       IF ((day LT 1) OR (day GT num_days[month])) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 160
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input argument day is invalid: Must be contained in ' + $

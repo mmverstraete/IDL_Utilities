@@ -102,6 +102,8 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -135,23 +137,24 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
+
+   ;  Get the name of this routine:
+   info = SCOPE_TRACEBACK(/STRUCTURE)
+   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
+
    ;  Initialize the default return code and the exception condition message:
    return_code = ''
-   IF KEYWORD_SET(debug) THEN BEGIN
-      debug = 1
-   ENDIF ELSE BEGIN
-      debug = 0
-   ENDELSE
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if this function is
-   ;  called with the wrong number of required positional parameters:
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
       n_reqs = 1
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          excpt_cond = 'Error 100 in routine ' + rout_name + $
             ': Routine must be called with ' + $
             STRTRIM(STRING(n_reqs), 2) + ' positional parameter(s): arg.'
@@ -161,8 +164,6 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  Return to the calling routine with an error message if arg is not an
    ;  alphanumeric expression:
       IF (is_alphanum(arg) NE 1) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          excpt_cond = 'Error 110 in routine ' + rout_name + $
             ': Argument arg is not an alphanumeric expression.'
          RETURN, return_code
@@ -176,8 +177,6 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    IF (is_numeric(arg) EQ 1) THEN RETURN, STRTRIM(STRING(arg), 2)
 
    ;  Otherwise return to the calling routine with an error message:
-   info = SCOPE_TRACEBACK(/STRUCTURE)
-   rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
    excpt_cond = 'Error 1000 in ' + rout_name + $
       ': Unexpected condition, check the type of argument arg ' + $
       'as function strstr only accepts alphanumeric arguments.'
