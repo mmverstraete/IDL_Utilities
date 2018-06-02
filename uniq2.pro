@@ -14,7 +14,7 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;  values.
    ;
    ;  SYNTAX:
-   ;  rc = uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
+   ;  rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
@@ -89,7 +89,16 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;
    ;  EXAMPLES:
    ;
-   ;      [Insert the command and its outcome]
+   ;      IDL> in_array_1 = [1.1, 1.1, 2.2, 2.2, 3.3, 3.3, 4.4, 4.4, 4.4, 2.2, 5.5]
+   ;      IDL> in_array_2 = [0.0, 0.0, 1.1, 2.2, 3.3, 3.3, 3.3, 4.4, 3.3, 2.2, 6.1]
+   ;      IDL> rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + excpt_cond + '<'
+   ;      rc = 0, excpt_cond = ><
+   ;      IDL> PRINT, out_array_1
+   ;      1.10000  2.20000  2.20000  3.30000  4.40000  4.40000  5.50000
+   ;      IDL> PRINT, out_array_2
+   ;      0.00000  1.10000  2.20000  3.30000  3.30000  4.40000  6.10000
    ;
    ;  REFERENCES: None.
    ;
