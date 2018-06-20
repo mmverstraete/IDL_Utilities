@@ -2092,7 +2092,7 @@ IDL&gt; PRINT, res
 <ul>
 <li><p><strong>Purpose:</strong> This function sorts and sifts two one-dimensional arrays of identical type and dimensions, retaining only the couples of unique values while maintaining the correspondance between elements of the same rank in each input array.</p></li>
 <li><p><strong>Algorithm:</strong> This function combines the two input positional array arguments into a single <code>STRING</code> array, sorts and sifts it to eliminate duplicates, and then splits it back into arrays of the original type but containing only unique pairs of corresponding values.</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $</code><br />
+<li><p><strong>Syntax:</strong> <code>rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
@@ -2130,7 +2130,16 @@ IDL&gt; PRINT, res
 <li><p><strong>Note 1:</strong> The input positional parameters <code>in_array_1</code> and <code>in_array_2</code> can be of any alphanumeric type, but must be defined.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>[Insert the command and its outcome]</code></pre></li>
+<pre><code>IDL&gt; in_array_1 = [1.1, 1.1, 2.2, 2.2, 3.3, 3.3, 4.4, 4.4, 4.4, 2.2, 5.5]
+IDL&gt; in_array_2 = [0.0, 0.0, 1.1, 2.2, 3.3, 3.3, 3.3, 4.4, 3.3, 2.2, 6.1]
+IDL&gt; rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $
+   /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;rc = &#39; + strstr(rc) + &#39;, excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+rc = 0, excpt_cond = &gt;&lt;
+IDL&gt; PRINT, out_array_1
+1.10000  2.20000  2.20000  3.30000  4.40000  4.40000  5.50000
+IDL&gt; PRINT, out_array_2
+0.00000  1.10000  2.20000  3.30000  3.30000  4.40000  6.10000</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
