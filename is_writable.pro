@@ -39,13 +39,28 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  OUTCOME:
    ;
-   ;  *   If no exception condition has been detected, this function
-   ;      returns 1 if the file or directory provided as the input
-   ;      positional parameter file_spec exists and is writable, 0 if it
-   ;      exists but is not writable, and -2 if the argument does not
-   ;      exist. The output keyword parameter excpt_cond is set to a null
-   ;      string, if the optional input keyword parameter DEBUG is set and
-   ;      if the optional output keyword parameter EXCPT_COND is provided.
+   ;  *   If no exception condition has been detected,
+   ;
+   ;      -   this function returns 1 if the file or directory provided as
+   ;          the input positional parameter file_spec exists and is
+   ;          writable, and the output keyword parameter excpt_cond is set
+   ;          to a null string, if the optional input keyword parameter
+   ;          DEBUG is set and if the optional output keyword parameter
+   ;          EXCPT_COND is provided.
+   ;
+   ;      -   this function returns 0 if the file or directory provided as
+   ;          the input positional parameter file_spec exists but is
+   ;          unwritable, and the output keyword parameter excpt_cond
+   ;          contains a message to this effect, if the optional input
+   ;          keyword parameter DEBUG is set and if the optional output
+   ;          keyword parameter EXCPT_COND is provided.
+   ;
+   ;      -   this function returns -2 if the file or directory provided
+   ;          as the input positional parameter file_spec does not exist,
+   ;          and the output keyword parameter excpt_cond contains a
+   ;          message to this effect, if the optional input keyword
+   ;          parameter DEBUG is set and if the optional output keyword
+   ;          parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns -1 and the output keyword parameter excpt_cond contains
@@ -183,9 +198,13 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       IF (res.WRITE EQ 1) THEN BEGIN
          RETURN, 1
       ENDIF ELSE BEGIN
+         IF (debug) THEN excpt_cond = 'The file or directory ' + file_spec + $
+            ' exists but is unwritable.'
          RETURN, 0
       ENDELSE
    ENDIF ELSE BEGIN
+      IF (debug) THEN excpt_cond = 'The file or directory ' + file_spec + $
+         ' does not exist.'
       RETURN, -2
    ENDELSE
 
