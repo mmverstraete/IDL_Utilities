@@ -123,6 +123,8 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      argument does not exist, and update the documentation.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2018–06–22: Version 1.6 — Improve diagnostic messages.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
