@@ -946,6 +946,46 @@ There are 2 disks mounted on MicMac2:
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 </ul></li>
 </ul>
+<h2>get_host_info</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function reports on the names of the operating system and the computer on which it is running.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> <code>!VERSION</code> internal variable and on either the <code>hostname</code> command (on computers running under <code>Linux</code> or <code>Mac</code>), or the environmental variable <code>COMPUTERNAME</code> (on computers running under <code>MS Windows</code>) to define the value of the output arguments.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = get_host_info(os_name, comp_name)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>os_name {STRING} [O]:</code> The name of the underlying operating system; under <code>IDL</code> Version 8.7, this output positional parameter is either <code>linux</code>, or <code>darwin</code>, or <code>Win32</code>.</p></li>
+<li><p><code>comp_name {STRING} [O]:</code> The name of the computer executing this routine.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong> None.</p></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>This function does not accept any input argument and does not perform any testing for exception conditions. If the operating system is recognized <em>and</em> a non-trivial computer name is retrieved, this function returns <code>0</code> and the output positional parameters contain these names.</p></li>
+<li><p>If the operating system is not recognized <em>or</em> if a non-trivial computer name cannot be retrieved, this function stops the processing and returns control to <code>IDL</code>.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong> None.</p></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The logic implemented in this function may need to be updated either if one of the operating systems changes its naming convention, or more or different operating systems should be considered, or the mechanism to retrieve the name of the computer changes.</p></li>
+<li><p><strong>Note 2:</strong> On computers running under the Microsoft Windows family of operating systems, the user should verify that the environment variable <code>COMPUTERNAME</code> exists.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; res = get_host_info(os_name, comp_name)
+IDL&gt; PRINT, &#39;os_name = &#39;, os_name
+os_name = darwin
+IDL&gt; PRINT, &#39;comp_name = &#39;, comp_name
+comp_name = MicMac2</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;07&#8211;03: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;07&#8211;05: Version 1.0 &#8212; Initial public release.</p></li>
+</ul></li>
+</ul>
 <h2>is_dir</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function returns <code>1</code> if argument <code>dir_spec</code> is a directory, and <code>0</code> if that argument is not a directory, and <code>-1</code> if an exception condition has been encountered, but only if the optional input keyword parameter <code>DEBUG</code> has been set.</p></li>
@@ -1181,7 +1221,12 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is readable, <code>0</code> if it exists but is not readable, and <code>-2</code> if the argument does not exist. The output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected,</p>
+<ul>
+<li><p>this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is readable, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>0</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists but is unreadable, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>-2</code> if the file or directory provided as the input positional parameter <code>file_spec</code> does not exist, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+</ul></li>
 <li><p>If an exception condition has been detected, this function returns <code>-1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -1225,6 +1270,7 @@ IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the argument exists but is unreadable.</p></li>
 <li><p>2018&#8211;05&#8211;14: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
+<li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
 </ul></li>
 </ul>
 <h2>is_uppercase</h2>
@@ -1295,7 +1341,12 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable, <code>0</code> if it exists but is not writable, and <code>-2</code> if the argument does not exist. The output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected,</p>
+<ul>
+<li><p>this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>0</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists but is unwritable, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>-2</code> if the file or directory provided as the input positional parameter <code>file_spec</code> does not exist, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+</ul></li>
 <li><p>If an exception condition has been detected, this function returns <code>-1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -1335,6 +1386,7 @@ IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the argument exists but is unwritable.</p></li>
 <li><p>2018&#8211;05&#8211;13: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
+<li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
 </ul></li>
 </ul>
 <h2>last_char</h2>

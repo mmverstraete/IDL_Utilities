@@ -187,16 +187,32 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
       ENDIF
    ENDIF
 
-   ;  Identify the current computer:
-   SPAWN, 'hostname -s', computer
-   computer = computer[0]
+   ;  Identify the current operating system and computer name:
+   rc = get_host_info(os_name, comp_name)
+
+   ;  Retrieve the amount of disk space available:
+   CASE os_name OF
+      'linux': BEGIN
+         IF (KEYWORD_SET(dir)) THEN BEGIN
+            command = 'df -h /Volumes/' + dir
+         ENDIF ELSE BEGIN
+            command = 'df -h /Volumes/*'
+         ENDELSE
+         SPAWN, command, disk_space, err_result
+         END
+      'darwin': BEGIN
+         IF (KEYWORD_SET(dir)) THEN BEGIN
+            command = 'df -h /Volumes/' + dir
+         ENDIF ELSE BEGIN
+            command = 'df -h /Volumes/*'
+         ENDELSE
+         SPAWN, command, disk_space, err_result
+         END
+      'Win32': BEGIN
+         END
+   ENDCASE
 
    ;  Set the Linux command line:
-   IF (KEYWORD_SET(dir)) THEN BEGIN
-      command = 'df -h /Volumes/' + dir
-   ENDIF ELSE BEGIN
-      command = 'df -h /Volumes/*'
-   ENDELSE
 
    ;  Spawn the Linux command and retrieve the disk information:
    ;  Note 1: The variable 'disk_space' returned by this spawned command is a
@@ -208,7 +224,7 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  Note 3: If the optional keyword parameter 'dir' is set but no physical
    ;  disk meeting that name specification is mounted, the spawned 'df' command
    ;  returns an error message in the variable 'err_result'.
-   SPAWN, command, disk_space, err_result
+
 
    ;  Return to the calling routine if no mount point meets the search
    ;  criterion of the spawned 'df' command, or if another error occurred:
@@ -218,10 +234,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
          IF (KEYWORD_SET(printit)) THEN BEGIN
             IF (KEYWORD_SET(dir)) THEN BEGIN
                PRINT, 'There are no disks matching the pattern ' + $
-                  dir + ' mounted on ' + computer + '.'
+                  dir + ' mounted on ' + comp_name + '.'
             ENDIF ELSE BEGIN
                PRINT, 'There are no disks matching the pattern ' + $
-                  '/Volumes/ mounted on ' + computer + '.'
+                  '/Volumes/ mounted on ' + comp_name + '.'
             ENDELSE
          ENDIF
          RETURN, return_code
@@ -270,10 +286,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  required information on the console:
    IF (KEYWORD_SET(printit)) THEN BEGIN
       CASE n_disks OF
-         0: PRINT, 'There are no disks mounted on ' + computer + '.'
-         1: PRINT, 'There is 1 disk mounted on ' + computer + ':'
+         0: PRINT, 'There are no disks mounted on ' + comp_name + '.'
+         1: PRINT, 'There is 1 disk mounted on ' + comp_name + ':'
          ELSE: PRINT, 'There are ' + strstr(n_disks) + $
-            ' disks mounted on ' + computer + ':'
+            ' disks mounted on ' + comp_name + ':'
       ENDCASE
       FOR j = 0, n_disks  - 1 DO BEGIN
          PRINT, disks_sizes[j, *], FORMAT = '(A24, 3A12)'
