@@ -984,6 +984,7 @@ comp_name = MicMac2</code></pre></li>
 <ul>
 <li><p>2018&#8211;07&#8211;03: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2018&#8211;07&#8211;05: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2018&#8211;07&#8211;10: Version 1.1 &#8212; Documentation update.</p></li>
 </ul></li>
 </ul>
 <h2>is_dir</h2>
@@ -1450,6 +1451,71 @@ excpt_cond = &gt;Error 110 in LAST_CHAR: Argument must be of type STRING.&lt;</c
 <li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
+</ul></li>
+</ul>
+<h2>make_bytemap</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function generates and saves, in the folder <code>save_spec</code>, a PNG-formatted graphic representation of the input positional parameter <code>byte_array</code>, where the <code>BYTE</code> values contained in the array <code>good_vals</code> are coded in the colors contained in the array <code>good_vals_cols</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function creates a graphical representation of the 2-D array <code>byte_array</code> where the values contained in <code>good_vals</code> are plotted in the corresponding colors given in <code>good_vals_cols</code>. Values in the data array that are not listed in <code>good_vals</code> are assigned the default color <code>0</code>, which is black. The list of recognized colors is defined by the World Wide Web Consortium (W3C) and are listed in the IDL documentation under the entry <code>!COLOR</code>.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = make_bytemap(byte_array, good_vals, good_vals_cols, $</code><br />
+<code>save_spec, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>byte_array {BYTE array} [I]:</code> A 2-D array of values of type <code>BYTE</code>.</p></li>
+<li><p><code>good_vals {BYTE array} [I]:</code> A 1-D array of values of type <code>BYTE</code>.</p></li>
+<li><p><code>good_vals_cols {STRING array} [I]:</code> A 1-D array of standard color names, as defined by W3C or IDL.</p></li>
+<li><p><code>save_spec {STRING} [I]:</code> The file specification to be used to save the graphic file.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INTEGER</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The output graphic file is saved in the location specified by the input argument <code>save_spec</code>.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output graphic file is not generated and is not saved.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Input positional parameter <code>byte_array</code> is not of type <code>BYTE</code>.</p></li>
+<li><p>Error 120: Input positional parameter <code>byte_array</code> is not a 2D array.</p></li>
+<li><p>Error 130: Input positional parameter <code>good_vals</code> is not of type <code>BYTE</code> or <code>INT</code>.</p></li>
+<li><p>Error 140: Input positional parameter <code>good_vals</code> contains none or more than 256 values.</p></li>
+<li><p>Error 150: Input positional parameter <code>good_vals_cols</code> must be of type <code>STRING</code>.</p></li>
+<li><p>Error 160: Input positional parameter <code>good_vals_cols</code> contains none or more than 256 values.</p></li>
+<li><p>Error 170: Input positional parameters <code>good_vals</code> and <code>good_vals_cols</code> must have the same dimensions.</p></li>
+<li><p>Error 180: At least one of the specified color names is unrecognized.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> Values contained in the input data array <code>byte_array</code> that are not listed in the input array <code>good_vals</code> have no explicitly assigned color code in the map, which defaults to a color code <code>0</code>, and hence to the first color listed in <code>good_vals_cols</code>.</p></li>
+<li><p><strong>Note 2:</strong> Different values of the input array <code>good_vals</code> can be assigned the same color in <code>good_vals_cols</code>, as long as these two arrays have the same dimension to ensure the correspondence between their matching elements.</p></li>
+<li><p><strong>Note 3:</strong> A given value of the input array <code>good_vals</code> can be assigned multiple colors in <code>good_vals_cols</code>, as long as these two arrays have the same dimension to ensure the correspondence between their matching elements. In that case, assignments associated with a higher index in those file supersede those made previously.</p></li>
+<li><p><strong>Note 4:</strong> The input array <code>good_vals</code> may contain values that are not present in the input data array <code>byte_array</code>, as long as the input array <code>good_vals_cols</code> also contains a nominal color assignment, which will be ignored.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; byte_array = BYTARR(200, 50)
+IDL&gt; FOR i = 0, 146 DO byte_array[i, *] = BYTE(i)
+IDL&gt; good_vals = BINDGEN(147)
+IDL&gt; good_vals_cols = TAG_NAMES(!COLOR)
+IDL&gt; rc = make_bytemap(byte_array, good_vals, good_vals_cols, &#39;/Users/michel/Desktop/test.png&#39;, /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;rc = &#39; + strstr(rc) + &#39; and excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+rc = 0 and excpt_cond = &gt;&lt;</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>See the color conventions recommended by the World Wide Web Consortium (W3C) [<a href="https://www.w3.org/TR/2018/REC-css-color-3-20180619/" class="uri">https://www.w3.org/TR/2018/REC-css-color-3-20180619/</a>], or the IDL documentation under the entry <code>!COLOR</code>.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2018&#8211;08&#8211;04: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2018&#8211;08&#8211;08: Version 1.0 &#8212; Initial public release.</p></li>
 </ul></li>
 </ul>
 <h2>oom</h2>

@@ -70,6 +70,8 @@ FUNCTION get_host_info, os_name, comp_name
    ;  *   2018–07–03: Version 0.9 — Initial release.
    ;
    ;  *   2018–07–05: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–07–10: Version 1.1 — Documentation update.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -103,10 +105,6 @@ FUNCTION get_host_info, os_name, comp_name
    ;      Please send comments and suggestions to the author at
    ;      MMVerstraete@gmail.com.
    ;Sec-Cod
-
-;  ==========================
-;  [Code section 0: Error handling]
-;  ==========================
 
    ;  Initialize the default return code:
    return_code = 1
