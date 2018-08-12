@@ -136,7 +136,7 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;
    ;  *   2018–08–04: Version 0.9 — Initial release.
    ;
-   ;  *   2018–08–08: Version 1.0 — Initial public release.
+   ;  *   2018–08–10: Version 1.0 — Initial public release.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -178,6 +178,9 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;  Initialize the default return code and the exception condition message:
    return_code = 0
    excpt_cond = ''
+
+   ;  Set the default values of essential input keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
 
    ;  Retrieve the list of 147 official color names, together with their
    ;  indices and RGB values (this standard information is used both for
