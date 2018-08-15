@@ -1272,6 +1272,7 @@ IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2018&#8211;05&#8211;14: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
+<li><p>2018&#8211;08&#8211;15: Version 1.7 &#8212; Return non-empty <code>excpt_cond</code> values only when errors are encountered (i.e., only when <code>rc = -1</code>, and not as warning or information messages).</p></li>
 </ul></li>
 </ul>
 <h2>is_uppercase</h2>
@@ -1344,8 +1345,8 @@ res =        1 and excpt_cond = &gt;&lt;</code></pre></li>
 <ul>
 <li><p>If no exception condition has been detected,</p>
 <ul>
-<li><p>this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>this function returns <code>0</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists but is unwritable, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable; the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>this function returns <code>0</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists but is unwritable; the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>this function returns <code>-2</code> if the file or directory provided as the input positional parameter <code>file_spec</code> does not exist, and the output keyword parameter <code>excpt_cond</code> contains a message to this effect, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p>If an exception condition has been detected, this function returns <code>-1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
@@ -1388,6 +1389,7 @@ IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2018&#8211;05&#8211;13: Version 1.3 &#8212; Add return code to indicate the input argument does not exist, and update the documentation.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
+<li><p>2018&#8211;08&#8211;15: Version 1.7 &#8212; Return non-empty <code>excpt_cond</code> values only when errors are encountered (i.e., only when <code>rc = -1</code>, and not as warning or information messages).</p></li>
 </ul></li>
 </ul>
 <h2>last_char</h2>
@@ -1515,7 +1517,7 @@ rc = 0 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2018&#8211;08&#8211;04: Version 0.9 &#8212; Initial release.</p></li>
-<li><p>2018&#8211;08&#8211;08: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2018&#8211;08&#8211;10: Version 1.0 &#8212; Initial public release.</p></li>
 </ul></li>
 </ul>
 <h2>oom</h2>

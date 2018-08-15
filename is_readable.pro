@@ -125,6 +125,10 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
    ;
    ;  *   2018–06–22: Version 1.6 — Improve diagnostic messages.
+   ;
+   ;  *   2018–08–15: Version 1.7 — Return non-empty excpt_cond values
+   ;      only when errors are encountered (i.e., only when rc = -1, and
+   ;      not as warning or information messages).
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -204,13 +208,9 @@ FUNCTION is_readable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       IF (res.READ EQ 1) THEN BEGIN
          RETURN, 1
       ENDIF ELSE BEGIN
-         IF (debug) THEN excpt_cond = 'The file or directory ' + file_spec + $
-            ' exists but is unreadable.'
          RETURN, 0
       ENDELSE
    ENDIF ELSE BEGIN
-      IF (debug) THEN excpt_cond = 'The file or directory ' + file_spec + $
-         ' does not exist.'
       RETURN, -2
    ENDELSE
 
