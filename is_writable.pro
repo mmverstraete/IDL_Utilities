@@ -125,6 +125,9 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2018–08–15: Version 1.7 — Return non-empty excpt_cond values
    ;      only when errors are encountered (i.e., only when rc = -1, and
    ;      not as warning or information messages).
+   ;
+   ;  *   2018–08–28: Version 1.8 — Return empty excpt_cond value only
+   ;      when file_spec exists and is writable.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -204,9 +207,11 @@ FUNCTION is_writable, file_spec, DEBUG = debug, EXCPT_COND = excpt_cond
       IF (res.WRITE EQ 1) THEN BEGIN
          RETURN, 1
       ENDIF ELSE BEGIN
+         excpt_cond = 'The file ' + file_spec + ' exists but is unwritable.'
          RETURN, 0
       ENDELSE
    ENDIF ELSE BEGIN
+      excpt_cond = 'The file ' + file_spec + ' does not exist.'
       RETURN, -2
    ENDELSE
 
