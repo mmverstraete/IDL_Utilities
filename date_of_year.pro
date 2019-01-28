@@ -1,14 +1,19 @@
-FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION date_of_year, $
+   day_of_year, $
+   month, $
+   day, $
+   YEAR = year, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function computes the date (month and day)
-   ;  corresponding to the rank number day_of_year provided as input.
+   ;  PURPOSE: This function reports the date corresponding to the rank
+   ;  number day_of_year provided as input.
    ;
    ;  ALGORITHM: This function computes the date (month and day)
-   ;  corresponding to the rank (day number) provided as input, either for
-   ;  a common year (if the keyword parameter YEAR is not specified), or
-   ;  for that particular year if it is.
+   ;  corresponding to the rank (day number within a civil year) provided
+   ;  as input, either for a common year (if the keyword parameter YEAR is
+   ;  not specified), or for that particular year if it is.
    ;
    ;  SYNTAX: rc = date_of_year(day_of_year, month, day, $
    ;  YEAR = year, DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -34,7 +39,7 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -55,7 +60,8 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      excpt_cond contains a message about the exception condition
    ;      encountered, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided. The output arguments month and day are set to -1.
+   ;      provided. The output positional parameters month and day are set
+   ;      to -1.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -116,10 +122,13 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      days_per_month.pro.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -127,16 +136,17 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -144,24 +154,30 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
+
+   ;  Set the default values of flags and essential output keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
-   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
-
-   ;  Initialize the output positional parameters to invalid values:
+   ;  Initialize the output positional parameter(s):
    month = -1
    day = -1
 
@@ -181,7 +197,7 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
-   ;  argument 'day_of_year' is not of numeric type:
+   ;  positional parameter 'day_of_year' is not of numeric type:
       IF (is_numeric(day_of_year) NE 1) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
@@ -209,14 +225,14 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with an invalid input argument 'day_of_year':
+   ;  called with an invalid input positional parameter 'day_of_year':
       IF ((day_of_year LT 1) OR (day_of_year GT num_days[0])) THEN BEGIN
          info = SCOPE_TRACEBACK(/STRUCTURE)
          rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input argument day_of_year must be within the range [1, ' + $
-            strstr(num_days[0]) + '].'
+            ': Input positional parameter day_of_year must be within ' + $
+            'the range [1, ' + strstr(num_days[0]) + '].'
          RETURN, error_code
       ENDIF
    ENDIF
@@ -238,9 +254,9 @@ FUNCTION date_of_year, day_of_year, month, day, YEAR = year, $
    cum_num_days[11] = TOTAL(num_days[1:11])
    cum_num_days[12] = TOTAL(num_days[1:12])
 
-   ;  Determine the date corresponding to the input argument 'day_of_year' by
-   ;  identifying the month in which it falls and subtracting the number of
-   ;  days in all previous completed months:
+   ;  Determine the date corresponding to the input positional parameter
+   ;  'day_of_year' by identifying the month in which it falls and subtracting
+   ;  the number of days in all previous completed months:
    CASE 1 OF
       (day_of_year GT cum_num_days[0]) AND $
       (day_of_year LE cum_num_days[1]): BEGIN

@@ -1,11 +1,15 @@
-FUNCTION day_of_year, month, day, YEAR = year, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION day_of_year, $
+   month, $
+   day, $
+   YEAR = year, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function computes the rank (day number) of a date
-   ;  specified by the month and day numbers provided as input arguments,
-   ;  either for an arbitrary common year, or for the particular year
-   ;  specified in the optional keyword parameter year.
+   ;  specified by the month and day numbers provided as input positional
+   ;  parameters, either for an arbitrary common year, or for the
+   ;  particular year specified in the optional keyword parameter year.
    ;
    ;  ALGORITHM: By default, this function accumulates and returns the
    ;  number of days between January 1 and the date specified by the
@@ -19,16 +23,16 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   month {INTEGER} [I]: The month of the date to characterize,
-   ;      where January is 1, February is 2, … and December is 12.
+   ;  *   month {INT} [I]: The month of the date to characterize, where
+   ;      January is 1, February is 2, … and December is 12.
    ;
-   ;  *   day {INTEGER} [I]: The day within the month of the date to
+   ;  *   day {INT} [I]: The day within the month of the date to
    ;      characterize, where the first day of the month is 1 and the last
    ;      day of the month is either 28, 30 or 31, depending on the month.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   YEAR = year {INTEGER} [I]: The specific year for which the
+   ;  *   YEAR = year {INT} [I]: The specific year for which the
    ;      computation must be carried out.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
@@ -38,7 +42,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -81,6 +85,9 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  *   Error 200: An exception condition occurred in
    ;      days_per_month.pro.
    ;
+   ;  *   Error 210: An exception condition occurred in
+   ;      days_per_month.pro.
+   ;
    ;  DEPENDENCIES:
    ;
    ;  *   days_per_month.pro
@@ -102,7 +109,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;
    ;  *   NOTE 2: If day is set to 29 (implying a leap year), the keyword
    ;      parameter year must be provided, otherwise the function returns
-   ;      an error code.
+   ;      an error code, provided the optional input keyword parameter
+   ;      DEBUG is set.
    ;
    ;  EXAMPLES:
    ;
@@ -123,11 +131,21 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;      IDL> PRINT, res
    ;            -1
    ;      IDL> PRINT, 'excpt_cond = ' + excpt_cond
-   ;      excpt_cond = Error 134 in day_of_year: Input argument day
-   ;         is invalid: Must be contained in [1, num_days[month]].
+   ;      excpt_cond = Error 134 in day_of_year: Input positional parameter
+   ;         day is invalid: Must be contained in [1, num_days[month]].
    ;
    ;      IDL> res = day_of_year(2, 29, YEAR = 2016, $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, res
+   ;            60
+   ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
+   ;      excpt_cond = ><
+   ;
+   ;      [Note: Without the DEBUG option, the result is incorrect
+   ;      (2015 is not a leap year) and the function does not report
+   ;      the problem.]
+   ;      IDL> res = day_of_year(2, 29, YEAR = 2015, DEBUG = 0, $
+   ;         EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;            60
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
@@ -144,10 +162,13 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -155,16 +176,17 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -172,22 +194,28 @@ FUNCTION day_of_year, month, day, YEAR = year, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
-   return_code = 0
-   excpt_cond = ''
+   ;  Initialize the default return code:
+   return_code = -1
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -207,7 +235,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       IF ((is_numeric(month) NE 1) OR (is_scalar(month) NE 1)) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input argument month is not a scalar numeric expression.'
+            ': Input positional parameter month is not a scalar numeric ' + $
+            'expression.'
          RETURN, return_code
       ENDIF
    ENDIF
@@ -220,7 +249,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       IF ((month LT 1) OR (month GT 12)) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in day_of_year: ' + $
-            'Input argument month is invalid: Must be contained in [1, 12].'
+            'Input positional parameter month is invalid: Must be ' + $
+            'contained in [1, 12].'
          RETURN, return_code
       ENDIF
    ENDIF
@@ -235,7 +265,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
          IF ((is_numeric(year) NE 1) OR (is_scalar(year) NE 1)) THEN BEGIN
             error_code = 130
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Input argument year is not a scalar numeric expression.'
+               ': Input positional parameter year is not a scalar ' + $
+               'numeric expression.'
             RETURN, return_code
          ENDIF
       ENDIF
@@ -247,7 +278,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       IF ((year LT 1582) OR (year GT 2100)) THEN BEGIN
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input argument year must be within [1582, 2100].'
+            ': Input positional parameter year must be within [1582, 2100].'
          RETURN, return_code
 
       ENDIF
@@ -265,7 +296,7 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       rc = days_per_month(num_days, $
          DEBUG = debug, EXCPT_COND = excpt_cond)
       IF (debug AND (rc NE 0)) THEN BEGIN
-         error_code = 200
+         error_code = 210
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': ' + excpt_cond
          RETURN, error_code
@@ -280,7 +311,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       IF ((is_numeric(day) NE 1) OR (is_scalar(day) NE 1)) THEN BEGIN
          error_code = 150
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input argument day is not a scalar numeric expression.'
+            ': Input positional parameter day is not a scalar numeric ' + $
+            'expression.'
          RETURN, return_code
       ENDIF
    ENDIF
@@ -294,8 +326,8 @@ FUNCTION day_of_year, month, day, YEAR = year, $
       IF ((day LT 1) OR (day GT num_days[month])) THEN BEGIN
          error_code = 160
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input argument day is invalid: Must be contained in ' + $
-            '[1, ' + strstr(num_days[month]) + '].'
+            ': Input positional parameter day is invalid: Must be ' + $
+            'contained in ' + '[1, ' + strstr(num_days[month]) + '].'
          RETURN, return_code
       ENDIF
    ENDIF

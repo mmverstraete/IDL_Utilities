@@ -1,5 +1,9 @@
-FUNCTION cor_arrays, array_1, array_2, stats, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION cor_arrays, $
+   array_1, $
+   array_2, $
+   stats, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function computes various statistics to describe the
@@ -54,7 +58,7 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -96,36 +100,53 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
    ;
    ;  *   NOTE 1: The structure elements experiment, array_1_id and
    ;      array_2_id are intended to contain a numeric identifier for the
-   ;      experiment and descriptors of the two arguments. These should be
-   ;      set in the calling routine.
+   ;      experiment and descriptors of these two positional parameters.
+   ;      These should be set prior to calling this function.
    ;
    ;  EXAMPLES:
    ;
-   ;      Program 'tst_cor_arrays.pro' sets the following inputs:
-   ;
-   ;      x = [65, 63, 67, 64, 68, 62, 70, 66, 68, 67, 69, 71]
-   ;      y = [68, 66, 68, 65, 69, 66, 68, 65, 71, 67, 68, 70]
-   ;
-   ;      defines the structure 'stats', calls 'cor_arrays' and outputs:
-   ;
-   ;               N_points = 12
-   ;                   RMSD = 2.10159
-   ;             Pearson_cc = 0.702652
-   ;            Spearman_cc = 0.740262
-   ;           Spearman_sig = 0.00590285
-   ;             Spearman_D = 72.5000
-   ;         Spearman_PROBD = 0.0140817
-   ;            Spearman_ZD = -2.45517
-   ;           Linear_fit_1 = array_2 = a + b x array_1
-   ;             Linfit_a_1 = 35.8248
-   ;             Linfit_b_1 = 0.476378
-   ;        Linfit_CHISQR_1 = 19.7028
-   ;          Linfit_PROB_1 = 1.00000
+   ;      IDL> stats = CREATE_STRUCT(NAME = 'Bivariate', $
+   ;      IDL>    'experiment', 0, $
+   ;      IDL>    'array_1_id', '', $
+   ;      IDL>    'array_2_id', '', $
+   ;      IDL>    'N_points', 0L, $
+   ;      IDL>    'RMSD', 0.0, $
+   ;      IDL>    'Pearson_cc', 0.0, $
+   ;      IDL>    'Spearman_cc', 0.0, $
+   ;      IDL>    'Spearman_sig', 0.0, $
+   ;      IDL>    'Spearman_D', 0.0, $
+   ;      IDL>    'Spearman_PROBD', 0.0, $
+   ;      IDL>    'Spearman_ZD', 0.0, $
+   ;      IDL>    'Linear_fit_1', '', $
+   ;      IDL>    'Linfit_a_1', 0.0, $
+   ;      IDL>    'Linfit_b_1', 0.0, $
+   ;      IDL>    'Linfit_CHISQR_1', 0.0, $
+   ;      IDL>    'Linfit_PROB_1', 0.0, $
+   ;      IDL>    'Linear_fit_2', '', $
+   ;      IDL>    'Linfit_a_2', 0.0, $
+   ;      IDL>    'Linfit_b_2', 0.0, $
+   ;      IDL>    'Linfit_CHISQR_2', 0.0, $
+   ;      IDL>    'Linfit_PROB_2', 0.0)
+   ;      IDL> x1 = [65,63,67,64,68,62,70,66,68,67,69,71]
+   ;      IDL> y1 = [68,66,68,65,69,66,68,65,71,67,68,70]
+   ;      IDL> stats.experiment = 1
+   ;      IDL> stats.array_1_id = 'x1'
+   ;      IDL> stats.array_2_id = 'y1'
+   ;      IDL> rc = cor_arrays(x1, y1, stats, /DEBUG, $
+   ;      IDL>    EXCPT_COND = excpt_cond)
+   ;      IDL> fmt = '(A20, A)'
+   ;      IDL> PRINT, 'N_points = ', strstr(stats.N_points), FORMAT = fmt
+   ;            N_points = 12
+   ;      IDL> PRINT, 'RMSD = ', strstr(stats.RMSD), FORMAT = fmt
+   ;            RMSD = 2.10159
+   ;      ...
+   ;      IDL> PRINT, 'Linear_fit_2 = ', strstr(stats.Linear_fit_2), $
+   ;      IDL>    FORMAT = fmt
    ;           Linear_fit_2 = array_1 = a + b x array_2
-   ;             Linfit_a_2 = -3.37687
-   ;             Linfit_b_2 = 1.03640
-   ;        Linfit_CHISQR_2 = 42.8651
-   ;          Linfit_PROB_2 = 1.00000
+   ;      IDL> PRINT, 'Linfit_a_2 = ', strstr(stats.Linfit_a_2), $
+   ;      IDL>    FORMAT = fmt
+   ;           Linfit_a_2 = -3.37687
+   ;      ...
    ;
    ;  REFERENCES: None.
    ;
@@ -143,10 +164,13 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -154,16 +178,17 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -171,22 +196,28 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -201,12 +232,13 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
          RETURN, error_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if either argument
-   ;  'array_1' or 'array_2' is not of a numeric type:
+   ;  Return to the calling routine with an error message if either of the
+   ;  input positional parameters 'array_1' or 'array_2' is not of a numeric
+   ;  type:
       IF ((is_numeric(array_1) NE 1) OR (is_numeric(array_2) NE 1)) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': At least one of the arguments array_1 or array_2 is not of ' + $
+            ': At least one of the input positional parameters array_1 or array_2 is not of ' + $
             'a numeric type.'
          RETURN, error_code
       ENDIF
@@ -221,8 +253,9 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
 
    IF (debug) THEN BEGIN
 
-   ;  Return to the calling routine with an error message if either argument
-   ;  'array_1' or 'array_2' is not of a vector (1D array):
+   ;  Return to the calling routine with an error message if either of the
+   ;  input positional parameters 'array_1' or 'array_2' is not a vector
+   ;  (1D array):
       IF ((n_dims_1 NE 1) OR (n_dims_2 NE 1)) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
@@ -230,12 +263,13 @@ FUNCTION cor_arrays, array_1, array_2, stats, $
          RETURN, error_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if arguments
-   ;  'array_1' and 'array_2' are of different sizes:
+   ;  Return to the calling routine with an error message if input positional
+   ;  parameters 'array_1' and 'array_2' are of different sizes:
       IF (n_elms_1 NE n_elms_2) THEN BEGIN
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': The arguments array_1 and array_2 are not of the same size.'
+            ': The input positional parameters array_1 and array_2 are ' + $
+            'not of the same size.'
          RETURN, error_code
       ENDIF
    ENDIF

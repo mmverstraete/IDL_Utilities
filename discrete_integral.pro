@@ -1,8 +1,12 @@
-FUNCTION discrete_integral, x, y, BASELINE = baseline, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION discrete_integral, $
+   x, $
+   y, $
+   BASELINE = baseline, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function computes the integral of a mathematical
+   ;  PURPOSE: This function returns the integral of a mathematical
    ;  function provided as a discrete set of (x, y) points.
    ;
    ;  ALGORITHM: This function calculates the ‘area under the curve’
@@ -56,13 +60,13 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: Routine arguments x and y must be numeric.
+   ;  *   Error 110: Input positional parameters x and y must be numeric.
    ;
-   ;  *   Error 120: Routine arguments x and y must be arrays containing
-   ;      at least 2 elements.
+   ;  *   Error 120: Input positional parameters x and y must be arrays
+   ;      containing at least 2 elements.
    ;
-   ;  *   Error 130: Routine arguments x and y must be arrays of the same
-   ;      length.
+   ;  *   Error 130: Input positional parameters x and y must be arrays of
+   ;      the same length.
    ;
    ;  *   Error 140: Optional keyword baseline must be of numeric type.
    ;
@@ -104,10 +108,13 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;  *   2018–03–25: Version 1.0 — Initial public release.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -115,16 +122,17 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -132,22 +140,28 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = -9999.00
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -163,30 +177,32 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
       ENDIF
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with non-numerical arguments:
+   ;  called with non-numerical input positional parameters:
       IF ((is_numeric(x) NE 1) OR (is_numeric(y) NE 1)) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Routine arguments x and y must be numeric.'
+            ': Routine input positional parameters x and y must be numeric.'
          RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with array arguments containing less then 2 points:
+   ;  called with array input positional parameters containing less than 2
+   ;  data points:
       IF ((N_ELEMENTS(x) LT 2) OR (N_ELEMENTS(y) LT 2)) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Routine arguments x and y must be arrays containing ' + $
-            'at least 2 elements.'
+            ': Routine input positional parameters x and y must be arrays ' + $
+            'containing at least 2 elements.'
          RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with array arguments of different lengths:
+   ;  called with array input positional parameters of different lengths:
       IF (N_ELEMENTS(x) NE N_ELEMENTS(y)) THEN BEGIN
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Routine arguments x and y must be arrays of the same length.'
+            ': Routine input positional parameters x and y must be arrays ' + $
+            'of the same length.'
          RETURN, return_code
       ENDIF
 
@@ -195,13 +211,13 @@ FUNCTION discrete_integral, x, y, BASELINE = baseline, $
       IF (KEYWORD_SET(baseline) AND (is_numeric(baseline) NE 1)) THEN BEGIN
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Optional keyword baseline must be of numeric type.'
+            ': Optional keyword parameter baseline must be of numeric type.'
          RETURN, return_code
       ENDIF
    ENDIF
 
    ;  Set the default value of baseline:
-   IF (NOT KEYWORD_SET(baseline)) THEN baseline = 0.0
+   IF (~KEYWORD_SET(baseline)) THEN baseline = 0.0
 
    ;  Cast both input arrays as DOUBLE for the purpose of the computations:
    x_dbl = DOUBLE(x)

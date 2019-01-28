@@ -1,12 +1,15 @@
-FUNCTION count_code_lines, file_spec, comm_char, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION count_code_lines, $
+   file_spec, $
+   comm_char, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns the approximate number of code lines
-   ;  (as a LONG integer) contained in a single file file_spec, i.e., the
-   ;  number of lines that are neither blank (empty) nor beginning with a
-   ;  string expression denoting the start of a comment contained in
-   ;  comm_char.
+   ;  (as a LONG integer) contained in the text file specified by the
+   ;  input positional parameter file_spec, i.e., the number of lines that
+   ;  are neither blank (empty) nor beginning with a string expression
+   ;  contained in comm_char denoting the start of a comment.
    ;
    ;  ALGORITHM: This function inspects each and every line of file_spec
    ;  and counts those that are neither empty nor starting with one of the
@@ -24,7 +27,7 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   file_spec {STRING} [I]: The file specification (optional path
-   ;      and name) of the file to inspect.
+   ;      and name) of the text file to inspect.
    ;
    ;  *   comm_char {STRING or STRING array} [I]: One (scalar) or more (if
    ;      array) string expression(s) containing the usual characters to
@@ -83,24 +86,26 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;  REMARKS:
    ;
    ;  *   NOTE 1: The IDL built-in command FILE_LINES counts and returns
-   ;      the total number of lines in a text file. By contrast, routine
-   ;      count_code_lines reports on the number of active or effective
-   ;      code lines, i.e., without counting comments and empty lines.
+   ;      the total number of lines in a text file. By contrast, the
+   ;      function count_code_lines reports on the number of active or
+   ;      effective code lines, i.e., without counting comments and empty
+   ;      lines.
    ;
    ;  *   NOTE 2: The STRING variable comm_char can be either a scalar or
    ;      an array, in which case all elements of that array are used in
    ;      succession to check all possible options. Each element of
    ;      comm_char can include multiple characters (e.g., to deal with C
    ;      or PL-1 language conventions such as /* comment */). And if
-   ;      comm_char is set to a null string, this function returns the
-   ;      total number of lines in the file, as reported by FILE_LINES.
+   ;      comm_char is set to a scalar null string, this function returns
+   ;      the total number of lines in the file, as reported by
+   ;      FILE_LINES.
    ;
    ;  *   NOTE 3: This routine may not yield the correct number of code
    ;      lines if comments span multiple lines, each terminated by a <CR>
    ;      and/or <LF>, without repeating the commenting character sequence
    ;      on each line. However, a comment written on a single long line,
-   ;      which may appear on multiple lines on screen due to wrapping,
-   ;      would be treated correctly.
+   ;      which may appear on multiple lines on screen due to soft
+   ;      wrapping, would be treated correctly.
    ;
    ;  *   NOTE 4: This function is also usable in other contexts that use
    ;      a character string at the start of a line to indicate comments,
@@ -108,13 +113,12 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> file_spec = $
-   ;         '~/Documents/MySoftware/IDL/Utilities/is_leap/is_leap.pro'
+   ;      IDL> file_spec = './Codes/IDL/Utilities/is_leap/is_leap.pro'
    ;      IDL> PRINT, FILE_LINES(file_spec)
-   ;                  195
+   ;                         206
    ;      IDL> PRINT, count_code_lines(file_spec, ';', $
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)
-   ;                  54
+   ;                48
    ;
    ;  REFERENCES: None.
    ;
@@ -127,10 +131,13 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -138,16 +145,17 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -155,22 +163,28 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = -1L
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -185,26 +199,26 @@ FUNCTION count_code_lines, file_spec, comm_char, $
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the argument
-   ;  'file_spec' is not of type STRING:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'file_spec' is not of type STRING:
       IF (is_string(file_spec) NE 1) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument file_spec is not of type STRING.'
+            ': Input positional parameter file_spec is not of type STRING.'
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the argument
-   ;  'file_spec' is not a scalar:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'file_spec' is not a scalar:
       IF (is_scalar(file_spec) NE 1) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument file_spec is not a scalar.'
+            ': Input positional parameter file_spec is not a scalar.'
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the file
-   ;  'file_spec' is not found or unreadable:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'file_spec' is not found or unreadable:
       IF (is_readable(file_spec, $
          DEBUG = debug, EXCPT_COND = excpt_cond) NE 1) THEN BEGIN
          error_code = 130
@@ -213,20 +227,20 @@ FUNCTION count_code_lines, file_spec, comm_char, $
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if argument
-   ;  'comm_char' is not of type STRING:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'comm_char' is not of type STRING:
       res = is_string(comm_char)
       IF (res NE 1) THEN BEGIN
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument comm_char is not of type STRING.'
+            ': Input positional parameter comm_char is not of type STRING.'
          RETURN, return_code
       ENDIF
    ENDIF
 
-   ;  If the input argument comm_char is a scalar empty string, return the
-   ;  actual number of lines in the file, as reported by IDL's FILE_LINES
-   ;  function:
+   ;  If the input positional parameter comm_char is a scalar empty string,
+   ;  return the actual number of lines in the file, as reported by IDL's
+   ;  FILE_LINES function.
    ;  WARNING: The following test must be performed as two independent IF
    ;  statements because the second IF would cause an error when comm_char is
    ;  an array.
@@ -234,8 +248,8 @@ FUNCTION count_code_lines, file_spec, comm_char, $
       IF (comm_char EQ '') THEN  RETURN, FILE_LINES(file_spec)
    ENDIF
 
-   ;  Check whether argument comm_char is an array, and if so assess the number
-   ;  of elements:
+   ;  Check whether input positional parameter comm_char is an array, and if
+   ;  so assess the number of elements:
    res = is_array(comm_char)
    IF (res EQ 1) THEN BEGIN
       n_comm_char = N_ELEMENTS(comm_char)
@@ -250,21 +264,21 @@ FUNCTION count_code_lines, file_spec, comm_char, $
    WHILE ~EOF(unit) DO BEGIN
       READF, unit, line
 
-      ;  Remove any extraneous white space at the start and end of the line:
+   ;  Remove any extraneous white space at the start and end of the line:
       line = STRTRIM(line, 2)
 
-      ;  Consider only non-empty lines:
+   ;  Consider only non-empty lines:
       IF (STRLEN(line) GT 0) THEN BEGIN
 
-         ;  Consider only lines that are not starting as a comment:
-         ;  If comm_char is a scalar expression:
+   ;  Consider only lines that are not starting as a comment:
+   ;  If comm_char is a scalar expression:
          IF (n_comm_char EQ 0) THEN BEGIN
             comm_char_len = STRLEN(comm_char)
             IF (STRMID(line, 0, comm_char_len) NE comm_char) THEN $
                n_lines = n_lines + 1
          ENDIF ELSE BEGIN
 
-            ;  If comm_char is an array of expressions, check all options:
+   ;  If comm_char is an array of expressions, check all options:
             test = 0
             FOR i = 0, n_comm_char - 1 DO BEGIN
                comm_char_len = STRLEN(comm_char[i])
@@ -277,6 +291,7 @@ FUNCTION count_code_lines, file_spec, comm_char, $
       ENDIF
    ENDWHILE
 
+   CLOSE, unit
    FREE_LUN, unit
 
    RETURN, n_lines
