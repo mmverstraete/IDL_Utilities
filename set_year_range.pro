@@ -1,5 +1,8 @@
-FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION set_year_range, $
+   jul_ini_date, $
+   jul_fin_date, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function returns a time interval, defined by two
@@ -53,12 +56,15 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
    ;  *   Error 110: Input positional parameters jul_ini_date and
-   ;      jul_fin_date must both be of type DOUBLE.
+   ;      jul_fin_date must both be of numeric type.
    ;
    ;  *   Error 120: Input positional parameters jul_ini_date and
+   ;      jul_fin_date must both be scalars.
+   ;
+   ;  *   Error 130: Input positional parameters jul_ini_date and
    ;      jul_fin_date must both be posterior to 4 October 1582.
    ;
-   ;  *   Error 300: Julian date jul_ini_date must precede Julian date
+   ;  *   Error 140: Julian date jul_ini_date must precede Julian date
    ;      jul_fin_date.
    ;
    ;  DEPENDENCIES:
@@ -77,7 +83,8 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;      IDL> jul2 = JULDAY(6, 13, 2015)
    ;      IDL> PRINT, jul1, jul2
    ;           2451599     2457187
-   ;      IDL> res = set_year_range(jul1, jul2, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_year_range(jul1, jul2, /DEBUG, $
+   ;         EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           2451544     2457389
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
@@ -89,13 +96,14 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;      IDL> PRINT, mo2, dy2, yr2
    ;                 1           1        2016
    ;
-   ;      IDL> res = set_year_range(jul2, jul1, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_year_range(jul2, jul1, /DEBUG, $
+   ;         EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;           -99.9000     -99.9000
    ;      IDL> PRINT, 'excpt_cond = ' + excpt_cond
-   ;      excpt_cond = Error 1000 in set_date_range:
-   ;         Julian date 'jul_ini_date' = 2457187 must precede
-   ;         Julian date 'jul_fin_date' = 2451599.
+   ;      excpt_cond = Error 140 in SET_YEAR_RANGE:
+   ;         Julian date 'jul_ini_date' = 2457187.0 must precede
+   ;         Julian date 'jul_fin_date' = 2451599.0.
    ;
    ;  REFERENCES: None.
    ;
@@ -108,10 +116,13 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -119,16 +130,17 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -136,22 +148,28 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = [-99.9D, -99.9D]
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -166,26 +184,42 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the Julian dates
-   ;  provided are not double precision numbers:
-      IF ((is_double(jul_ini_date) NE 1) OR $
-         (is_double(jul_fin_date) NE 1)) THEN BEGIN
+   ;  Return to the calling routine with an error message if either of the
+   ;  input positional parameters jul_ini_date and jul_fin_date is not numeric:
+      IF ((is_numeric(jul_ini_date) NE 1) OR $
+         (is_numeric(jul_fin_date) NE 1)) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
-            ' and jul_fin_date = ' + strstr(jul_fin_date) + $
-            ' must both be of type DOUBLE.'
+            ': Input positional parameters jul_ini_date and jul_ini_date ' + $
+            'must both be of numeric type.'
          RETURN, return_code
       ENDIF
+
+   ;  Return to the calling routine with an error message if either of the
+   ;  input positional parameters jul_ini_date and jul_fin_date is not scalar:
+      IF ((is_scalar(jul_ini_date) NE 1) OR $
+         (is_scalar(jul_fin_date) NE 1)) THEN BEGIN
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameters jul_ini_date and jul_ini_date ' + $
+            'must both be of numeric type.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Convert the input positional parameters jul_ini_date and jul_fin_date
+   ;  to DOUBLE precision floating point values:
+      jul_ini_date = DOUBLE(jul_ini_date)
+      jul_fin_date = DOUBLE(jul_fin_date)
 
    ;  Return to the calling routine with an error message if the Julian dates
    ;  provided are anterior to 4 October 1582:
       start_date = JULDAY(10, 4, 1582)
       IF ((jul_ini_date LT start_date) OR $
          (jul_fin_date LT start_date)) THEN  BEGIN
-         error_code = 120
+         error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Arguments jul_ini_date = ' + strstr(jul_ini_date) + $
+            ': Input positional parameters jul_ini_date = ' + $
+            strstr(jul_ini_date) + $
             ' and jul_fin_date = ' + strstr(jul_fin_date) + $
             ' must both be posterior to ' + strstr(start_date) + '.'
          RETURN, return_code
@@ -194,7 +228,7 @@ FUNCTION set_year_range, jul_ini_date, jul_fin_date, $
    ;  Return to the calling routine with an error message if 'jul_ini_date'
    ;  follows 'jul_fin_date':
       IF (jul_ini_date GT jul_fin_date) THEN BEGIN
-         error_code = 300
+         error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Julian date jul_ini_date = ' + strstr(jul_ini_date) + $
             ' must precede Julian date jul_fin_date = ' + $

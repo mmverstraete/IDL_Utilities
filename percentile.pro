@@ -1,7 +1,17 @@
-FUNCTION percentile, per, array, amin, amax, thresh, $
-   AMISS = amiss, IGN_BEL_STR = ign_bel_str, IGN_ABO_STR = ign_abo_str, $
-   ASORT = asort, COUNT = count, DOUBLE = double, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION percentile, $
+   per, $
+   array, $
+   amin, $
+   amax, $
+   thresh, $
+   AMISS = amiss, $
+   IGN_BEL_STR = ign_bel_str, $
+   IGN_ABO_STR = ign_abo_str, $
+   ASORT = asort, $
+   COUNT = count, $
+   DOUBLE = double, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function estimates the sample value thresh of the
@@ -11,7 +21,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;  ALGORITHM: This function determines the sample value corresponding
    ;  to the desired percentile per by either selecting a particular item
-   ;  of array, if it corresponds exactly, or interpolates between two
+   ;  of array, if it corresponds exactly, or interpolating between two
    ;  array sample values otherwise. If missing values may be present in
    ;  array (i.e., input keyword parameter AMISS is set), the output
    ;  keyword parameters amin and amax report the minimum and maximum
@@ -35,15 +45,15 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;  *   amin {FLOAT} [O]: The minimum value of array, within the allowed
    ;      range
-   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these arguments are
-   ;      provided, or within the whole array otherwise. DOUBLE precision
-   ;      equivalents are used if required.
+   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these input
+   ;      positional parameters are provided, or within the whole array
+   ;      otherwise. DOUBLE precision equivalents are used if required.
    ;
    ;  *   amax {FLOAT} [O]: The maximum value of array, within the allowed
    ;      range
-   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these arguments are
-   ;      provided, or within the whole array otherwise. DOUBLE precision
-   ;      equivalents are used if required.
+   ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)], if these input
+   ;      positional parameters are provided, or within the whole array
+   ;      otherwise. DOUBLE precision equivalents are used if required.
    ;
    ;  *   thresh {FLOAT} [O]: The threshold value in the given array,
    ;      within the allowed range
@@ -52,7 +62,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   AMISS = amiss {INTEGER} [I]: Flag indicating whether the array
+   ;  *   AMISS = amiss {INT} [I]: Flag indicating whether the array
    ;      contains (1) or does not contain (0) missing values. If missing
    ;      values are present in array, they are assumed to be strictly
    ;      smaller than the numerical equivalent of ign_bel_str or strictly
@@ -74,7 +84,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      been set, this keyword is ignored. See the notes below for
    ;      additional information.
    ;
-   ;  *   ASORT = asort {INTEGER} [I]: Flag indicating whether array is
+   ;  *   ASORT = asort {INT} [I]: Flag indicating whether array is
    ;      already sorted in ascending order (1) or not (0).
    ;
    ;  *   COUNT = count {LONG} [O]: If the keyword parameter AMISS is not
@@ -85,8 +95,8 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      elements within the range
    ;      [FLOAT(ign_bel_str), FLOAT(ign_abo_str)].
    ;
-   ;  *   DOUBLE = double {INTEGER} [I]: Flag requesting explicitly (1)
-   ;      that computations be carried out in double precision or not (0).
+   ;  *   DOUBLE = double {INT} [I]: Flag requesting explicitly (1) that
+   ;      computations be carried out in double precision or not (0).
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
    ;      or skip (0) debugging tests.
@@ -95,7 +105,7 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -105,7 +115,8 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      set and if the optional output keyword parameter EXCPT_COND was
    ;      provided in the call. The output positional parameters amin,
    ;      amax and thresh provide the minimum and maximum values of the
-   ;      input argument array and the desired percentile, respectively.
+   ;      input positional parameter array and the desired percentile,
+   ;      respectively.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero value, and the output keyword parameter
@@ -129,9 +140,11 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;  *   Error 110: The requested percentile is not within [0.0, 1.0].
    ;
-   ;  *   Error 120: Input argument array is not an array or not numeric.
+   ;  *   Error 120: Input positional parameter array is not an array or
+   ;      not numeric.
    ;
-   ;  *   Error 130: Input argument array contains less than 4 elements.
+   ;  *   Error 130: Input positional parameter array contains less than 4
+   ;      elements.
    ;
    ;  *   Error 140: Keyword AMISS was set but keyword IGN_BEL_STR was
    ;      not.
@@ -139,7 +152,8 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  *   Error 150: Keyword AMISS was set but keyword IGN_ABO_STR was
    ;      not.
    ;
-   ;  *   Error 160: Input array contains less than 2 non-missing values.
+   ;  *   Error 160: Input positional parameter array contains less than 2
+   ;      non-missing values.
    ;
    ;  DEPENDENCIES:
    ;
@@ -149,8 +163,9 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: The argument array can be multi-dimensional, but the
-   ;      resulting thresh applies to all elements of array.
+   ;  *   NOTE 1: The input positional parameter array can be
+   ;      multi-dimensional, but the resulting thresh applies to all
+   ;      elements of array.
    ;
    ;  *   NOTE 2: The keyword parameters ign_bel_str and ign_abo_str must
    ;      be provided as strings because IDL interprets a null value as
@@ -215,10 +230,13 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -226,16 +244,17 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -243,22 +262,28 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    error_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    ;  Initialize the output positional parameters to invalid values:
    amin = -!VALUES.F_INFINITY
@@ -292,16 +317,16 @@ FUNCTION percentile, per, array, amin, amax, thresh, $
       IF ((is_array(array) NE 1) OR (is_numeric(array) NE 1)) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument array is not an array or not numeric.'
+            ': Input positional parameter array is not an array or not numeric.'
          RETURN, error_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the input argument
-   ;  'array' does not contain at least 3 elements:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'array' does not contain at least 3 elements:
       IF (N_ELEMENTS(array) LT 3) THEN BEGIN
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument array contains less than 3 elements.'
+            ': Input positional parameter array contains less than 3 elements.'
          RETURN, error_code
       ENDIF
    ENDIF

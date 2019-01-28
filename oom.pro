@@ -1,14 +1,18 @@
-FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION oom, $
+   arg, $
+   BASE = base, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This routine returns an integer value representing the
-   ;  order of magnitude of the argument arg in the optional logarithmic
-   ;  base base (10 by default).
+   ;  order of magnitude of the input positional parameter arg in the
+   ;  optional logarithmic base base (10 by default).
    ;
    ;  ALGORITHM: The input positional parameters arg and the input keyword
    ;  parameter base (if provided) must both be strictly positive numbers,
    ;  in which case this function returns FLOOR(alogb(arg, base)). If
-   ;  either is not strictly positive, the function returns NaN as well as
+   ;  either is not strictly positive, the function returns NaN and raises
    ;  an exception condition.
    ;
    ;  SYNTAX: res = oom(arg, BASE = base, $
@@ -30,15 +34,16 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns the order of magnitude of argument arg, and the output
-   ;      keyword parameter excpt_cond is set to a null string, if the
-   ;      optional input keyword parameter DEBUG is set and if the
-   ;      optional output keyword parameter EXCPT_COND is provided.
+   ;      returns the order of magnitude of input positional parameter
+   ;      arg, and the output keyword parameter excpt_cond is set to a
+   ;      null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns NaN, and the output keyword parameter excpt_cond
@@ -69,11 +74,11 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   NOTE 1: Positional parameter arg and keyword parameter base must
    ;      both be strictly positive numbers. If the order of magnitude of
    ;      a negative number is required, provide the absolute value of
-   ;      that number as the argument to oom.
+   ;      that number as the input positional parameter to oom.
    ;
-   ;  *   NOTE 2: Arguments arg and base can be of any numeric type,
-   ;      including COMPLEX or DOUBLE; the result will be of the same type
-   ;      as arg.
+   ;  *   NOTE 2: Input positional parameters arg and base can be of any
+   ;      numeric type, including COMPLEX or DOUBLE; the result will be of
+   ;      the same type as arg.
    ;
    ;  EXAMPLES:
    ;
@@ -89,7 +94,7 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      IDL> PRINT, oom(c, BASE = 5)
    ;                 2
    ;
-   ;      IDL> e = 123.45
+   ;      IDL> d = 123.45
    ;      IDL> PRINT, oom(e, BASE = 2.8)
    ;                 4
    ;
@@ -97,8 +102,8 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      IDL> PRINT, oom(f, /DEBUG, EXCPT_COND = excpt_cond)
    ;                NaN
    ;      IDL> PRINT, excpt_cond
-   ;      Error 110 in routine OOM: Argument arg is not
-   ;      strictly positive.
+   ;      Error 120 in routine OOM: Input positional parameter
+   ;         arg is not strictly positive.
    ;
    ;  REFERENCES: None.
    ;
@@ -114,10 +119,13 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -125,16 +133,17 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -142,25 +151,32 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    res = MACHAR()
    smallest = res.XMIN
+
    IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if one or more
@@ -174,19 +190,20 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
          RETURN, !VALUES.F_NAN
       ENDIF
 
-   ;  Return to the calling routine with an error message if the argument 'arg'
-   ;  is not of a numeric type:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'arg' is not of a numeric type:
       IF (is_numeric(arg) EQ 0) THEN BEGIN
-         excpt_cond = 'Error 110 in routine ' + rout_name + $
-            ': Argument arg is not numeric.'
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter arg is not numeric.'
          RETURN, !VALUES.F_NAN
       ENDIF
 
-   ;  Return to the calling routine with an error message if the argument 'arg'
-   ;  is not strictly positive:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'arg' is not strictly positive:
       IF (arg LT smallest) THEN BEGIN
          excpt_cond = 'Error 120 in routine ' + rout_name + $
-            ': Argument arg is not strictly positive.'
+            ': Input positional parameter arg is not strictly positive.'
          RETURN, !VALUES.F_NAN
       ENDIF
    ENDIF
@@ -199,7 +216,7 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  parameter 'base' is of a numeric type:
             IF (is_numeric(base) EQ 0) THEN BEGIN
                excpt_cond = 'Error 130 in routine ' + rout_name + $
-                  ': Argument base is not numeric.'
+                  ': Input positional parameter base is not numeric.'
                RETURN, !VALUES.F_NAN
             ENDIF
 
@@ -207,7 +224,7 @@ FUNCTION oom, arg, BASE = base, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  parameter 'base' is not strictly positive:
             IF (base LT smallest) THEN BEGIN
                excpt_cond = 'Error 140 in routine ' + rout_name + $
-                  ': Argument base is not strictly positive.'
+                  ': Input positional parameter base is not strictly positive.'
                RETURN, !VALUES.F_NAN
             ENDIF
          ENDIF

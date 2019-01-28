@@ -1,9 +1,10 @@
-FUNCTION today, FMT = fmt
+FUNCTION today, $
+   FMT = fmt
 
    ;Sec-Doc
    ;  PURPOSE: This function returns today’s date and time as a string in
    ;  one of the following formats: default (keyword FMT not set), iso,
-   ;  nice, usa or ymd.
+   ;  jul, julian, nice, usa or ymd.
    ;
    ;  ALGORITHM: This routine implements some of the recommendations by
    ;  World Wide Web Consortium (W3C) regarding simplified formats to
@@ -31,12 +32,22 @@ FUNCTION today, FMT = fmt
    ;  *   This function returns today’s date to the calling routine in one
    ;      of the following formats:
    ;
-   ;      -   If the keyword FMT is NOT set (default), or unrecognized,
+   ;      -   If the keyword FMT is NOT set (default), or is unrecognized,
    ;          the current date and time are provided as a string formatted
    ;          like YYYY-MM-DD_hh:mm:ss.
    ;
    ;      -   If the keyword FMT is set to iso, the current date and time
-   ;          are provided as a string formatted like YYYY-MM-DDThh:mm:ss.
+   ;          are provided as a string formatted like
+   ;          YYYY-MM-DDThh:mm:ssZ.
+   ;
+   ;      -   If the keyword FMT is set to jul, the current date is
+   ;          provided as the current Julian day number, i.e., a STRING
+   ;          representation of a LONG integer.
+   ;
+   ;      -   If the keyword FMT is set to julian, the current date and
+   ;          time are provided as the current Julian day number and time,
+   ;          i.e., a STRING representation of a DOUBLE floating point
+   ;          number.
    ;
    ;      -   If the keyword FMT is set to nice, the current date and time
    ;          are provided as a string formatted like
@@ -93,10 +104,16 @@ FUNCTION today, FMT = fmt
    ;  *   2017–11–20: Version 1.0 — Initial public release.
    ;
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
+   ;
+   ;  *   2019–01–04: Version 1.2 — Add the optional output formats jul
+   ;      and julday.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -104,16 +121,17 @@ FUNCTION today, FMT = fmt
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -121,11 +139,18 @@ FUNCTION today, FMT = fmt
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
+
    ;  Get the current system date and time:
    result = SYSTIME()
 
@@ -170,7 +195,10 @@ FUNCTION today, FMT = fmt
    IF (KEYWORD_SET(fmt)) THEN BEGIN
       fmt = STRLOWCASE(fmt)
       CASE fmt OF
-         'iso': ymdhms = yyyy + '-' + mm + '-' + dd + 'T' + sres[3]
+         'iso': ymdhms = yyyy + '-' + mm + '-' + dd + 'T' + sres[3] + 'Z'
+         'jul': ymdhms = STRING(JULDAY(mm, dd, yyyy))
+         'julian': ymdhms = STRING(JULDAY(mm, dd, yyyy, hor, min, sec), $
+            FORMAT='(D15.6)')
          'nice': ymdhms = yyyy + '-' + mm + '-' + dd + ' at ' + sres[3]
          'usa': ymdhms = sres[1] + ' ' + dd + ', ' + yyyy
          'ymd': ymdhms = yyyy + '-' + mm + '-' + dd

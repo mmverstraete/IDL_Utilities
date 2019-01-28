@@ -1,5 +1,10 @@
-FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION make_bytemap, $
+   byte_array, $
+   good_vals, $
+   good_vals_cols, $
+   save_spec, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function generates and saves, in the folder save_spec,
@@ -40,7 +45,7 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -49,7 +54,7 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;      a null string, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
    ;      provided in the call. The output graphic file is saved in the
-   ;      location specified by the input argument save_spec.
+   ;      location specified by the input positional parameter save_spec.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
@@ -107,7 +112,7 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;      assigned multiple colors in good_vals_cols, as long as these two
    ;      arrays have the same dimension to ensure the correspondence
    ;      between their matching elements. In that case, assignments
-   ;      associated with a higher index in those file supersede those
+   ;      associated with a higher index in those files supersede those
    ;      made previously.
    ;
    ;  *   NOTE 4: The input array good_vals may contain values that are
@@ -121,8 +126,11 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;      IDL> FOR i = 0, 146 DO byte_array[i, *] = BYTE(i)
    ;      IDL> good_vals = BINDGEN(147)
    ;      IDL> good_vals_cols = TAG_NAMES(!COLOR)
-   ;      IDL> rc = make_bytemap(byte_array, good_vals, good_vals_cols, '/Users/michel/Desktop/test.png', /DEBUG, EXCPT_COND = excpt_cond)
-   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ' and excpt_cond = >' + excpt_cond + '<'
+   ;      IDL> rc = make_bytemap(byte_array, good_vals, $
+   ;         good_vals_cols, '/Users/michel/Desktop/test.png', $
+   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ' and excpt_cond = >' + $
+   ;         excpt_cond + '<'
    ;      rc = 0 and excpt_cond = ><
    ;
    ;  REFERENCES:
@@ -137,10 +145,18 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;  *   2018–08–04: Version 0.9 — Initial release.
    ;
    ;  *   2018–08–10: Version 1.0 — Initial public release.
+   ;
+   ;  *   2018–09–25: Version 1.1 — Move the code line to document the
+   ;      nature and properties of the input positional parameter
+   ;      byte_array before the initial testing block to ensure the
+   ;      function works when the DEBUG option is not used.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -148,16 +164,17 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -165,22 +182,28 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    ;  Retrieve the list of 147 official color names, together with their
    ;  indices and RGB values (this standard information is used both for
@@ -194,6 +217,9 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
       list_col_rgb[1, i] = !COLOR.(i)[1]
       list_col_rgb[2, i] = !COLOR.(i)[2]
    ENDFOR
+
+   ;  Document the properties the input positional parameter 'byte_array':
+   size_ba = SIZE(byte_array)
 
    IF (debug) THEN BEGIN
 
@@ -211,7 +237,6 @@ FUNCTION make_bytemap, byte_array, good_vals, good_vals_cols, save_spec, $
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'byte_array' is not of type BYTE:
-      size_ba = SIZE(byte_array)
       type_ba = size_ba[N_ELEMENTS(size_ba) - 2]
       IF (type_ba NE 1) THEN BEGIN
          error_code = 110

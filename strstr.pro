@@ -1,4 +1,7 @@
-FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION strstr, $
+   arg, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function converts the value of the alphanumeric
@@ -12,7 +15,8 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   arg {alphanumeric} [I]: The alphanumeric input argument.
+   ;  *   arg {alphanumeric} [I]: The alphanumeric input variable to
+   ;      process.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -28,10 +32,11 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns the string representation of argument arg to the calling
-   ;      routine, and the keyword parameter excpt_cond is set to a null
-   ;      string, if the optional input keyword parameter DEBUG is set and
-   ;      if the optional output keyword parameter EXCPT_COND is provided.
+   ;      returns the string representation of the input positional
+   ;      parameter arg to the calling routine, and the keyword parameter
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a null string and the keyword parameter excpt_cond
@@ -45,8 +50,8 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  *   Error 110: Positional parameter arg is not of type alphanumeric.
    ;
-   ;  *   Error 1000: Unexpected condition, check the type of argument
-   ;      arg.
+   ;  *   Error 200: Unexpected condition, check the type of input
+   ;      positional parameter arg.
    ;
    ;  DEPENDENCIES:
    ;
@@ -60,9 +65,9 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: Argument arg can be an array, in which case each array
-   ;      element is converted into a string without any blank space in
-   ;      the front or at the back.
+   ;  *   NOTE 1: The input positional parameter arg can be an array, in
+   ;      which case each array element is converted into a string without
+   ;      any blank space in the front or at the back.
    ;
    ;  EXAMPLES:
    ;
@@ -74,19 +79,19 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      3.14159
    ;
    ;      IDL> a = '   Hello   '
-   ;      IDL> PRINT, a
-   ;         Hello
+   ;      IDL> PRINT, '>' + a + '<'
+   ;      >   Hello   <
    ;      IDL> res = strstr(a)
-   ;      IDL> PRINT, res
-   ;      Hello
+   ;      IDL> PRINT, '>' + res + '<'
+   ;      >Hello<
    ;
    ;      IDL> a = CREATE_STRUCT('A', 1, 'B', 'xxx')
    ;      IDL> res = strstr(a, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, '>' + res + '<'
    ;      ><
    ;      IDL> PRINT, excpt_cond
-   ;      Error 110 in routine STRSTR: Argument arg is not an alphanumeric
-   ;      expression.
+   ;      Error 110 in routine STRSTR: Input positional
+   ;         parameter arg is not an alphanumeric expression.
    ;
    ;      IDL> b = ['   Hello   ', '   World   ']
    ;      IDL> res = strstr(b)
@@ -104,10 +109,13 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -115,16 +123,17 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -132,22 +141,28 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = ''
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -155,17 +170,19 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  positional parameters are missing:
       n_reqs = 1
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         excpt_cond = 'Error 100 in routine ' + rout_name + $
-            ': Routine must be called with ' + $
-            STRTRIM(STRING(n_reqs), 2) + ' positional parameter(s): arg.'
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): arg.'
          RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if arg is not an
-   ;  alphanumeric expression:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'arg' is not an alphanumeric expression:
       IF (is_alphanum(arg) NE 1) THEN BEGIN
-         excpt_cond = 'Error 110 in routine ' + rout_name + $
-            ': Argument arg is not an alphanumeric expression.'
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter arg is not an alphanumeric expression.'
          RETURN, return_code
       ENDIF
    ENDIF
@@ -177,9 +194,10 @@ FUNCTION strstr, arg, DEBUG = debug, EXCPT_COND = excpt_cond
    IF (is_numeric(arg) EQ 1) THEN RETURN, STRTRIM(STRING(arg), 2)
 
    ;  Otherwise return to the calling routine with an error message:
-   excpt_cond = 'Error 1000 in ' + rout_name + $
-      ': Unexpected condition, check the type of argument arg ' + $
-      'as function strstr only accepts alphanumeric arguments.'
+   error_code = 200
+   excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+      ': Unexpected condition, check the type of input positional ' + $
+      'parameter arg, which must be alphanumeric.'
    RETURN, return_code
 
 END

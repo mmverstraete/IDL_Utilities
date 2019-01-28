@@ -1,28 +1,29 @@
-FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION strcat, $
+   str_array, $
+   separator, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function takes the STRING array argument str_array as
-   ;  input and returns the STRING scalar obtained by concatenating all
-   ;  array elements in their original order, using the optional sep_char
-   ;  character as separator between successive elements.
+   ;  PURPOSE: This function returns a scalar STRING variable that
+   ;  combines all elements of the input positional parameter str_array.
    ;
-   ;  ALGORITHM: This function concatenates all elements of str_array,
-   ;  separated by the optional character sep_char or a single blank
-   ;  space, into a single STRING which is returned to the calling
-   ;  routine.
+   ;  ALGORITHM: This function concatenates the elements of the input
+   ;  positional parameter str_array, in their original order, into a
+   ;  single scalar STRING variable, using the input positional parameter
+   ;  sep_char character as separator between successive elements.
    ;
-   ;  SYNTAX: res = strcat(str_array, SEP_CHAR = sep_char, $
+   ;  SYNTAX: res = strcat(str_array, separator, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   str_array {STRING} [I]: A string array.
+   ;  *   str_array {STRING} [I]: An arbitrary string array.
+   ;
+   ;  *   separator {STRING} [I] (Default value: None): Character string
+   ;      used to separate the array elements in the output string.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
-   ;
-   ;  *   SEP_CHAR = sep_char {STRING} [I] (Default value: ’ ’): Character
-   ;      string used to separate the array elements in the output string.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
    ;      or skip (0) debugging tests.
@@ -52,13 +53,15 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: Positional parameter str_array is not of type STRING.
+   ;  *   Error 110: Input positional parameter str_array is not of type
+   ;      STRING.
    ;
-   ;  *   Error 120: Positional parameter str_array is not an array.
+   ;  *   Error 120: Input positional parameter str_array is not an array.
    ;
-   ;  *   Error 130: Keyword parameter sep_char is not of type STRING.
+   ;  *   Error 130: Input positional parameter sep_char is not of type
+   ;      STRING.
    ;
-   ;  *   Error 140: Keyword parameter sep_char is not a scalar.
+   ;  *   Error 140: Input positional parameter sep_char is not a scalar.
    ;
    ;  DEPENDENCIES:
    ;
@@ -72,25 +75,28 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: The input argument str_array can be multi-dimensional.
-   ;      In the case of a 2D array, the elements are concatenated line by
-   ;      line.
+   ;  *   NOTE 1: The input positional parameter str_array can be
+   ;      multi-dimensional. In the case of a 2D array, the elements are
+   ;      concatenated line by line.
+   ;
+   ;  *   NOTE 1: The input positional parameter sep_char can be a null
+   ;      string or contain multiple characters.
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> a = ['Hello', 'World']
-   ;      IDL> res = strcat(a)
+   ;      IDL> a = ['multi', 'spectral']
+   ;      IDL> res = strcat(a, '')
    ;      IDL> PRINT, '>' + res + '<'
-   ;      >Hello World<
+   ;      >multispectral<
    ;
    ;      IDL> str_array = [['This', 'is', 'a'], ['2D', 'string', 'array']]
-   ;      IDL> res = strcat(str_array, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> res = strcat(str_array, ' ', /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, res
    ;      This is a 2D string array
    ;
    ;      IDL> str_array = ['P168', 'O068050', 'B110']
-   ;      IDL> sep_char = '_'
-   ;      IDL> res = strcat(str_array, SEP_CHAR = sep_char, $
+   ;      IDL> separator = '_'
+   ;      IDL> res = strcat(str_array, separator, $
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'res = >' + res + '<'
    ;      res = >P168_O068050_B110<
@@ -106,10 +112,17 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2018–12–04: Version 1.6 — Convert the input keyword parameter
+   ;      sep_char into the input positional parameter separator to allow
+   ;      concatenation with empty separators.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -117,16 +130,17 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -134,82 +148,78 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_string = ''
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if one or more
    ;  positional parameters are missing:
-      n_reqs = 1
+      n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
-            ' positional parameter(s): str_array.'
+            ' positional parameter(s): str_array, separator.'
          RETURN, return_string
       ENDIF
 
-   ;  Return to the calling routine with an error message if argument
-   ;  'str_array' is not of type STRING:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'str_array' is not of type STRING:
       IF (is_string(str_array) NE 1) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument str_array is not of type STRING.'
+            ': Input positional parameter str_array is not of type STRING.'
          RETURN, return_string
       ENDIF
 
-   ;  Return to the calling routine with an error message if argument
-   ;  'str_array' is not an array:
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'str_array' is not an array:
       IF (is_array(str_array) NE 1) THEN BEGIN
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Argument str_array is not an array.'
+            ': Input positional parameter str_array is not an array.'
+         RETURN, return_string
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'separator' is not of type STRING:
+      IF (is_string(separator) NE 1) THEN BEGIN
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter separator is not of type STRING.'
+         RETURN, return_string
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'separator' is not a scalar:
+      IF (is_scalar(separator) NE 1) THEN BEGIN
+         error_code = 140
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter separator is not a scalar.'
          RETURN, return_string
       ENDIF
    ENDIF
-
-   IF KEYWORD_SET(sep_char) THEN BEGIN
-
-      IF (debug) THEN BEGIN
-
-   ;  Return to the calling routine with an error message if the optional
-   ;  keyword argument 'sep_char' is not of type STRING:
-         IF (is_string(sep_char) NE 1) THEN BEGIN
-            error_code = 130
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Keyword parameter sep_char is not of type STRING.'
-            RETURN, return_string
-         ENDIF
-
-   ;  Return to the calling routine with an error message if the optional
-   ;  keyword argument 'sep_char' is not a scalar:
-         IF (is_scalar(sep_char) NE 1) THEN BEGIN
-            error_code = 140
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Keyword parameter sep_char is not a scalar.'
-            RETURN, return_string
-         ENDIF
-      ENDIF
-   ENDIF ELSE BEGIN
-
-   ;  Set the default value of sep_char:
-      sep_char = ' '
-   ENDELSE
 
    ;  Compute the number of elements in 'str_array':
    n_str = N_ELEMENTS(str_array)
@@ -220,10 +230,10 @@ FUNCTION strcat, str_array, SEP_CHAR = sep_char, $
    ENDIF ELSE BEGIN
 
    ;  Otherwise, assemble the result by concatenating all elements of
-   ;  'str_array', separated by the specified or default separation character:
+   ;  'str_array', separated by the specified separator string:
       return_string = ''
       FOR i = 0, n_str - 2 DO BEGIN
-         return_string = return_string + str_array[i] + sep_char
+         return_string = return_string + str_array[i] + separator
       ENDFOR
       return_string = return_string + str_array[n_str - 1]
    ENDELSE

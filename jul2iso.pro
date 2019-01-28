@@ -1,21 +1,27 @@
-FUNCTION last_char, $
-   arg, $
+FUNCTION jul2iso, $
+   juldate, $
+   isodate, $
    DEBUG = debug, $
    EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function returns the last character of the input
-   ;  positional parameter arg.
+   ;  PURPOSE: This function converts a Julian date provided as a DOUBLE
+   ;  floating point number into an ISO 8601/W3C date, specified as a
+   ;  STRING.
    ;
-   ;  ALGORITHM: This function relies on IDL built-in string functions to
-   ;  extract the desired character.
+   ;  ALGORITHM: This function relies on the IDL program CALDAT to extract
+   ;  the date elements from the input Julian date, and reformats those
+   ;  into the ISO 8601/W3C date specification (yyyy-mm-ddThh:mm:ssZ).
    ;
-   ;  SYNTAX: res = last_char(arg, $
+   ;  SYNTAX: rc = jul2iso(juldate, isodate, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   arg {STRING} [I]: An arbitrary string expression.
+   ;  *   juldate {DOUBLE} [I]: The input Julian day number.
+   ;
+   ;  *   isodate {STRING} [O]: The output date formatted according to the
+   ;      ISO 8601/W3C specifications.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -26,70 +32,67 @@ FUNCTION last_char, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: STRING.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns the last character of the input positional parameter,
-   ;      and the output keyword parameter excpt_cond is set to a null
-   ;      string, if the optional input keyword parameter DEBUG is set and
-   ;      if the optional output keyword parameter EXCPT_COND is provided.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided in the call. The output positional parameter isodate
+   ;      contains the date corresponding to the input Julian day number.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a null string, and the output keyword parameter
+   ;      returns a non-zero error code, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
    ;      encountered, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      provided. The output positional parameter isodate may be
+   ;      undefined, inexistent, incomplete or useless.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: Positional parameter arg is not of type STRING.
-   ;
-   ;  *   Error 120: Positional parameter arg does not contain at least
-   ;      one character.
+   ;  *   Error 110: Input positional parameter juldate is not of type
+   ;      DOUBLE.
    ;
    ;  DEPENDENCIES:
    ;
-   ;  *   is_string.pro
+   ;  *   is_double.pro
    ;
    ;  *   strstr.pro
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: This may be useful, for instance, to check whether a
-   ;      directory name is terminated by the proper path segment
-   ;      separator character for the current operating system.
+   ;  *   NOTE 1: Julian days start at noon local time, so the first 12
+   ;      hours of a particular civilian day belong to the second half of
+   ;      one Julian day, and the last 12 hours belong to the first half
+   ;      of the next Julian day. See the examples below.
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> path = '/Volumes/MISR_Data'
-   ;      IDL> PRINT, last_char(path)
-   ;      a
+   ;      IDL> juldate = 2458444.0D
+   ;      IDL> rc = jul2iso(juldate, isodate, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'isodate = ' + isodate
+   ;      isodate = 2018-11-21T12:00:00Z
    ;
-   ;      IDL> pi = 3.14
-   ;      IDL> res = last_char(pi, /DEBUG, EXCPT_COND = excpt_cond)
-   ;      IDL> PRINT, 'res = >' + res + '< and excpt_cond = ' + excpt_cond
-   ;      res = >< and excpt_cond = Error 110 in LAST_CHAR:
-   ;         Input positional parameter must be of type STRING.
+   ;      IDL> juldate = 2458443.9D
+   ;      IDL> rc = jul2iso(juldate, isodate, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'isodate = ' + isodate
+   ;      isodate = 2018-11-21T09:36:00Z
    ;
-   ;      IDL> PRINT, last_char(xyz)
-   ;      % STRLEN: Variable is undefined: ARG.
-   ;      % Execution halted at: LAST_CHAR...
-   ;      %                      $MAIN$
+   ;  REFERENCES:
    ;
-   ;  REFERENCES: None.
+   ;  *   https://www.w3.org/TR/NOTE-datetime, accessed on 21
+   ;      November 2018.
    ;
    ;  VERSIONING:
    ;
-   ;  *   2017–11–20: Version 1.0 — Initial public release.
+   ;  *   2018–11–20: Version 0.9 — Initial release.
    ;
-   ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
-   ;
-   ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;  *   2018–11–30: Version 1.0 — Initial public release.
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
@@ -139,47 +142,52 @@ FUNCTION last_char, $
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
    ;  Initialize the default return code:
-   return_code = ''
+   return_code = 0
 
    ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
+   ;  Initialize the output positional parameter(s):
+   isodate = ''
+
    IF (debug) THEN BEGIN
 
    ;  Return to the calling routine with an error message if one or more
    ;  positional parameters are missing:
-      n_reqs = 1
+      n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
-            ' positional parameter(s): arg.'
-         RETURN, return_code
+            ' positional parameter(s): juldate, isodate.'
+         RETURN, error_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
-   ;  positional parameter 'arg' is not of type STRING:
-      IF (is_string(arg) NE 1) THEN BEGIN
+   ;  positional parameter 'juldate' is not a DOUBLE floating point number:
+      rc = is_double(juldate)
+      IF (rc EQ 0) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input positional parameter must be of type STRING.'
-         RETURN, return_code
-      ENDIF
-
-   ;  Return to the calling routine with an error message if the input
-   ;  positional parameter 'arg' does not contain at least 1 character:
-      IF (STRLEN(arg) EQ 0) THEN BEGIN
-         error_code = 120
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input positional parameter must contain at least 1 character.'
-         RETURN, return_code
+            ': Input positional parameter juldate is not a DOUBLE ' + $
+            'floating point number.'
+         RETURN, error_code
       ENDIF
    ENDIF
 
-   ;  Extract the last character of arg:
-   lc = STRMID(arg, STRLEN(arg) - 1, 1)
+   ;  Get the date information from the input Julian day:
+   CALDAT, juldate, month, day, year, hour, minute, second
 
-   RETURN, lc
+   ;  Reformat this date according to the ISO 8601/W3C specification
+   ;  (yyyy-mm-ddThh:mm:ssZ):
+   isodate = strstr(year) + '-' + $
+      STRING(month, FORMAT = '(I02)') + '-' + $
+      STRING(day, FORMAT = '(I02)')  + 'T' + $
+      STRING(hour, FORMAT = '(I02)') + ':' + $
+      STRING(minute, FORMAT = '(I02)') + ':' + $
+      STRING(second, FORMAT = '(I02)') + 'Z'
+
+   RETURN, return_code
 
 END

@@ -1,5 +1,10 @@
-FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION uniq2, $
+   in_array_1, $
+   in_array_2, $
+   out_array_1, $
+   out_array_2, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function sorts and sifts two one-dimensional arrays of
@@ -7,11 +12,10 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;  values while maintaining the correspondance between elements of the
    ;  same rank in each input array.
    ;
-   ;  ALGORITHM: This function combines the two input positional array
-   ;  arguments into a single STRING array, sorts and sifts it to
-   ;  eliminate duplicates, and then splits it back into arrays of the
-   ;  original type but containing only unique pairs of corresponding
-   ;  values.
+   ;  ALGORITHM: This function combines the two input positional parameter
+   ;  arrays into a single STRING array, sorts and sifts it to eliminate
+   ;  duplicates, and then splits it back into arrays of the original type
+   ;  but containing only unique pairs of corresponding values.
    ;
    ;  SYNTAX:
    ;  rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $
@@ -41,7 +45,7 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
@@ -51,7 +55,8 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;      input keyword parameter DEBUG was set and if the optional output
    ;      keyword parameter EXCPT_COND was provided in the call. The
    ;      output positional parameters out_array_1 and out_array_2 contain
-   ;      the unique combinations of values of the input arguments.
+   ;      the unique combinations of values of the input positional
+   ;      parameters.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
@@ -89,11 +94,14 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> in_array_1 = [1.1, 1.1, 2.2, 2.2, 3.3, 3.3, 4.4, 4.4, 4.4, 2.2, 5.5]
-   ;      IDL> in_array_2 = [0.0, 0.0, 1.1, 2.2, 3.3, 3.3, 3.3, 4.4, 3.3, 2.2, 6.1]
+   ;      IDL> in_array_1 = [1.1, 1.1, 2.2, 2.2, 3.3, 3.3, $
+   ;         4.4, 4.4, 4.4, 2.2, 5.5]
+   ;      IDL> in_array_2 = [0.0, 0.0, 1.1, 2.2, 3.3, 3.3, $
+   ;         3.3, 4.4, 3.3, 2.2, 6.1]
    ;      IDL> rc = uniq2(in_array_1, in_array_2, out_array_1, out_array_2, $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
-   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + excpt_cond + '<'
+   ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + $
+   ;         excpt_cond + '<'
    ;      rc = 0, excpt_cond = ><
    ;      IDL> PRINT, out_array_1
    ;      1.10000  2.20000  2.20000  3.30000  4.40000  4.40000  5.50000
@@ -109,10 +117,13 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;  *   2018–05–14: Version 1.0 — Initial public release.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -120,16 +131,17 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -137,22 +149,28 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -169,7 +187,7 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
       ENDIF
 
    ;  Return to the calling routine with an error message if either (or both)
-   ;  input argument(s) are not arrays:
+   ;  input positional parameter(s) are not arrays:
       res_1 = is_array(in_array_1)
       res_2 = is_array(in_array_2)
       IF ((res_1 NE 1) OR (res_2 NE 1)) THEN BEGIN
@@ -181,7 +199,7 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
       ENDIF
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with input array arguments of different sizes:
+   ;  called with input positional parameter arrays of different sizes:
       nel_1 = N_ELEMENTS(in_array_1)
       nel_2 = N_ELEMENTS(in_array_2)
       IF (nel_1 NE nel_2) THEN BEGIN
@@ -193,14 +211,14 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
       ENDIF
 
    ;  Return to the calling routine with an error message if this function is
-   ;  called with input array arguments of different types:
+   ;  called with input positional parameter arrays of different types:
       rc = type_of(in_array_1, type_code_1, type_name_1)
       rc = type_of(in_array_2, type_code_2, type_name_2)
       IF (type_code_1 NE type_code_2) THEN BEGIN
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameters in_array_1 and in_array_2 ' + $
-            'must be arrays of the same sizes.'
+            'must be arrays of the same types.'
          RETURN, error_code
       ENDIF
    ENDIF
@@ -209,7 +227,7 @@ FUNCTION uniq2, in_array_1, in_array_2, out_array_1, out_array_2, $
    sep = '\~*~\'
 
    ;  Assemble a 1-d string array containing the elements of the two inputs
-   ;  arguments, separated by this separator:
+   ;  input positional parameters, separated by this separator:
    temp_str = strstr(in_array_1[*]) + sep + strstr(in_array_2[*])
 
    ;  Create a new array containing unique elements:
