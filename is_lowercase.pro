@@ -1,12 +1,14 @@
-FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION is_lowercase, $
+   char, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function determines whether the input positional
-   ;  parameter char is a lower case letter (returns 1) or not (returns
-   ;  (0).
+   ;  parameter char is set in lower case letter or not.
    ;
-   ;  ALGORITHM: This function returns 1 if the input argument char is
-   ;  lower case or 0 otherwise.
+   ;  ALGORITHM: This function checks whether the BYTE value of the
+   ;  character char lies in the range [97, 122].
    ;
    ;  SYNTAX:
    ;  rc = is_lowercase(char, DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -24,23 +26,23 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: INTEGER.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns 1 if the input argument is set in lower case, 0
-   ;      otherwise, and the output keyword parameter excpt_cond is set to
-   ;      a null string, if the optional input keyword parameter DEBUG is
-   ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      returns 1 if the input positional parameter is set in lower
+   ;      case, 0 otherwise, and the output keyword parameter excpt_cond
+   ;      is set to a null string, if the optional input keyword parameter
+   ;      DEBUG is set and if the optional output keyword parameter
+   ;      EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a non-zero error code larger than 1 and the output
-   ;      keyword parameter excpt_cond contains a message about the
-   ;      exception condition encountered, if the optional input keyword
-   ;      parameter DEBUG is set and if the optional output keyword
-   ;      parameter EXCPT_COND is provided.
+   ;      returns an error code larger than 1 and the output keyword
+   ;      parameter excpt_cond contains a message about the exception
+   ;      condition encountered, if the optional input keyword parameter
+   ;      DEBUG is set and if the optional output keyword parameter
+   ;      EXCPT_COND is provided.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -61,8 +63,14 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  EXAMPLES:
    ;
    ;      IDL> res = is_lowercase('b', /DEBUG, EXCPT_COND = excpt_cond)
-   ;      IDL> PRINT, 'res = ', res, ' and excpt_cond = >' + excpt_cond + '<'
-   ;      res =        1 and excpt_cond = ><
+   ;      IDL> PRINT, 'res = ', res, ' excpt_cond = >' + excpt_cond + '<'
+   ;      res =        1 excpt_cond = ><
+   ;
+   ;      IDL> res = is_lowercase('ab', /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> PRINT, 'res = ', res, ' excpt_cond = >' + excpt_cond + '<'
+   ;      res =      120 excpt_cond = >Error 120 in IS_LOWERCASE:
+   ;         Input positional parameter cannot be the null string or
+   ;         contain more than 1 character.<
    ;
    ;  REFERENCES: None.
    ;
@@ -73,10 +81,13 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ;  *   2018–01–15: Version 1.1 — Implement optional debugging.
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -84,16 +95,17 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -101,22 +113,28 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
-   excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
+   ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
+   excpt_cond = ''
 
    IF (debug) THEN BEGIN
 
@@ -153,9 +171,7 @@ FUNCTION is_lowercase, char, DEBUG = debug, EXCPT_COND = excpt_cond
    ENDIF
 
    ;  Determine whether this letter is lower case:
-   lowercases = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', $
-      'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-   idx = WHERE(char EQ lowercases, count)
-   IF (count EQ 1) THEN RETURN, 1 ELSE RETURN, 0
+   IF ((BYTE(char) GE 97) AND (BYTE(char) LE 122)) $
+      THEN RETURN, 1 ELSE RETURN, 0
 
 END

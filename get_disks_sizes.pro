@@ -1,5 +1,9 @@
-FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
-   DEBUG = debug, EXCPT_COND = excpt_cond
+FUNCTION get_disks_sizes, $
+   disks_sizes, $
+   DIR = dir, $
+   PRINTIT = printit, $
+   DEBUG = debug, $
+   EXCPT_COND = excpt_cond
 
    ;Sec-Doc
    ;  PURPOSE: This function retrieves the name, total capacity, used
@@ -37,13 +41,18 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: STRING array.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
-   ;  *   If no exception condition has been detected, this function sets
-   ;      the 2-dimensional STRING array disks_sizes[n_disks, n_items] as
-   ;      follows:
+   ;  *   If no exception condition has been detected, this function
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided in the call. The output positional parameter
+   ;      disks_sizes is set as a 2-dimensional STRING array
+   ;      disks_sizes[n_disks, n_items] whose elements have the following
+   ;      meanings:
    ;
    ;      -   N_ELEMENTS(disks_sizes[*, 0]) is the number of currently
    ;          mounted disks meeting the optional selection criterion dir,
@@ -59,17 +68,14 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      -   disks_sizes[i, 3] contains the space remaining available on
    ;          disk i.
    ;
-   ;      The output keyword parameter excpt_cond is set to a null string,
-   ;      if the optional input keyword parameter DEBUG was set and if the
-   ;      optional output keyword parameter EXCPT_COND was provided in the
-   ;      call.
-   ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a null STRING array, and the output keyword parameter
-   ;      excpt_cond contains a message about the exception condition
-   ;      encountered, if the optional input keyword parameter DEBUG is
-   ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      returns [a non-zero error code, or some non-sandard returned
+   ;      value], and the output keyword parameter excpt_cond contains a
+   ;      message about the exception condition encountered, if the
+   ;      optional input keyword parameter DEBUG is set and if the
+   ;      optional output keyword parameter EXCPT_COND is provided. The
+   ;      output positional parameter disks_sizes may be inexistent,
+   ;      incomplete or incorrect.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -94,6 +100,10 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;  *   NOTE 1: This function relies on Linux’s df command, so it will
    ;      only work within the macOS or Linux environments.
    ;
+   ;  *   NOTE 2: The 3 numbers reported for each disk found represent the
+   ;      total space, the used space and the remaining available space,
+   ;      respectively.
+   ;
    ;  EXAMPLES:
    ;
    ;      IDL> dir = 'MISR*'
@@ -116,10 +126,13 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      rather than the return value (now used for error reporting).
    ;
    ;  *   2018–06–01: Version 1.5 — Implement new coding standards.
+   ;
+   ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
+   ;      implement stricter coding standards and improve documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2018 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -127,16 +140,17 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;      restriction, including without limitation the rights to use,
    ;      copy, modify, merge, publish, distribute, sublicense, and/or
    ;      sell copies of the Software, and to permit persons to whom the
-   ;      Software is furnished to do so, subject to the following
+   ;      Software is furnished to do so, subject to the following three
    ;      conditions:
    ;
-   ;      The above copyright notice and this permission notice shall be
-   ;      included in all copies or substantial portions of the Software.
+   ;      1. The above copyright notice and this permission notice shall
+   ;      be included in its entirety in all copies or substantial
+   ;      portions of the Software.
    ;
-   ;      THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-   ;      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-   ;      OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   ;      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+   ;      KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   ;      WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+   ;      AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
    ;      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
    ;      WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    ;      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -144,25 +158,31 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
    ;
    ;      See: https://opensource.org/licenses/MIT.
    ;
+   ;      3. The current version of this Software is freely available from
+   ;
+   ;      https://github.com/mmverstraete.
+   ;
    ;  *   Feedback
    ;
    ;      Please send comments and suggestions to the author at
-   ;      MMVerstraete@gmail.com.
+   ;      MMVerstraete@gmail.com
    ;Sec-Cod
+
+   COMPILE_OPT idl2, HIDDEN
 
    ;  Get the name of this routine:
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code and the exception condition message:
+   ;  Initialize the default return code:
    return_code = 0
+
+   ;  Set the default values of flags and essential output keyword parameters:
+   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
-   ;  Set the default values of essential input keyword parameters:
-   IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
-
-   ;  Initialize the output positional parameters to invalid values:
-   par_1 = 0
+   ;  Initialize the output positional parameter(s)):
+   disks_sizes = ['']
 
    IF (debug) THEN BEGIN
 
@@ -182,7 +202,7 @@ FUNCTION get_disks_sizes, disks_sizes, DIR = dir, PRINTIT = printit, $
       IF (KEYWORD_SET(dir) AND (is_string(dir) NE 1)) THEN BEGIN
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Optional keyword parameter dir must be of type STRING.'
+            ': Optional input keyword parameter dir must be of type STRING.'
          RETURN, error_code
       ENDIF
    ENDIF
