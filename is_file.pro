@@ -154,8 +154,8 @@ FUNCTION is_file, $
       ENDIF
    ENDIF
 
-   ;  Assess whether the input positional parameter 'dir_spec' is a directory
-   ;  or not:
+   ;  Assess whether the input positional parameter 'file_spec' is a regular
+   ;  file or not:
    res = FILE_INFO(file_spec)
    IF (res.REGULAR EQ 1) THEN RETURN, 1 ELSE RETURN, 0
 
