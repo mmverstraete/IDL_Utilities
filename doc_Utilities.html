@@ -22,7 +22,7 @@ where both <code>arg</code> and <code>base</code>.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>DOUBLE = double {INT} [I] (Default value: 0):</code> Flag to request computations in <code>DOUBLE</code> (<code>1</code>) or single (<code>0</code>) precision.</p></li>
+<li><p><code>DOUBLE = double {INT} [I] (Default value: 0):</code> Flag to request computation in <code>DOUBLE</code> (<code>1</code>) or single (<code>0</code>) precision.</p></li>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
@@ -101,6 +101,7 @@ res =       1.00000      2.00000      3.00000</code></pre></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;02&#8211;24: Version 2.01 &#8212; Documentation update.</p></li>
 </ul></li>
 </ul>
 <p>Input positional parameter</p>
@@ -1493,14 +1494,14 @@ juldate = 2434542.0417</code></pre></li>
 </ul>
 <h2>jul2iso</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function converts a Julian date provided as a <code>DOUBLE</code> floating point number into an ISO 8601/W3C date, specified as a <code>STRING</code>.</p></li>
+<li><p><strong>Purpose:</strong> This function converts a Julian date, specified as a floating point number in <code>DOUBLE</code> precision, into an ISO 8601/W3C date, specified as a <code>STRING</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> program <code>CALDAT</code> to extract the date elements from the input Julian date, and reformats those into the ISO 8601/W3C date specification (<code>yyyy-mm-ddThh:mm:ssZ</code>).</p></li>
 <li><p><strong>Syntax:</strong> <code>rc = jul2iso(juldate, isodate, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>juldate {DOUBLE} [I]:</code> The input Julian day number.</p></li>
-<li><p><code>isodate {STRING} [O]:</code> The output date formatted according to the ISO 8601/W3C specifications.</p></li>
+<li><p><code>isodate {STRING} [O]:</code> The output date, formatted as per the ISO 8601/W3C specifications.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
@@ -1546,6 +1547,7 @@ isodate = 2018-11-21T09:36:00Z</code></pre></li>
 <li><p>2018&#8211;11&#8211;20: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2018&#8211;11&#8211;30: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;02&#8211;24: Version 2.01 &#8212; Documentation update.</p></li>
 </ul></li>
 </ul>
 <h2>last_char</h2>

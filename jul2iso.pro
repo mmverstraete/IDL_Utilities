@@ -5,9 +5,9 @@ FUNCTION jul2iso, $
    EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function converts a Julian date provided as a DOUBLE
-   ;  floating point number into an ISO 8601/W3C date, specified as a
-   ;  STRING.
+   ;  PURPOSE: This function converts a Julian date, specified as a
+   ;  floating point number in DOUBLE precision, into an ISO 8601/W3C
+   ;  date, specified as a STRING.
    ;
    ;  ALGORITHM: This function relies on the IDL program CALDAT to extract
    ;  the date elements from the input Julian date, and reformats those
@@ -20,8 +20,8 @@ FUNCTION jul2iso, $
    ;
    ;  *   juldate {DOUBLE} [I]: The input Julian day number.
    ;
-   ;  *   isodate {STRING} [O]: The output date formatted according to the
-   ;      ISO 8601/W3C specifications.
+   ;  *   isodate {STRING} [O]: The output date, formatted as per the ISO
+   ;      8601/W3C specifications.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -96,6 +96,8 @@ FUNCTION jul2iso, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–02–24: Version 2.01 — Documentation update.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;

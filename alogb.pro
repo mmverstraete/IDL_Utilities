@@ -30,7 +30,7 @@ FUNCTION alogb, $
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   DOUBLE = double {INT} [I] (Default value: 0): Flag to request
-   ;      computations in DOUBLE (1) or single (0) precision.
+   ;      computation in DOUBLE (1) or single (0) precision.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
    ;      or skip (0) debugging tests.
@@ -161,6 +161,8 @@ FUNCTION alogb, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–02–24: Version 2.01 — Documentation update.
    ;
    ;Input positional parameter
    ;Sec-Lic
