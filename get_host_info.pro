@@ -95,6 +95,9 @@ FUNCTION get_host_info, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–02–26: Version 2.01 — Minor coding update: Add requirement
+   ;      to call this function with 2 output positional parameters.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -146,6 +149,20 @@ FUNCTION get_host_info, $
    ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
+
+   IF (debug) THEN BEGIN
+
+   ;  Return to the calling routine with an error message if one or more
+   ;  positional parameters are missing:
+      n_reqs = 2
+      IF (N_PARAMS() NE n_reqs) THEN BEGIN
+         error_code = 100
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Routine must be called with ' + strstr(n_reqs) + $
+            ' positional parameter(s): os_name, comp_name.'
+         RETURN, error_code
+      ENDIF
+   ENDIF
 
    ;  Initialize the output positional parameter(s):
    os_name = 'Unknown_OS'
