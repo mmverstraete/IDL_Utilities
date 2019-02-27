@@ -931,7 +931,7 @@ IDL&gt; PRINT, dirs_sizes
 <li><p><code>disks_sizes[i, 2]</code> contains the space already used on disk <code>i</code>, and</p></li>
 <li><p><code>disks_sizes[i, 3]</code> contains the space remaining available on disk <code>i</code>.</p></li>
 </ul></li>
-<li><p>If an exception condition has been detected, this function returns [a non-zero error code, or some non-sandard returned value], and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameter <code>disks_sizes</code> may be inexistent, incomplete or incorrect.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameter <code>disks_sizes</code> may be inexistent, incomplete or incorrect.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
@@ -965,6 +965,7 @@ There are 2 disks mounted on MicMac2:
 <li><p>2017&#8211;04&#8211;04: Version 1.1 &#8212; Update the code and documentation to provide the desired information through a positional parameter rather than the return value (now used for error reporting).</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;02&#8211;28: Version 2.01 &#8212; Documentation update.</p></li>
 </ul></li>
 </ul>
 <h2>get_host_info</h2>
@@ -1012,6 +1013,7 @@ comp_name = MicMac2</code></pre></li>
 <li><p>2018&#8211;07&#8211;05: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;07&#8211;10: Version 1.1 &#8212; Documentation update.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;02&#8211;26: Version 2.01 &#8212; Minor coding update: Add requirement to call this function with 2 output positional parameters.</p></li>
 </ul></li>
 </ul>
 <h2>is_dir</h2>
@@ -2476,7 +2478,7 @@ IDL&gt; PRINT, res
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns [<code>0</code>, or default returned value], and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>out_array_1</code> and <code>out_array_2</code> contain the unique combinations of values of the input positional parameters.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>out_array_1</code> and <code>out_array_2</code> contain the unique combinations of values of the input positional parameters.</p></li>
 <li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters may be undefined, inexistent, incomplete or useless.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -2517,6 +2519,7 @@ IDL&gt; PRINT, out_array_2
 <li><p>2018&#8211;05&#8211;14: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;02&#8211;28: Version 2.01 &#8212; Documentation update.</p></li>
 </ul></li>
 </ul>
 </body>

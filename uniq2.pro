@@ -50,13 +50,12 @@ FUNCTION uniq2, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns [0, or default returned value], and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG was set and if the optional output
-   ;      keyword parameter EXCPT_COND was provided in the call. The
-   ;      output positional parameters out_array_1 and out_array_2 contain
-   ;      the unique combinations of values of the input positional
-   ;      parameters.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG was
+   ;      set and if the optional output keyword parameter EXCPT_COND was
+   ;      provided in the call. The output positional parameters
+   ;      out_array_1 and out_array_2 contain the unique combinations of
+   ;      values of the input positional parameters.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
@@ -120,6 +119,8 @@ FUNCTION uniq2, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–02–28: Version 2.01 — Documentation update.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
