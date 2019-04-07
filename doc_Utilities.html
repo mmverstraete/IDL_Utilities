@@ -1016,6 +1016,73 @@ comp_name = MicMac2</code></pre></li>
 <li><p>2019&#8211;02&#8211;26: Version 2.01 &#8212; Minor coding update: Add requirement to call this function with 2 output positional parameters.</p></li>
 </ul></li>
 </ul>
+<h2>haversine</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes the haversine distance between the two locations specified by their latitudes and longitudes in decimal degrees.</p></li>
+<li><p><strong>Algorithm:</strong> This function implements the classical haversine formula, as described in the references below.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = haversine(lat_1, lon_1, lat_2, lon_2, $</code><br />
+<code>distance, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>lat_1 {DOUBLE} [I]:</code> The latitude of the first location, in decimal degrees.</p></li>
+<li><p><code>lon_1 {DOUBLE} [I]:</code> The longitude of the first location, in decimal degrees.</p></li>
+<li><p><code>lat_2 {DOUBLE} [I]:</code> The latitude of the second location, in decimal degrees.</p></li>
+<li><p><code>lon_2 {DOUBLE} [I]:</code> The longitude of the second location, in decimal degrees.</p></li>
+<li><p><code>distance {DOUBLE} [O]:</code> The distance between the two locations, in m, following a great circle on a spherical Earth.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The distance between the 2 input locations is provided in output positional parameter.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The distance between the 2 locations may be undefined, incomplete or incorrect.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: The input positional parameter <code>lat_1</code> is not of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p>Error 112: The input positional parameter <code>lat_1</code> must be in the range <code>[-90.0D, 90.0D]</code>.</p></li>
+<li><p>Error 120: The input positional parameter <code>lon_1</code> is not of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p>Error 122: The input positional parameter <code>lon_1</code> must be in the range <code>[-180.0D, 180.0D]</code>.</p></li>
+<li><p>Error 130: The input positional parameter <code>lat_2</code> is not of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p>Error 132: The input positional parameter <code>lat_2</code> must be in the range <code>[-90.0D, 90.0D]</code>.</p></li>
+<li><p>Error 140: The input positional parameter <code>lon_2</code> is not of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p>Error 142: The input positional parameter <code>lon_2</code> must be in the range <code>[-180.0D, 180.0D]</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_double.pro</code></p></li>
+<li><p><code>is_float.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The distance between two locations returned by this function does not take into account any differences in altitude: it only reports on the distance between the specified latitudes and longitudes, on a spherical Earth, at the mean sea level.</p></li>
+<li><p><strong>Note 2:</strong> The outcome of this routine is quite sensitive to the number of decimal places and the numerical precision with which the input latitudes and longitudes are provided: this is particularly important for small distances.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; lat_1 = -27.34439555D
+IDL&gt; lon_1 = 30.13553714D
+IDL&gt; lat_2 = -27.34400537D
+IDL&gt; lon_2 = 30.13680177D
+IDL&gt; rc = haversine(lat_1, lon_1, lat_2, lon_2, distance)
+IDL&gt; PRINT, &#39;distance = &#39; + strstr(distance)
+distance = 132.22839</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>https://www.movable-type.co.uk/scripts/latlong.html, visited on 6 April 2019.</p></li>
+<li><p>https://en.wikipedia.org/wiki/Earth_radius, visited on 6 April 2019.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2019&#8211;04&#8211;06: Version 1.0 &#8212; Initial release.</p></li>
+<li><p>2019&#8211;04&#8211;06: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+</ul></li>
+</ul>
 <h2>is_dir</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function reports whether the input positional parameter <code>dir_spec</code> is a directory or not.</p></li>
