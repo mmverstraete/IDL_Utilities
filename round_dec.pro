@@ -145,6 +145,9 @@ FUNCTION round_dec, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–04–17: Version 2.01 — Update the code to always round the
+   ;      decimal part of the input argument to 64-bit integers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -223,7 +226,7 @@ FUNCTION round_dec, $
    ;  Ensure that the input positional parameter n_dec is of type INT:
    n_dec = FIX(n_dec)
 
-   ;  If the input positional parameter is of type INTEGER, return it
+   ;  If the input positional parameter arg is of type INTEGER, return it
    ;  unmodified:
    res = type_of(arg, type_code, type_name)
    IF ((type_code EQ 1) OR (type_code EQ 2) OR (type_code EQ 3) OR $
@@ -237,7 +240,7 @@ FUNCTION round_dec, $
    IF (type_code EQ 4) THEN BEGIN
       ori_dec = arg - FIX(arg)
       factor = 10.0^n_dec
-      trn_dec = ROUND(ori_dec * factor) / factor
+      trn_dec = ROUND(ori_dec * factor, /L64) / factor
       val = FIX(arg) + trn_dec
       RETURN, val
    ENDIF
@@ -247,7 +250,7 @@ FUNCTION round_dec, $
    IF (type_code EQ 5) THEN BEGIN
       ori_dec = arg - LONG(arg)
       factor = 10.0D^n_dec
-      trn_dec = ROUND(ori_dec * factor) / factor
+      trn_dec = ROUND(ori_dec * factor, /L64) / factor
       val = LONG(arg) + trn_dec
       RETURN, val
    ENDIF
