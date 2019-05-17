@@ -48,13 +48,10 @@ FUNCTION sha256, $
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: File file_spec is unreadable.
-   ;
-   ;  *   Error 120: File file_spec is not found.
+   ;  *   Error 110: File file_spec is not found, not a regular file or
+   ;      not readable.
    ;
    ;  DEPENDENCIES:
-   ;
-   ;  *   is_readable.pro
    ;
    ;  *   strstr.pro
    ;
@@ -88,6 +85,8 @@ FUNCTION sha256, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–05–17: Version 2.01 — Code simplification (FILE_TEST).
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -152,23 +151,20 @@ FUNCTION sha256, $
             ' positional parameter(s): file_spec.'
          RETURN, return_code
       ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  file 'file_spec' does not exist or is unreadable:
+      res = FILE_TEST(file_spec, /READ, /REGULAR)
+      IF (res EQ 0) THEN BEGIN
+         error_code = 110
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
+            rout_name + ': The input file ' + file_spec + $
+            ' is not found, not a regular file or not readable.'
+         RETURN, error_code
+      ENDIF
    ENDIF
 
-   ;  Determine whether file_spec is readable, unreadable or unreachable:
-   rc = is_readable(file_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
-   IF ((debug) AND (rc EQ 0)) THEN BEGIN
-      error_code = 110
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input file_spec is unreadable.'
-      RETURN, return_code
-   ENDIF
-   IF ((debug) AND (rc EQ -1)) THEN BEGIN
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input file_spec is not found.'
-      RETURN, return_code
-   ENDIF
-
+   ;  Compute the SHA-2 (256 bits) hash signature of the input file:
    SPAWN, 'shasum -a 256 ' + file_spec, result
    res = STRSPLIT(result, ' ', /EXTRACT)
    RETURN, res[0]

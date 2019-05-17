@@ -475,13 +475,12 @@ IDL&gt;    FORMAT = fmt
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>file_spec</code> is not of type STRING.</p></li>
 <li><p>Error 120: Positional parameter <code>file_spec</code> is not a scalar.</p></li>
-<li><p>Error 130: Positional parameter <code>file_spec</code> is not found or unreadable.</p></li>
+<li><p>Error 130: Positional parameter <code>file_spec</code> is not found, not a regular file or not readable.</p></li>
 <li><p>Error 140: Positional parameter <code>comm_char</code> is not of type <code>STRING</code>.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>is_array.pro</code></p></li>
-<li><p><code>is_readable.pro</code></p></li>
 <li><p><code>is_scalar.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
@@ -508,6 +507,7 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;05&#8211;17: Version 2.01 &#8212; Code simplification (<code>FILE_TEST</code>).</p></li>
 </ul></li>
 </ul>
 <h2>date_of_year</h2>
@@ -2288,12 +2288,10 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: File <code>file_spec</code> is unreadable.</p></li>
-<li><p>Error 120: File <code>file_spec</code> is not found.</p></li>
+<li><p>Error 110: File <code>file_spec</code> is not found, not a regular file or not readable.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
-<li><p><code>is_readable.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
@@ -2316,6 +2314,7 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <li><p>2018&#8211;04&#8211;24: Version 1.1 &#8212; Update debugging messages.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;05&#8211;17: Version 2.01 &#8212; Code simplification (<code>FILE_TEST</code>).</p></li>
 </ul></li>
 </ul>
 <h2>strcat</h2>

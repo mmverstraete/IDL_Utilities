@@ -66,16 +66,14 @@ FUNCTION count_code_lines, $
    ;
    ;  *   Error 120: Positional parameter file_spec is not a scalar.
    ;
-   ;  *   Error 130: Positional parameter file_spec is not found or
-   ;      unreadable.
+   ;  *   Error 130: Positional parameter file_spec is not found, not a
+   ;      regular file or not readable.
    ;
    ;  *   Error 140: Positional parameter comm_char is not of type STRING.
    ;
    ;  DEPENDENCIES:
    ;
    ;  *   is_array.pro
-   ;
-   ;  *   is_readable.pro
    ;
    ;  *   is_scalar.pro
    ;
@@ -134,6 +132,8 @@ FUNCTION count_code_lines, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–05–17: Version 2.01 — Code simplification (FILE_TEST).
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -179,8 +179,8 @@ FUNCTION count_code_lines, $
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Initialize the default return code:
-   return_code = -1L
+   ;  Initialize the default error return code:
+   error_return_code = -1L
 
    ;  Set the default values of flags and essential output keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
@@ -196,7 +196,7 @@ FUNCTION count_code_lines, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
             ' positional parameter(s): file_spec, comm_char.'
-         RETURN, return_code
+         RETURN, error_return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -205,7 +205,7 @@ FUNCTION count_code_lines, $
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter file_spec is not of type STRING.'
-         RETURN, return_code
+         RETURN, error_return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -214,17 +214,18 @@ FUNCTION count_code_lines, $
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter file_spec is not a scalar.'
-         RETURN, return_code
+         RETURN, error_return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'file_spec' is not found or unreadable:
-      IF (is_readable(file_spec, $
-         DEBUG = debug, EXCPT_COND = excpt_cond) NE 1) THEN BEGIN
+      res = FILE_TEST(file_spec, /WRITE, /REGULAR)
+      IF (res EQ 0) THEN BEGIN
          error_code = 130
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': ' + excpt_cond
-         RETURN, return_code
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
+            rout_name + ': The output file ' + file_spec + $
+            ' is not found, not a regular file or not readable.'
+         RETURN, error_return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -234,7 +235,7 @@ FUNCTION count_code_lines, $
          error_code = 140
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter comm_char is not of type STRING.'
-         RETURN, return_code
+         RETURN, error_return_code
       ENDIF
    ENDIF
 
