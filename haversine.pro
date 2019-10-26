@@ -32,8 +32,8 @@ FUNCTION haversine, $
    ;  *   lon_2 {DOUBLE} [I]: The longitude of the second location, in
    ;      decimal degrees.
    ;
-   ;  *   distance {DOUBLE} [O]: The distance between the two locations,
-   ;      in m, following a great circle on a spherical Earth.
+   ;  *   distance {DOUBLE} [O]: The shortest distance between the two
+   ;      locations, in m, following a great circle on a spherical Earth.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -101,15 +101,17 @@ FUNCTION haversine, $
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: The distance between two locations returned by this
-   ;      function does not take into account any differences in altitude:
-   ;      it only reports on the distance between the specified latitudes
-   ;      and longitudes, on a spherical Earth, at the mean sea level.
+   ;  *   NOTE 1: The shortest distance between two locations returned by
+   ;      this function does not take into account any differences in
+   ;      altitude: it only reports on the distance between the specified
+   ;      latitudes and longitudes, on a spherical Earth, at the mean sea
+   ;      level.
    ;
    ;  *   NOTE 2: The outcome of this routine is quite sensitive to the
    ;      number of decimal places and the numerical precision with which
    ;      the input latitudes and longitudes are provided: this is
-   ;      particularly important for small distances.
+   ;      particularly important for small distances (compare the results
+   ;      of the two examples below).
    ;
    ;  EXAMPLES:
    ;
@@ -118,8 +120,18 @@ FUNCTION haversine, $
    ;      IDL> lat_2 = -27.34400537D
    ;      IDL> lon_2 = 30.13680177D
    ;      IDL> rc = haversine(lat_1, lon_1, lat_2, lon_2, distance)
-   ;      IDL> PRINT, 'distance = ' + strstr(distance)
-   ;      distance = 132.22839
+   ;      IDL> PRINT, 'distance = ', distance, ' m.', $
+   ;         FORMAT = '(3X, A12, D12.8, A)'
+   ;      distance = 132.22838583 m.
+   ;
+   ;      IDL> lat_1 = -27.344D
+   ;      IDL> lon_1 = 30.135D
+   ;      IDL> lat_2 = -27.344D
+   ;      IDL> lon_2 = 30.136D
+   ;      IDL> rc = haversine(lat_1, lon_1, lat_2, lon_2, distance)
+   ;      IDL> PRINT, 'distance = ', distance, ' m.', $
+   ;         FORMAT = '(3X, A12, D12.8, A)'
+   ;      distance =  98.77053613 m.
    ;
    ;  REFERENCES:
    ;
@@ -135,6 +147,11 @@ FUNCTION haversine, $
    ;
    ;  *   2019–04–06: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -183,7 +200,7 @@ FUNCTION haversine, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

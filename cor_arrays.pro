@@ -167,6 +167,11 @@ FUNCTION cor_arrays, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -215,7 +220,7 @@ FUNCTION cor_arrays, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

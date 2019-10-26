@@ -98,6 +98,11 @@ FUNCTION jul2iso, $
    ;      implement stricter coding standards and improve documentation.
    ;
    ;  *   2019–02–24: Version 2.01 — Documentation update.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -146,7 +151,7 @@ FUNCTION jul2iso, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

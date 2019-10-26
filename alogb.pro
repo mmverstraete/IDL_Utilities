@@ -7,14 +7,14 @@ FUNCTION alogb, $
 
    ;Sec-Doc
    ;  PURPOSE: This function returns the logarithm of the input positional
-   ;  parameter arg to an arbitrary base.
+   ;  parameter arg to an arbitrary base base.
    ;
    ;  ALGORITHM: This function computes the logarithm of a strictly
    ;  positive numeric (but not complex) scalar or array arg to an
    ;  arbitrary but strictly positive numeric (but not complex and
-   ;  different from 1.0) scalar or array base as
-   ;  log (arg, base) = log (arg, 10)/log (base, 10),
-   ;  where both arg and base.
+   ;  different from 1.0) scalar base as follows:
+   ;  log(arg, base) = log(arg, 10) / log(base, 10),
+   ;  where both arg and base are strictly positive.
    ;
    ;  SYNTAX: res = alogb(arg, base, DOUBLE = double, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
@@ -85,13 +85,11 @@ FUNCTION alogb, $
    ;  *   Error 150: Positional parameter arg is an array with at least
    ;      one element not strictly positive.
    ;
-   ;  *   Error 160: Positional parameter base is a scalar not strictly
-   ;      positive.
+   ;  *   Error 160: Positional parameter base cannot be an array.
    ;
-   ;  *   Error 170: Positional parameter base is an array with at least
-   ;      one element not strictly positive.
+   ;  *   Error 170: Positional parameter base is not strictly positive.
    ;
-   ;  *   Error 180: Positional parameter base must be different from 1.0.
+   ;  *   Error 180: Positional parameter base cannot be equal to 1.0.
    ;
    ;  DEPENDENCIES:
    ;
@@ -105,11 +103,15 @@ FUNCTION alogb, $
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: Input positional parameters arg and base can be provided
-   ;      in any positive numeric type, but the returned result will
-   ;      always be of type FLOAT or DOUBLE.
+   ;  *   NOTE 1: The input positional parameters arg and base can be
+   ;      provided in any positive numeric type other than COMPLEX or
+   ;      DCOMPLEX, but the returned result will always be of type FLOAT
+   ;      or DOUBLE.
    ;
-   ;  *   NOTE 2: The function returns NaN if either input positional
+   ;  *   NOTE 2: The input positional parameter arg may be an array, but
+   ;      the input positional parameter base must be a scalar.
+   ;
+   ;  *   NOTE 3: The function returns NaN if either input positional
    ;      parameter is not a strictly positive number.
    ;
    ;  EXAMPLES:
@@ -164,7 +166,16 @@ FUNCTION alogb, $
    ;
    ;  *   2019–02–24: Version 2.01 — Documentation update.
    ;
-   ;Input positional parameter
+   ;  *   2019–06–19: Version 2.02 — Prevent the input positional
+   ;      parameter base from being an array.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
+   ;
+   ;  *   2019–10–05: Version 2.1.1 — Update the code to make use of the
+   ;      internal variable return_code.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -211,9 +222,9 @@ FUNCTION alogb, $
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
    ;  Initialize the default return code:
-   return_code = 0
+   return_code = !VALUES.F_NAN
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(double)) THEN double = 1 ELSE double = 0
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
@@ -232,7 +243,7 @@ FUNCTION alogb, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
             ' positional parameter(s): arg, base.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -241,7 +252,7 @@ FUNCTION alogb, $
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter arg is not numeric.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -250,7 +261,7 @@ FUNCTION alogb, $
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter base is not numeric.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if either the input
@@ -262,7 +273,7 @@ FUNCTION alogb, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameters arg and base cannot be ' + $
             'of type COMPLEX.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -273,7 +284,7 @@ FUNCTION alogb, $
             excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
                ': Input positional parameter arg is a scalar not ' + $
                'strictly positive.'
-            RETURN, !VALUES.F_NAN
+            RETURN, return_code
          ENDIF
       ENDIF ELSE BEGIN
          FOR i = 0, N_ELEMENTS(arg) - 1 DO BEGIN
@@ -283,54 +294,37 @@ FUNCTION alogb, $
                   rout_name + ': Input positional parameter arg is an ' + $
                   'array with at least one element that is not ' + $
                   'strictly positive.'
-               RETURN, !VALUES.F_NAN
+               RETURN, return_code
             ENDIF
          ENDFOR
       ENDELSE
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'base' is an array:
+      IF (is_array(base) EQ 1) THEN BEGIN
+         error_code = 160
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter base cannot be an array.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'base' is not strictly positive:
-      IF (is_array(base) EQ 0) THEN BEGIN
-         IF (base LT smallest) THEN BEGIN
-            error_code = 160
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Input positional parameter base is a scalar not ' + $
-               'strictly positive.'
-            RETURN, !VALUES.F_NAN
-         ENDIF
-      ENDIF ELSE BEGIN
-         FOR i = 0, N_ELEMENTS(base) - 1 DO BEGIN
-            IF (base[i] LT smallest) THEN BEGIN
-               error_code = 170
-               excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
-                  rout_name + ': Input positional parameter base is an ' + $
-                  'array with at least one element that is not strictly ' + $
-                  'positive.'
-               RETURN, !VALUES.F_NAN
-            ENDIF
-         ENDFOR
-      ENDELSE
+      IF (base LT smallest) THEN BEGIN
+         error_code = 170
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter base is not strictly positive.'
+         RETURN, return_code
+      ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'base' is equal to 1.0:
-      IF (is_array(base) EQ 0) THEN BEGIN
-         IF (base EQ 1.0) THEN BEGIN
-            error_code = 180
-            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-               ': Input positional parameter base is a scalar equal to 1.0.'
-            RETURN, !VALUES.F_NAN
-         ENDIF
-      ENDIF ELSE BEGIN
-         FOR i = 0, N_ELEMENTS(base) - 1 DO BEGIN
-            IF (base[i] EQ 1.0) THEN BEGIN
-               error_code = 190
-               excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
-                  rout_name + ': Input positional parameter base is an ' + $
-                  'array with at least one element that is equal to 1.0.'
-               RETURN, !VALUES.F_NAN
-            ENDIF
-         ENDFOR
-      ENDELSE
+      IF (base EQ 1.0) THEN BEGIN
+         error_code = 180
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input positional parameter base cannot be equal to 1.0.'
+         RETURN, return_code
+      ENDIF
    ENDIF
 
    ;  Check whether computations need to be executed in double precision:

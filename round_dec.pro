@@ -5,45 +5,29 @@ FUNCTION round_dec, $
    EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function rounds the input positional parameter arg to
-   ;  a new representation with only n_dec significant decimals.
+   ;  PURPOSE: This function returns a STRING representation of the input
+   ;  positional parameter arg, rounded to n_dec decimals.
    ;
-   ;  ALGORITHM: This function implements the following rules:
+   ;  ALGORITHM: If the input positional parameter arg
    ;
-   ;  *   If arg is of type BYTE (code 1), INT (code 2), LONG (code 3),
-   ;      UINT (code 12), ULONG (code 13), LONG64 (code 14), or ULONG64
-   ;      (code 15), the function returns the input positional parameter
-   ;      arg unmodified.
+   ;  *   is of type FLOAT, DOUBLE, COMPLEX or DCOMPLEX, the function
+   ;      returns a STRING representation of arg with the specified number
+   ;      of decimal places;
    ;
-   ;  *   If arg is of type FLOAT (code 4), the function returns the
-   ;      desired output provided the total number of significant digits
-   ;      of the input positional parameter does not exceed 6. The
-   ;      accuracy of the result for longer input positional parameters
-   ;      cannot be guaranteed.
+   ;  *   is of one of the integer types, the function returns arg
+   ;      unchanged.
    ;
-   ;  *   If arg is of type DOUBLE (code 5), the function returns the
-   ;      desired output provided the total number of significant digits
-   ;      of the input positional parameter does not exceed 15. The
-   ;      accuracy of the result for longer input positional parameters
-   ;      cannot be guaranteed.
-   ;
-   ;  *   If arg is of a numeric type different than those mentioned
-   ;      above, the function returns NaN.
-   ;
-   ;  *   If n_dec is not of one of the numeric types, the function
-   ;      returns the value NaN; if n_dec is a non-integer numeric
-   ;      expression, its INT value, as returned by the FIX built-in
-   ;      function is used.
+   ;  *   is not numeric, the function returns NaN.
    ;
    ;  SYNTAX: res = round_dec(arg, n_dec, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   arg {Number} [I]: An arbitrary expression of type FLOAT or
-   ;      DOUBLE. Integer values are tolerated (the function returns the
-   ;      input unmodified). If arg is an array, each of its elements will
-   ;      be treated in the same way.
+   ;  *   arg {Number} [I]: An arbitrary numeric expression, typically of
+   ;      one of the types FLOAT, DOUBLE, COMPLEX or DCOMPLEX. Integer
+   ;      values are tolerated (the function returns the input
+   ;      unmodified).
    ;
    ;  *   n_dec {INT} [I]: The desired number of decimal digits in the
    ;      result.
@@ -57,16 +41,17 @@ FUNCTION round_dec, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: Number or NaN.
+   ;  RETURNED VALUE TYPE: STRING, or Number or NaN.
    ;
    ;  OUTCOME:
    ;
-   ;  *   If no exception condition has been detected and the input
-   ;      positional parameter arg is of one of the INTEGER types, this
-   ;      function returns the value arg itself and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;  *   If no exception condition has been detected and the type of the
+   ;      input positional parameter arg is INTEGER, COMPLEX, or one of
+   ;      the compound data types, this function returns the value arg
+   ;      itself and the output keyword parameter excpt_cond is set to a
+   ;      null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided.
    ;
    ;  *   If no exception condition has been detected and the input
    ;      positional parameter arg is either of type FLOAT or DOUBLE, this
@@ -86,28 +71,38 @@ FUNCTION round_dec, $
    ;
    ;  *   Error 100: One or more positional parameter(s) are missing.
    ;
-   ;  *   Error 110: Input positional parameter n_dec must be numeric.
+   ;  *   Error 110: Input positional parameter arg must be numeric.
    ;
-   ;  *   Error 120: Input positional parameter arg cannot be rounded
-   ;      because it is not numeric or COMPLEX.
+   ;  *   Error 120: Input positional parameter n_dec must be numeric.
+   ;
+   ;  *   Error 130: Input positional parameter n_dec must be a scalar.
    ;
    ;  DEPENDENCIES:
    ;
    ;  *   is_numeric.pro
    ;
+   ;  *   is_scalar.pro
+   ;
+   ;  *   strstr.pro
+   ;
    ;  *   type_of.pro
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: Floating point numbers often cannot be represented
-   ;      internally with an exact number of decimals, hence, after
-   ;      rounding off, the returned number is the closest to the desired
-   ;      number but may still contain arbitrary digits in less
-   ;      significant places.
+   ;  *   NOTE 1: The returned (STRING) value can be converted back to a
+   ;      numeric expression using the IDL built-in functions FLOAT and
+   ;      DOUBLE, for instance.
    ;
-   ;  *   NOTE 2: If the number of required decimals exceeds the inherent
-   ;      precision of the input number, this function returns a result
-   ;      equal to the input arg. See the examples below.
+   ;  *   NOTE 2: The input positional parameter arg can be a scalar or an
+   ;      array.
+   ;
+   ;  *   NOTE 3: If the required number of decimals n_dec exceeds the
+   ;      number of decimals provided in the input positional parameter
+   ;      arg, the result is padded with zeros.
+   ;
+   ;  *   NOTE 4: If the required number of decimals n_dec exceeds the
+   ;      inherent precision of the input number, this function returns a
+   ;      result equal to the input arg. See the examples below.
    ;
    ;  EXAMPLES:
    ;
@@ -115,15 +110,15 @@ FUNCTION round_dec, $
    ;      IDL> n_dec = 2
    ;      IDL> res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'arg = ', arg, 'n_dec = ', n_dec, 'res = ', res, $
-   ;         FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)'
-   ;      arg = 12.3456783   n_dec = 2   res = 12.3500004
+   ;         FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, A)'
+   ;      arg =            12.3456783   n_dec =   2   res = 12.35
    ;
    ;      IDL> arg = 12.987654
    ;      IDL> n_dec = 1
    ;      IDL> res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'arg = ', arg, 'n_dec = ', n_dec, 'res = ', res, $
-   ;         FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)'
-   ;      arg = 12.9876537   n_dec = 1   res = 13.0000000
+   ;         FORMAT = '(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, A)'
+   ;      arg =            12.9876537   n_dec =   1   res = 13.0
    ;
    ;      IDL> arg = [1.23456, 2.34567]
    ;      IDL> n_dec = 1
@@ -132,6 +127,13 @@ FUNCTION round_dec, $
    ;            1.23456      2.34567
    ;      IDL> PRINT, res
    ;            1.20000      2.30000
+   ;
+   ;      IDL> arg = [DCOMPLEX(12.345678, -98.432101), $
+   ;         DCOMPLEX(-34.567890, 87.543215)]
+   ;      IDL> n_dec = 2
+   ;      IDL> res = round_dec(arg, n_dec)
+   ;      IDL> PRINT, 'res = ' + res
+   ;            res = (12.35, -98.43) res = (-34.57, 87.54)
    ;
    ;  REFERENCES: None.
    ;
@@ -148,6 +150,15 @@ FUNCTION round_dec, $
    ;
    ;  *   2019–04–17: Version 2.01 — Update the code to always round the
    ;      decimal part of the input argument to 64-bit integers.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Improve the algorithm to handle
+   ;      arrays and COMPLEX arguments, update the documentation, adopt
+   ;      revised coding and documentation standards (in particular
+   ;      regarding the assignment of numeric return codes), and switch to
+   ;      3-parts version identifiers.
+   ;
+   ;  *   2019–10–05: Version 2.1.1 — Update the code to correctly handle
+   ;      a null argument.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -194,11 +205,14 @@ FUNCTION round_dec, $
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
    ;  Initialize the default return code:
-   return_code = 0
+   return_code = !VALUES.F_NAN
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
+
+   res_mac = MACHAR()
+   smallest = res_mac.XMIN
 
    IF (debug) THEN BEGIN
 
@@ -206,63 +220,128 @@ FUNCTION round_dec, $
    ;  positional parameters are missing:
       n_reqs = 2
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         error_code = 100
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         excpt_cond = 'Error 100 in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
             ' positional parameter(s): arg, n_dec.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter arg is not of a numeric type:
+      IF (is_numeric(arg) NE 1) THEN BEGIN
+         excpt_cond = 'Error 110 in ' + rout_name + $
+            ': Input positional parameter arg must be numeric.'
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter n_dec is not of a numeric type:
       IF (is_numeric(n_dec) NE 1) THEN BEGIN
-         error_code = 110
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         excpt_cond = 'Error 120 in ' + rout_name + $
             ': Input positional parameter n_dec must be numeric.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter n_dec is not a scalar:
+      IF (is_scalar(n_dec) NE 1) THEN BEGIN
+         excpt_cond = 'Error 130 in ' + rout_name + $
+            ': Input positional parameter n_dec must be a scalar.'
+         RETURN, return_code
       ENDIF
    ENDIF
 
    ;  Ensure that the input positional parameter n_dec is of type INT:
    n_dec = FIX(n_dec)
 
-   ;  If the input positional parameter arg is of type INTEGER, return it
-   ;  unmodified:
    res = type_of(arg, type_code, type_name)
-   IF ((type_code EQ 1) OR (type_code EQ 2) OR (type_code EQ 3) OR $
-      (type_code EQ 12) OR (type_code EQ 13) OR (type_code EQ 14) OR $
-      (type_code EQ 15)) THEN BEGIN
-      RETURN, arg
-   ENDIF
-
-   ;  If the input input positional parameter is of type FLOAT, compute
-   ;  the new value of the decimal part and add it to the integer part:
-   IF (type_code EQ 4) THEN BEGIN
-      ori_dec = arg - FIX(arg)
-      factor = 10.0^n_dec
-      trn_dec = ROUND(ori_dec * factor, /L64) / factor
-      val = FIX(arg) + trn_dec
+   IF (is_scalar(arg) EQ 1) THEN BEGIN
+      IF (ABS(arg) LT smallest) THEN BEGIN
+         val = '0.' + strrepeat('0', n_dec)
+         RETURN, val
+      ENDIF ELSE BEGIN
+         val = ''
+         CASE type_code OF
+            4: BEGIN
+               val = strstr(STRING(arg, $
+                  FORMAT = '(F' + strstr(MAX([oom(arg), 0]) + 3 + n_dec) + $
+                  '.' + strstr(n_dec) + ')'))
+               RETURN, val
+            END
+            5: BEGIN
+               val = strstr(STRING(arg, $
+                  FORMAT = '(D' + strstr(MAX([oom(arg), 0]) + 3 + n_dec) + $
+                  '.' + strstr(n_dec) + ')'))
+               RETURN, val
+            END
+            6: BEGIN
+               val = COMPLEXROUND(arg * 10^n_dec) / 10^n_dec
+               rp = strstr(REAL_PART(val))
+               dp = STRPOS(rp, '.')
+               rp = STRMID(rp, 0, dp + n_dec + 1)
+               ip = strstr(IMAGINARY(val))
+               dp = STRPOS(ip, '.')
+               ip = STRMID(ip, 0, dp + n_dec + 1)
+               val = '(' + rp + ', ' + ip + ')'
+               RETURN, val
+            END
+            9: BEGIN
+               val = COMPLEXROUND(arg * 10^n_dec) / 10^n_dec
+               rp = strstr(REAL_PART(val))
+               dp = STRPOS(rp, '.')
+               rp = STRMID(rp, 0, dp + n_dec + 1)
+               ip = strstr(IMAGINARY(val))
+               dp = STRPOS(ip, '.')
+               ip = STRMID(ip, 0, dp + n_dec + 1)
+               val = '(' + rp + ', ' + ip + ')'
+               RETURN, val
+            END
+            ELSE: RETURN, arg
+         ENDCASE
+      ENDELSE
+   ENDIF ELSE BEGIN
+      n_elem = N_ELEMENTS(arg)
+      val = STRARR(n_elem)
+      FOR i = 0, n_elem - 1 DO BEGIN
+         IF (ABS(arg[i]) LT smallest) THEN BEGIN
+            val[i] = '0.' + strrepeat('0', n_dec)
+         ENDIF ELSE BEGIN
+            CASE type_code OF
+            4: BEGIN
+               val[i] = strstr(STRING(arg[i], $
+                  FORMAT = '(F' + strstr(MAX([oom(arg[i]), 0]) + 3 + $
+                  n_dec)  + '.' + strstr(n_dec) + ')'))
+            END
+            5: BEGIN
+               val[i] = strstr(STRING(arg[i], $
+                  FORMAT = '(D' + strstr(MAX([oom(arg[i]), 0]) + 3 + $
+                  n_dec) + '.' + strstr(n_dec) + ')'))
+            END
+            6: BEGIN
+               tmp = COMPLEXROUND(arg[i] * 10^n_dec) / 10^n_dec
+               rp = strstr(REAL_PART(tmp))
+               dp = STRPOS(rp, '.')
+               rp = STRMID(rp, 0, dp + n_dec + 1)
+               ip = strstr(IMAGINARY(tmp))
+               dp = STRPOS(ip, '.')
+               ip = STRMID(ip, 0, dp + n_dec + 1)
+               val[i] = '(' + rp + ', ' + ip + ')'
+            END
+            9: BEGIN
+               tmp = COMPLEXROUND(arg[i] * 10^n_dec) / 10^n_dec
+               rp = strstr(REAL_PART(tmp))
+               dp = STRPOS(rp, '.')
+               rp = STRMID(rp, 0, dp + n_dec + 1)
+               ip = strstr(IMAGINARY(tmp))
+               dp = STRPOS(ip, '.')
+               ip = STRMID(ip, 0, dp + n_dec + 1)
+               val[i] = '(' + rp + ', ' + ip + ')'
+               END
+               ELSE: val[i] = arg[i]
+            ENDCASE
+         ENDELSE
+      ENDFOR
       RETURN, val
-   ENDIF
-
-   ;  If the input input positional parameter is of type DOUBLE, compute
-   ;  the new value of the decimal part and add it to the integer part:
-   IF (type_code EQ 5) THEN BEGIN
-      ori_dec = arg - LONG(arg)
-      factor = 10.0D^n_dec
-      trn_dec = ROUND(ori_dec * factor, /L64) / factor
-      val = LONG(arg) + trn_dec
-      RETURN, val
-   ENDIF
-
-   ;  In all other cases (e.g., COMPLEX, STRUCT, etc.), the input positional
-   ;  parameter arg is not numeric or cannot be simply rounded to a set
-   ;  number of decimals:
-   IF (debug) THEN BEGIN
-      error_code = 120
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': Input positional parameter arg must be either FLOAT or DOUBLE.'
-   ENDIF
-   RETURN, !VALUES.F_NAN
+   ENDELSE
 
 END

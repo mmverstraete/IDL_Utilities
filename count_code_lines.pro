@@ -109,14 +109,18 @@ FUNCTION count_code_lines, $
    ;      a character string at the start of a line to indicate comments,
    ;      such as in LaTeX, for instance.
    ;
+   ;  *   NOTE 5: If the input positional parameter comm_char is the
+   ;      scalar empty string ”, then this function returns the number of
+   ;      lines provided by the IDL function FILE_LINES.
+   ;
    ;  EXAMPLES:
    ;
    ;      IDL> file_spec = './Codes/IDL/Utilities/is_leap/is_leap.pro'
    ;      IDL> PRINT, FILE_LINES(file_spec)
-   ;                         206
+   ;                         208
    ;      IDL> PRINT, count_code_lines(file_spec, ';', $
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)
-   ;                48
+   ;                49
    ;
    ;  REFERENCES: None.
    ;
@@ -134,6 +138,16 @@ FUNCTION count_code_lines, $
    ;      implement stricter coding standards and improve documentation.
    ;
    ;  *   2019–05–17: Version 2.01 — Code simplification (FILE_TEST).
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
+   ;
+   ;  *   2019–10–10: Version 2.1.1 — Update the documentation to indicate
+   ;      that this function returns the value provided by FILE_TEST
+   ;      whenever the input positional parameter comm_char is set to a
+   ;      null string.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -182,7 +196,7 @@ FUNCTION count_code_lines, $
    ;  Initialize the default error return code:
    error_return_code = -1L
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

@@ -56,12 +56,10 @@ FUNCTION strcat, $
    ;  *   Error 110: Input positional parameter str_array is not of type
    ;      STRING.
    ;
-   ;  *   Error 120: Input positional parameter str_array is not an array.
-   ;
-   ;  *   Error 130: Input positional parameter sep_char is not of type
+   ;  *   Error 120: Input positional parameter sep_char is not of type
    ;      STRING.
    ;
-   ;  *   Error 140: Input positional parameter sep_char is not a scalar.
+   ;  *   Error 130: Input positional parameter sep_char is not a scalar.
    ;
    ;  DEPENDENCIES:
    ;
@@ -79,7 +77,10 @@ FUNCTION strcat, $
    ;      multi-dimensional. In the case of a 2D array, the elements are
    ;      concatenated line by line.
    ;
-   ;  *   NOTE 1: The input positional parameter sep_char can be a null
+   ;  *   NOTE 2: If the input positional parameter str_array is empty or
+   ;      a scalar STRING, this function returns that argument unmodified.
+   ;
+   ;  *   NOTE 3: The input positional parameter sep_char can be a null
    ;      string or contain multiple characters.
    ;
    ;  EXAMPLES:
@@ -119,6 +120,11 @@ FUNCTION strcat, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -167,7 +173,7 @@ FUNCTION strcat, $
    ;  Initialize the default return code:
    return_string = ''
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -194,18 +200,9 @@ FUNCTION strcat, $
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
-   ;  positional parameter 'str_array' is not an array:
-      IF (is_array(str_array) NE 1) THEN BEGIN
-         error_code = 120
-         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-            ': Input positional parameter str_array is not an array.'
-         RETURN, return_string
-      ENDIF
-
-   ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'separator' is not of type STRING:
       IF (is_string(separator) NE 1) THEN BEGIN
-         error_code = 130
+         error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter separator is not of type STRING.'
          RETURN, return_string
@@ -214,7 +211,7 @@ FUNCTION strcat, $
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'separator' is not a scalar:
       IF (is_scalar(separator) NE 1) THEN BEGIN
-         error_code = 140
+         error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter separator is not a scalar.'
          RETURN, return_string

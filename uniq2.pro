@@ -53,9 +53,9 @@ FUNCTION uniq2, $
    ;      returns 0, and the output keyword parameter excpt_cond is set to
    ;      a null string, if the optional input keyword parameter DEBUG was
    ;      set and if the optional output keyword parameter EXCPT_COND was
-   ;      provided in the call. The output positional parameters
-   ;      out_array_1 and out_array_2 contain the unique combinations of
-   ;      values of the input positional parameters.
+   ;      provided in the call. The positional parameters out_array_1 and
+   ;      out_array_2 contain the unique combinations of values of the
+   ;      input positional parameters.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
@@ -88,8 +88,8 @@ FUNCTION uniq2, $
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: The input positional parameters in_array_1 and
-   ;      in_array_2 can be of any alphanumeric type, but must be defined.
+   ;  *   NOTE 1: The positional parameters in_array_1 and in_array_2 can
+   ;      be of any alphanumeric type, but must be defined.
    ;
    ;  EXAMPLES:
    ;
@@ -121,6 +121,11 @@ FUNCTION uniq2, $
    ;      implement stricter coding standards and improve documentation.
    ;
    ;  *   2019–02–28: Version 2.01 — Documentation update.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -169,7 +174,7 @@ FUNCTION uniq2, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -213,8 +218,8 @@ FUNCTION uniq2, $
 
    ;  Return to the calling routine with an error message if this function is
    ;  called with input positional parameter arrays of different types:
-      rc = type_of(in_array_1, type_code_1, type_name_1)
-      rc = type_of(in_array_2, type_code_2, type_name_2)
+      rc1 = type_of(in_array_1, type_code_1, type_name_1)
+      rc2 = type_of(in_array_2, type_code_2, type_name_2)
       IF (type_code_1 NE type_code_2) THEN BEGIN
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $

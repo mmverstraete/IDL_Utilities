@@ -3,8 +3,10 @@ FUNCTION caldate, $
    year, $
    month, $
    day, $
+   HOUR = hour, $
+   MINUTE = minute, $
+   SECOND = second, $
    DATE = date, $
-   VERBOSE = verbose, $
    DEBUG = debug, $
    EXCPT_COND = excpt_cond
 
@@ -17,8 +19,7 @@ FUNCTION caldate, $
    ;  ALGORITHM: This function is a convenient wrapper to the IDL program
    ;  CALDAT.
    ;
-   ;  SYNTAX: rc = caldate(jdate, year, month, day, $
-   ;  DATE = date, VERBOSE = verbose, $
+   ;  SYNTAX: rc = caldate(jdate, year, month, day, DATE = date, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
@@ -33,14 +34,8 @@ FUNCTION caldate, $
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   DATE = date {STRING} [O] (Default value: None.
-   ;
-   ;  *   VERBOSE = verbose {INT} [I] (Default value: 0): Flag to enable
-   ;      (> 0) or skip (0) reporting progress on the console: 1 only
-   ;      reports exiting the routine; 2 reports entering and exiting the
-   ;      routine, as well as key milestones; 3 reports entering and
-   ;      exiting the routine, and provides detailed information on the
-   ;      intermediary results.
+   ;  *   DATE = date {STRING} [O]: The corresponding date expressed as a
+   ;      STRING formatted as yyyy-mm-dd.
    ;
    ;  *   DEBUG = debug {INT} [I] (Default value: 0): Flag to activate (1)
    ;      or skip (0) debugging tests.
@@ -92,12 +87,28 @@ FUNCTION caldate, $
    ;      order year, month, day, rather than order of the CALDAT program,
    ;      which is month, day, year.
    ;
+   ;  *   NOTE 2: The input positional parameter jdate can be a scalar or
+   ;      an array.
+   ;
    ;  EXAMPLES:
    ;
-   ;      IDL> jdate = 2458606
+   ;      IDL> jdate = 2458606L
    ;      IDL> rc = caldate(jdate, year, month, day, DATE = date)
    ;      IDL> PRINT, 'date = ' + date
    ;      date = 2019-05-02
+   ;
+   ;      IDL> jdate = 2458606.12345D
+   ;      IDL> rc = caldate(jdate, year, month, day, DATE = date,
+   ;         HOUR = hour, MINUTE = minute, SECOND = second)
+   ;      IDL> PRINT, 'date = ' + date
+   ;      date = 2019-05-02
+   ;      IDL> PRINT, hour, minute, second
+   ;                14          57       46.079986
+   ;
+   ;      IDL> jdate = [2458606, 2458607]
+   ;      IDL> rc = caldate(jdate, year, month, day, DATE = date)
+   ;      IDL> PRINT, date
+   ;      2019-05-02 2019-05-03
    ;
    ;  REFERENCES: None.
    ;
@@ -107,6 +118,13 @@ FUNCTION caldate, $
    ;
    ;  *   2019–05–02: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–06–12: Version 2.01 — Update the documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -155,16 +173,9 @@ FUNCTION caldate, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
-   IF (KEYWORD_SET(verbose)) THEN BEGIN
-      IF (is_numeric(verbose)) THEN verbose = FIX(verbose) ELSE verbose = 0
-      IF (verbose LT 0) THEN verbose = 0
-      IF (verbose GT 3) THEN verbose = 3
-   ENDIF ELSE verbose = 0
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
-
-   IF (verbose GT 1) THEN PRINT, 'Entering ' + rout_name + '.'
 
    IF (debug) THEN BEGIN
 
@@ -200,14 +211,12 @@ FUNCTION caldate, $
    ENDIF
 
    ;  Extract the calendar information from the Julian date:
-   CALDAT, jdate, month, day, year
+   CALDAT, jdate, month, day, year, hour, minute, second
 
    ;  Generate the date STRING:
    date = strstr(year) + '-' + $
       STRING(month, FORMAT = '(I02)') + '-' + $
       STRING(day, FORMAT = '(I02)')
-
-   IF (verbose GT 0) THEN PRINT, 'Exiting ' + rout_name + '.'
 
    RETURN, return_code
 

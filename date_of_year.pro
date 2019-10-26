@@ -75,14 +75,14 @@ FUNCTION date_of_year, $
    ;
    ;  *   Error 130: Input positional parameter day_of_year is invalid.
    ;
-   ;  *   Error 200: Exception condition encountered in CASE statement,
-   ;      probably when optional keyword parameter DEBUG is not set.
+   ;  *   Error 200: Exception condition encountered in CASE statement:
+   ;      the value of the input positional parameter day_of_year is
+   ;      invalid. Set the optional keyword parameter DEBUG to get a more
+   ;      specific diagnostic.
    ;
    ;  DEPENDENCIES:
    ;
    ;  *   days_per_month.pro
-   ;
-   ;  *   is_leap.pro
    ;
    ;  *   is_numeric.pro
    ;
@@ -125,6 +125,11 @@ FUNCTION date_of_year, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -173,7 +178,7 @@ FUNCTION date_of_year, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -187,8 +192,6 @@ FUNCTION date_of_year, $
    ;  positional parameters are missing:
       n_reqs = 3
       IF (N_PARAMS() NE n_reqs) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 100
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
@@ -199,8 +202,6 @@ FUNCTION date_of_year, $
    ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'day_of_year' is not of numeric type:
       IF (is_numeric(day_of_year) NE 1) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter day_of_year must be of numeric type.'
@@ -214,8 +215,6 @@ FUNCTION date_of_year, $
    rc = days_per_month(num_days, YEAR = year, DEBUG = debug, $
       EXCPT_COND = excpt_cond)
    IF (rc NE 0) THEN BEGIN
-      info = SCOPE_TRACEBACK(/STRUCTURE)
-      rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
       error_code = 120
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': ' + excpt_cond
@@ -227,8 +226,6 @@ FUNCTION date_of_year, $
    ;  Return to the calling routine with an error message if this function is
    ;  called with an invalid input positional parameter 'day_of_year':
       IF ((day_of_year LT 1) OR (day_of_year GT num_days[0])) THEN BEGIN
-         info = SCOPE_TRACEBACK(/STRUCTURE)
-         rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
          error_code = 130
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter day_of_year must be within ' + $

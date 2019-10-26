@@ -4,12 +4,12 @@ FUNCTION chk_isodate, $
    EXCPT_COND = excpt_cond
 
    ;Sec-Doc
-   ;  PURPOSE: This function checks the validity of the input positional
-   ;  parameter isodate.
+   ;  PURPOSE: This function checks the validity of the scalar input
+   ;  positional parameter isodate.
    ;
    ;  ALGORITHM: This function verifies that the input positional
-   ;  parameter isodate is a STRING formatted as yyyy-mm-ddThh:nn:ssZ
-   ;  where
+   ;  parameter isodate is a scalar STRING formatted as
+   ;  yyyy-mm-ddThh:nn:ssZ where
    ;
    ;  *   yyyy is a valid 4-digit year number,
    ;
@@ -48,14 +48,15 @@ FUNCTION chk_isodate, $
    ;      returns 0, and the output keyword parameter excpt_cond is set to
    ;      a null string, if the optional input keyword parameter DEBUG was
    ;      set and if the optional output keyword parameter EXCPT_COND was
-   ;      provided in the call.
+   ;      provided in the call. The input positional parameter isodate is
+   ;      valid.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
    ;      encountered, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      provided. The input positional parameter isodate may be invalid.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -63,6 +64,9 @@ FUNCTION chk_isodate, $
    ;
    ;  *   Error 110: Input positional parameter isodate is not of type
    ;      STRING.
+   ;
+   ;  *   Error 120: Input positional parameter isodate cannot be an
+   ;      array.
    ;
    ;  *   Error 200: The input positional parameter isodate is incorrectly
    ;      formatted: it must contain 2 strings separated by T.
@@ -99,6 +103,8 @@ FUNCTION chk_isodate, $
    ;
    ;  *   days_per_month.pro
    ;
+   ;  *   is_array.pro
+   ;
    ;  *   is_string.pro
    ;
    ;  *   last_char.pro
@@ -110,9 +116,13 @@ FUNCTION chk_isodate, $
    ;  *   NOTE 1: Since the purpose of this function is to check the
    ;      validity of the input positional parameter isodate, all tests
    ;      are performed irrespective of the setting of the input keyword
-   ;      parameter DEBUG. The keywords DEBUG and EXCPT_COND are included
-   ;      for consistency, and to allow reporting of the exception
-   ;      condition if one is encountered.
+   ;      parameter DEBUG. The optional input keyword DEBUG is included
+   ;      for consistency but its value on input is ignored, while the
+   ;      optional output keyword parameter EXCPT_COND allows reporting of
+   ;      the exception condition if one is encountered.
+   ;
+   ;  *   NOTE 2: The input positional parameter isodate cannot be an
+   ;      array.
    ;
    ;  EXAMPLES:
    ;
@@ -126,7 +136,7 @@ FUNCTION chk_isodate, $
    ;      IDL> rc = chk_isodate(isodate, DEBUG = 0, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'rc = ' + strstr(rc) + ', excpt_cond = >' + $
    ;         excpt_cond + '<'
-   ;      rc = 340, excpt_cond = >Error 270 in CHK_ISODATE: Input positional
+   ;      rc = 270, excpt_cond = >Error 270 in CHK_ISODATE: Input positional
    ;         parameter isodate is invalid: the hour must be within the range
    ;         [0, 23].<
    ;
@@ -164,6 +174,11 @@ FUNCTION chk_isodate, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -212,11 +227,11 @@ FUNCTION chk_isodate, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags provided as optional keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
-   ;  Implement all tests: See Note 1 above.
+   ;  Implement all tests on the input positional parameter: See Note 1 above.
 
    ;  Return to the calling routine with an error message if one or more
    ;  positional parameters are missing:
@@ -235,6 +250,15 @@ FUNCTION chk_isodate, $
       error_code = 110
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter isodate must be of type STRING.'
+      RETURN, error_code
+   ENDIF
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter isodate is an array:
+   IF (is_array(isodate) EQ 1) THEN BEGIN
+      error_code = 120
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': Input positional parameter isodate cannot be an array.'
       RETURN, error_code
    ENDIF
 
@@ -260,8 +284,8 @@ FUNCTION chk_isodate, $
    ENDIF
 
    ;  Remove the character 'Z' at the end of the time specification, if present:
-   lstchr = last_char(parts1[1], DEBUG = debug, EXCPT_COND = excpt_cond)
-   IF ((lstchr EQ 'Z') OR (lstchr EQ 'Z')) THEN $
+   lstchr = last_char(parts1[1])
+   IF ((lstchr EQ 'Z') OR (lstchr EQ 'z')) THEN $
       parts1[1] = STRMID(parts1[1], 0, STRLEN(parts1[1]) - 1)
 
    ;  Check that the time component contains 3 parts:

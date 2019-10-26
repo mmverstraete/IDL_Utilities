@@ -69,6 +69,10 @@ FUNCTION strstr, $
    ;      which case each array element is converted into a string without
    ;      any blank space in the front or at the back.
    ;
+   ;  *   NOTE 2: Note that if an exception condition is encountered, this
+   ;      function calls itself recursively to output the corresponding
+   ;      message.
+   ;
    ;  EXAMPLES:
    ;
    ;      IDL> pi = 3.14159
@@ -112,6 +116,11 @@ FUNCTION strstr, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -160,7 +169,7 @@ FUNCTION strstr, $
    ;  Initialize the default return code:
    return_code = ''
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

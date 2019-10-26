@@ -14,7 +14,7 @@ FUNCTION set_cap, $
    ;  can also be optionally performed on each word (continuous sequence
    ;  of letters) or on all characters.
    ;
-   ;  SYNTAX: rc = set_cap, arg, $
+   ;  SYNTAX: res = set_cap, arg, $
    ;  ALLCHARS = allchars, ALLWORDS = allwords, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
@@ -54,8 +54,8 @@ FUNCTION set_cap, $
    ;      -   If the optional keyword parameter ALLCHARS is set, all
    ;          letters of arg are set in upper case.
    ;
-   ;      -   If the optional keyword parameter ALLWORDS is set, each word
-   ;          of arg is set in upper case.
+   ;      -   If the optional keyword parameter ALLWORDS is set, the first
+   ;          letter of each word of arg is set in upper case.
    ;
    ;      -   If both optional keyword parameters ALLCHARS and ALLWORDS
    ;          are set, the former takes precedence and all letters of arg
@@ -84,6 +84,8 @@ FUNCTION set_cap, $
    ;  DEPENDENCIES:
    ;
    ;  *   is_array.pro
+   ;
+   ;  *   is_letter.pro
    ;
    ;  *   is_string.pro
    ;
@@ -122,6 +124,11 @@ FUNCTION set_cap, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -167,7 +174,7 @@ FUNCTION set_cap, $
    info = SCOPE_TRACEBACK(/STRUCTURE)
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(allchars)) THEN allchars = 1 ELSE allchars = 0
    IF (KEYWORD_SET(allwords)) THEN allwords = 1 ELSE allwords = 0
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0

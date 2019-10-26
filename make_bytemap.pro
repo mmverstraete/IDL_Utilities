@@ -54,7 +54,8 @@ FUNCTION make_bytemap, $
    ;      a null string, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
    ;      provided in the call. The output graphic file is saved in the
-   ;      location specified by the input positional parameter save_spec.
+   ;      location specified by the input positional parameter save_spec,
+   ;      and the implied directory path is created if it does not exist.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns a non-zero error code, and the output keyword parameter
@@ -92,7 +93,16 @@ FUNCTION make_bytemap, $
    ;  *   Error 180: At least one of the specified color names is
    ;      unrecognized.
    ;
+   ;  *   Error 190: The input positional parameter save_spec is not of
+   ;      type STRING.
+   ;
+   ;  *   Error 400: The output folder save_fpath is unwritable.
+   ;
    ;  DEPENDENCIES:
+   ;
+   ;  *   is_string.pro
+   ;
+   ;  *   is_writable_dir.pro
    ;
    ;  *   strstr.pro
    ;
@@ -127,7 +137,7 @@ FUNCTION make_bytemap, $
    ;      IDL> good_vals = BINDGEN(147)
    ;      IDL> good_vals_cols = TAG_NAMES(!COLOR)
    ;      IDL> rc = make_bytemap(byte_array, good_vals, $
-   ;         good_vals_cols, '/Users/michel/Desktop/test.png', $
+   ;         good_vals_cols, '~/Desktop/test.png', $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, 'rc = ' + strstr(rc) + ' and excpt_cond = >' + $
    ;         excpt_cond + '<'
@@ -153,6 +163,11 @@ FUNCTION make_bytemap, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -201,7 +216,7 @@ FUNCTION make_bytemap, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -326,6 +341,26 @@ FUNCTION make_bytemap, $
             RETURN, error_code
          ENDIF
       ENDFOR
+
+   ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'save_spec' is not of type STRING:
+      IF (is_string(save_spec) NE 1) THEN BEGIN
+         error_code = 190
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, error_code
+      ENDIF
+   ENDIF
+
+   ;  Inspect the input positional parameter, ensure that the implied folder
+   ;  is writable, and create it if it does not exist:
+   save_fpath = FILE_DIRNAME(save_spec)
+   res = is_writable_dir(save_fpath, /CREATE)
+   IF (debug AND (res NE 1)) THEN BEGIN
+      error_code = 400
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + $
+         rout_name + ': The directory save_fpath is unwritable.'
+      RETURN, error_code
    ENDIF
 
    ;  Ensure that the array of good values, possibly of type INT, is recast

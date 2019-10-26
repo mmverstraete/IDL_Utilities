@@ -9,10 +9,10 @@
 <h1>Documentation for the IDL routines in project Utilities</h1>
 <h2>alogb</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function returns the logarithm of the input positional parameter <code>arg</code> to an arbitrary <code>base</code>.</p></li>
-<li><p><strong>Algorithm:</strong> This function computes the logarithm of a strictly positive numeric (but not complex) scalar or array <code>arg</code> to an arbitrary but strictly positive numeric (but not complex and different from 1.0) scalar or array <code>base</code> as<br />
-<span class="math inline">log&#8198;(<em>a</em><em>r</em><em>g</em>,&#8198;<em>b</em><em>a</em><em>s</em><em>e</em>)&#8196;=&#8196;log&#8198;(<em>a</em><em>r</em><em>g</em>,&#8198;10)/log&#8198;(<em>b</em><em>a</em><em>s</em><em>e</em>,&#8198;10)</span>,<br />
-where both <code>arg</code> and <code>base</code>.</p></li>
+<li><p><strong>Purpose:</strong> This function returns the logarithm of the input positional parameter <code>arg</code> to an arbitrary base <code>base</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function computes the logarithm of a strictly positive numeric (but not complex) scalar or array <code>arg</code> to an arbitrary but strictly positive numeric (but not complex and different from 1.0) scalar <code>base</code> as follows:<br />
+log(arg, base) = log(arg, 10) / log(base, 10),<br />
+where both <code>arg</code> and <code>base</code> are strictly positive.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = alogb(arg, base, DOUBLE = double, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -45,9 +45,9 @@ where both <code>arg</code> and <code>base</code>.</p></li>
 <li><p>Error 130: Positional parameters <code>arg</code> and/or <code>base</code> cannot be of type <code>COMPLEX</code> or <code>DCOMPLEX</code>.</p></li>
 <li><p>Error 140: Positional parameter <code>arg</code> is a scalar not strictly positive.</p></li>
 <li><p>Error 150: Positional parameter <code>arg</code> is an array with at least one element not strictly positive.</p></li>
-<li><p>Error 160: Positional parameter <code>base</code> is a scalar not strictly positive.</p></li>
-<li><p>Error 170: Positional parameter <code>base</code> is an array with at least one element not strictly positive.</p></li>
-<li><p>Error 180: Positional parameter <code>base</code> must be different from 1.0.</p></li>
+<li><p>Error 160: Positional parameter <code>base</code> cannot be an array.</p></li>
+<li><p>Error 170: Positional parameter <code>base</code> is not strictly positive.</p></li>
+<li><p>Error 180: Positional parameter <code>base</code> cannot be equal to 1.0.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -58,8 +58,9 @@ where both <code>arg</code> and <code>base</code>.</p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> Input positional parameters <code>arg</code> and <code>base</code> can be provided in any positive numeric type, but the returned result will always be of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
-<li><p><strong>Note 2:</strong> The function returns <code>NaN</code> if either input positional parameter is not a strictly positive number.</p></li>
+<li><p><strong>Note 1:</strong> The input positional parameters <code>arg</code> and <code>base</code> can be provided in any positive numeric type other than <code>COMPLEX</code> or <code>DCOMPLEX</code>, but the returned result will always be of type <code>FLOAT</code> or <code>DOUBLE</code>.</p></li>
+<li><p><strong>Note 2:</strong> The input positional parameter <code>arg</code> may be an array, but the input positional parameter <code>base</code> must be a scalar.</p></li>
+<li><p><strong>Note 3:</strong> The function returns <code>NaN</code> if either input positional parameter is not a strictly positive number.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; a = 100.0
@@ -102,15 +103,117 @@ res =       1.00000      2.00000      3.00000</code></pre></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;02&#8211;24: Version 2.01 &#8212; Documentation update.</p></li>
+<li><p>2019&#8211;06&#8211;19: Version 2.02 &#8212; Prevent the input positional parameter <code>base</code> from being an array.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2019&#8211;10&#8211;05: Version 2.1.1 &#8212; Update the code to make use of the internal variable <code>return_code</code>.</p></li>
 </ul></li>
 </ul>
-<p>Input positional parameter</p>
+<h2>autocorr</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function computes the autocovariance and autocorrelation statistics on a series that may contain an arbitrary number of missing values arbitrarily distributed within the series.</p></li>
+<li><p><strong>Algorithm:</strong> This function computes the arithmetic mean, variance, autocovariance and autocorrelation statistics for all values of a series that lie between <code>ignore_below</code> and <code>ignore_above</code>. In the statistical literature, the normalization of the autocorrelation is typically done by dividing the sum of the products by the number of elements in the original series (thus ignoring the presence of missing values) or by that number minus the lag, to account for the smaller number of pairs of points contributing to the covariance at larger lags. Here, the normalization is made by the number of valid values in the series. This matches the convention used in IDL&#8217;s own function <code>A_CORRELATE</code> and the recommendations of Datta and Du (2012) [See the References section below].</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = autocorr(series, lags, ignore_below, ignore_above, $</code><br />
+<code>nval, armean, var, ncv, cov, cor, $</code><br />
+<code>VERBOSE = verbose, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>series {FLOAT array} [I]:</code> The series of values to be analyzed.</p></li>
+<li><p><code>lags {INT array} [I]:</code> The lags to consider.</p></li>
+<li><p><code>ignore_below {FLOAT} [I]:</code> The threshold below which values in <code>series</code> should be ignored.</p></li>
+<li><p><code>ignore_above {FLOAT} [I]:</code> The threshold above which values in <code>series</code> should be ignored.</p></li>
+<li><p><code>nval {LONG} [O]:</code> The number of valid values in <code>series</code>.</p></li>
+<li><p><code>armean {FLOAT} [O]:</code> The arithmetic mean of the valid values in <code>series</code>.</p></li>
+<li><p><code>var {FLOAT} [O]:</code> The variance of the valid values in <code>series</code>.</p></li>
+<li><p><code>ncv {INT array} [O]:</code> The number of pairs of valid values in <code>series</code> contributing to the autocovariance and autocorrelation functions at each of the lags: this value is not used in the computation but may serves as an empirical diagnostic of the reliability of those functions.</p></li>
+<li><p><code>cov {FLOAT array} [O]:</code> The autocovariances of the <code>series</code> at the specified <code>lags</code>.</p></li>
+<li><p><code>cor {FLOAT array} [O]:</code> The autocorrelations of the <code>series</code> at the specified <code>lags</code>.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>VERBOSE = verbose {INT} [I] (Default value: 0):</code> Flag to enable (&gt; 0) or skip (0) outputting messages on the console:</p>
+<ul>
+<li><p>If <code>verbose &gt; 0</code>, messages inform the user about progress in the execution of time-consuming routines, or the location of output files (e.g., log, map, plot, etc.);</p></li>
+<li><p>If <code>verbose &gt; 1</code>, messages record entering and exiting the routine; and</p></li>
+<li><p>If <code>verbose &gt; 2</code>, messages provide additional information about intermediary results.</p></li>
+</ul></li>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The output positional parameters contain the results generated by this function.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters may be incomplete or incorrect.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Warning 98: The computer has not been recognized by the function<br />
+<code>get_host_info.pro</code>.</p></li>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: The input positional parameter <code>misr_mode</code> is invalid.</p></li>
+<li><p>Error 120: The input positional parameter <code>misr_path</code> is invalid.</p></li>
+<li><p>Error 130: The input positional parameter <code>misr_orbit</code> is invalid.</p></li>
+<li><p>Error 132: The input positional parameter <code>misr_orbit</code> is inconsistent with the input positional parameter <code>misr_path</code>.</p></li>
+<li><p>Error 134: An exception condition occurred in <code>is_frompath.pro</code>.</p></li>
+<li><p>Error 136: Unexpected return code received from <code>is_frompath.pro</code>.</p></li>
+<li><p>Error 140: The input positional parameter <code>misr_block</code> is invalid.</p></li>
+<li><p>Error 199: An exception condition occurred in <code>set_roots_vers.pro</code>.</p></li>
+<li><p>Error 200: An exception condition occurred in function <code>path2str.pro</code>.</p></li>
+<li><p>Error 210: An exception condition occurred in function <code>orbit2str.pro</code>.</p></li>
+<li><p>Error 220: An exception condition occurred in function <code>block2str.pro</code>.</p></li>
+<li><p>Error 230: An exception condition occurred in function <code>orbit2date.pro</code>.</p></li>
+<li><p>Error 299: The computer is not recognized and at least one of the optional input keyword parameters <code>l1b2_folder</code>, ..., <code>map_folder</code> is not specified.</p></li>
+<li><p>Error 300: The input folder <code>l1b2_path</code> is unreadable.</p></li>
+<li><p>Error 400: The output folder <code>log_path</code> is unwritable.</p></li>
+<li><p>Error 500: An exception condition occurred in function <code>fname.pro</code>.</p></li>
+<li><p>Error 600: An exception condition occurred in the <span class="smallcaps">MISR</span> <span class="smallcaps">Toolkit</span> routine<br />
+<code>MTK_SETREGION_BY_PATH_BLOCKRANGE</code>.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>MISR Toolkit</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong></p>
+<ul>
+<li><p><strong>Note 1:</strong> The computations are carried out in <code>DOUBLE</code> precision.</p></li>
+<li><p><strong>Note 2:</strong> The autocovariance at lag <code>l</code> is set to <code>-999.0</code> if there are fewer than <code>2</code> valid values.</p></li>
+<li><p><strong>Note 3:</strong> The autocorrelation at lag <code>l</code> is set to <code>-999.0</code> if the autocovariance at that lag is negative or if the variance of the entire series of valid values is null.</p></li>
+</ul></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; series = [3.73, 3.67, 3.77, 3.83, 4.67, $
+   5.87, 6.70, 6.97, 6.40, 5.57]
+IDL&gt; lags = [-3, 0, 1, 3, 4, 8]
+IDL&gt; ignore_below = -10.0
+IDL&gt; ignore_above = 10.0
+IDL&gt; rc = autocorr(series, lags, ignore_below, $
+   ignore_above, nval, armean, var, ncv, cov, cor, $
+   VERBOSE = verbose, DEBUG = debug, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;cov = &#39;, cov
+cov =  0.023456856  1.6045959  1.3011335  0.023456856
+   -0.52194154  -0.24339123
+IDL&gt; PRINT, &#39;cor = &#39;, cor
+cor =  0.014618544  1.0000000  0.81087926  0.014618544
+   -0.32527912  -0.15168382</code></pre></li>
+<li><p><strong>References:</strong></p>
+<ul>
+<li><p>Box, G. and G. Jenkins (1976) &#8217;Time Series Analysis&#8217;, Holden-Day.</p></li>
+<li><p>Fuller, W. (1976) &#8217;Introduction to Statistical Time Series&#8217;, Wiley.</p></li>
+<li><p>Datta, D. D. and Du, W. (2012) &#8217;Nonparametric HAC Estimation for Time Sereis Data with Missing Observations&#8217;, Board of Governots of the Federal Reserve System, International Finance Discussion Papers number 1060, available from <code>https://www.federalreserve.gov/pubs/ifdp/2012/1060/ifdp1060.htm</code>, accessed on 11 October 2019.</p></li>
+<li><p>URL: <code>http://en.wikipedia.org/wiki/Autocorrelation</code>, first accessed on 18 February 2007, and again on 11 October 2019.</p></li>
+</ul></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2007&#8211;02&#8211;18: Version 1.0 &#8212; Initial public release.</p></li>
+<li><p>2019&#8211;10&#8211;12: Version 2.1.0 &#8212; Adopt revised coding and documentation standards, and switch to 3-parts version identifiers.</p></li>
+</ul></li>
+</ul>
 <h2>caldate</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function takes a Julian date as input and computes the corresponding calendar year, month and day. The date, formatted as a <code>YYYY-MM-DD</code> is available in the optional output keyword parameter <code>DATE</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This function is a convenient wrapper to the <code>IDL</code> program <code>CALDAT</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = caldate(jdate, year, month, day, $</code><br />
-<code>DATE = date, VERBOSE = verbose, $</code><br />
+<li><p><strong>Syntax:</strong> <code>rc = caldate(jdate, year, month, day, DATE = date, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
@@ -121,8 +224,7 @@ res =       1.00000      2.00000      3.00000</code></pre></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>DATE = date {STRING} [O] (Default value:</code> None.</p></li>
-<li><p><code>VERBOSE = verbose {INT} [I] (Default value: 0):</code> Flag to enable (&gt; 0) or skip (0) reporting progress on the console: 1 only reports exiting the routine; 2 reports entering and exiting the routine, as well as key milestones; 3 reports entering and exiting the routine, and provides detailed information on the intermediary results.</p></li>
+<li><p><code>DATE = date {STRING} [O]:</code> The corresponding date expressed as a <code>STRING</code> formatted as <code>yyyy-mm-dd</code>.</p></li>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
@@ -147,23 +249,39 @@ res =       1.00000      2.00000      3.00000</code></pre></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
 <li><p><strong>Note 1:</strong> This function returns the calendar information in the order <code>year</code>, <code>month</code>, <code>day</code>, rather than order of the <code>CALDAT</code> program, which is <code>month</code>, <code>day</code>, <code>year</code>.</p></li>
+<li><p><strong>Note 2:</strong> The input positional parameter <code>jdate</code> can be a scalar or an array.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; jdate = 2458606
+<pre><code>IDL&gt; jdate = 2458606L
 IDL&gt; rc = caldate(jdate, year, month, day, DATE = date)
 IDL&gt; PRINT, &#39;date = &#39; + date
-date = 2019-05-02</code></pre></li>
+date = 2019-05-02
+
+IDL&gt; jdate = 2458606.12345D
+IDL&gt; rc = caldate(jdate, year, month, day, DATE = date,
+   HOUR = hour, MINUTE = minute, SECOND = second)
+IDL&gt; PRINT, &#39;date = &#39; + date
+date = 2019-05-02
+IDL&gt; PRINT, hour, minute, second
+          14          57       46.079986
+
+IDL&gt; jdate = [2458606, 2458607]
+IDL&gt; rc = caldate(jdate, year, month, day, DATE = date)
+IDL&gt; PRINT, date
+2019-05-02 2019-05-03</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
 <li><p>2014&#8211;06&#8211;13: Version 1.0 &#8212; Initial release by Linda Hunt.</p></li>
 <li><p>2019&#8211;05&#8211;02: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;06&#8211;12: Version 2.01 &#8212; Update the documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>chk_isodate</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function checks the validity of the input positional parameter <code>isodate</code>.</p></li>
-<li><p><strong>Algorithm:</strong> This function verifies that the input positional parameter <code>isodate</code> is a <code>STRING</code> formatted as <code>yyyy-mm-ddThh:nn:ssZ</code> where</p>
+<li><p><strong>Purpose:</strong> This function checks the validity of the scalar input positional parameter <code>isodate</code>.</p></li>
+<li><p><strong>Algorithm:</strong> This function verifies that the input positional parameter <code>isodate</code> is a scalar <code>STRING</code> formatted as <code>yyyy-mm-ddThh:nn:ssZ</code> where</p>
 <ul>
 <li><p><code>yyyy</code> is a valid 4-digit year number,</p></li>
 <li><p><code>mm</code> is a valid 2-digit month number,</p></li>
@@ -186,13 +304,14 @@ date = 2019-05-02</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call.</p></li>
-<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The input positional parameter <code>isodate</code> is valid.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The input positional parameter <code>isodate</code> may be invalid.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Input positional parameter <code>isodate</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Input positional parameter <code>isodate</code> cannot be an array.</p></li>
 <li><p>Error 200: The input positional parameter <code>isodate</code> is incorrectly formatted: it must contain 2 strings separated by <code>T</code>.</p></li>
 <li><p>Error 210: The input positional parameter <code>isodate</code> is incorrectly formatted: the date must contain 3 strings separated by <code>-</code>.</p></li>
 <li><p>Error 220: The input positional parameter <code>isodate</code> is incorrectly formatted: the time must contain 3 strings separated by <code>:</code>.</p></li>
@@ -207,13 +326,15 @@ date = 2019-05-02</code></pre></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>days_per_month.pro</code></p></li>
+<li><p><code>is_array.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>last_char.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the validity of the input positional parameter <code>isodate</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The keywords <code>DEBUG</code> and <code>EXCPT_COND</code> are included for consistency, and to allow reporting of the exception condition if one is encountered.</p></li>
+<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the validity of the input positional parameter <code>isodate</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The optional input keyword <code>DEBUG</code> is included for consistency but its value on input is ignored, while the optional output keyword parameter <code>EXCPT_COND</code> allows reporting of the exception condition if one is encountered.</p></li>
+<li><p><strong>Note 2:</strong> The input positional parameter <code>isodate</code> cannot be an array.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; isodate = &#39;2018-06-13T12:00:00Z&#39;
@@ -226,7 +347,7 @@ IDL&gt; isodate = &#39;2018-06-13T32:00:00Z&#39;
 IDL&gt; rc = chk_isodate(isodate, DEBUG = 0, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, &#39;rc = &#39; + strstr(rc) + &#39;, excpt_cond = &gt;&#39; + $
    excpt_cond + &#39;&lt;&#39;
-rc = 340, excpt_cond = &gt;Error 270 in CHK_ISODATE: Input positional
+rc = 270, excpt_cond = &gt;Error 270 in CHK_ISODATE: Input positional
    parameter isodate is invalid: the hour must be within the range
    [0, 23].&lt;
 
@@ -248,6 +369,7 @@ rc = 270</code></pre></li>
 <li><p>2018&#8211;11&#8211;23: Version 1.6 &#8212; Change the name of the routine from <code>chk_date_iso.pro</code> to <code>chk_isodate.pro</code>, remove the output positional parameter <code>julian_iso</code> and the code to compute its value, as this functionality is now available with function<br />
 <code>iso2jul.pro</code>, perform all diagnostic tests irrespective of the value of the optional input keyword parameter <code>DEBUG</code>, and update the documentation.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>chk_ymddate</h2>
@@ -279,24 +401,27 @@ rc = 270</code></pre></li>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>date</code> is not of type <code>STRING</code>.</p></li>
 <li><p>Error 120: Positional parameter <code>date</code> is not of length 10.</p></li>
-<li><p>Error 130: Positional parameter <code>date</code> does not contain a dash character.</p></li>
-<li><p>Error 140: Positional parameter <code>date</code> does not contain 2 dash characters.</p></li>
-<li><p>Error 150: Positional parameter <code>date</code> does not contain 3 elements separated by 2 dashes.</p></li>
-<li><p>Error 160: Positional parameter <code>date</code> specifies an invalid year.</p></li>
-<li><p>Error 170: Positional parameter <code>date</code> specifies an invalid month.</p></li>
-<li><p>Error 180: Positional parameter <code>date</code> specifies an invalid day.</p></li>
-<li><p>Error 200: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
+<li><p>Error 130: Positional parameter <code>date</code> cannot be an array.</p></li>
+<li><p>Error 200: Positional parameter <code>date</code> does not contain a dash character.</p></li>
+<li><p>Error 210: Positional parameter <code>date</code> does not contain 2 dash characters.</p></li>
+<li><p>Error 220: Positional parameter <code>date</code> does not contain 3 elements separated by 2 dashes.</p></li>
+<li><p>Error 230: Positional parameter <code>date</code> specifies an invalid year.</p></li>
+<li><p>Error 240: Positional parameter <code>date</code> specifies an invalid month.</p></li>
+<li><p>Error 250: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
+<li><p>Error 260: Positional parameter <code>date</code> specifies an invalid day.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>days_per_month.pro</code></p></li>
+<li><p><code>is_array.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the validity of the input positional parameter <code>date</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The keywords <code>DEBUG</code> and <code>EXCPT_COND</code> are included for consistency, and to allow reporting of the exception condition if one is encountered.</p></li>
-<li><p><strong>Note 2:</strong> The month and day elements of the input positional parameter <code>date</code> must be 0-filled to make up a 10-character long string; hence a date like 5 Feb 2011 must be provided as <code>2011-02-05</code>.</p></li>
+<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the validity of the input positional parameter <code>date</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The optional input keyword <code>DEBUG</code> is included for consistency but its value on input is ignored, while the optional output keyword parameter <code>EXCPT_COND</code> allows reporting of the exception condition if one is encountered.</p></li>
+<li><p><strong>Note 2:</strong> The input positional parameter <code>date</code> cannot be an array.</p></li>
+<li><p><strong>Note 3:</strong> The month and day elements of the input positional parameter <code>date</code> must be 0-filled to make up a 10-character long string; hence a date like 5 Feb 2011 must be provided as <code>2011-02-05</code>.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; rc = chk_ymddate(&#39;2010-01-01&#39;, year, month, day, $
@@ -309,13 +434,13 @@ IDL&gt; PRINT, year, month, day
 IDL&gt; rc = chk_ymddate(&#39;2200-01-01&#39;, year, month, day, $
    DEBUG = 1, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-     160   &gt;Error 160 in CHK_DATE_YMD: Year 2200 is invalid
+     230   &gt;Error 230 in CHK_YMDDATE: Year 2200 is invalid
       (must be 4 digits long and lie within [1582, 2100]).&lt;
 
 IDL&gt; rc = chk_ymddate(&#39;1999-02-29&#39;, year, month, day, $
    /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-     180   &gt;Error 180 in CHK_DATE_YMD: Day 29 is invalid
+     260   &gt;Error 260 in CHK_YMDDATE: Day 29 is invalid
      (must be 2 digits long and lie within
      [1, #days in the month]).&lt;
 IDL&gt; PRINT, year, month, day
@@ -331,6 +456,7 @@ IDL&gt; PRINT, year, month, day
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2018&#8211;12&#8211;13: Version 1.6 &#8212; Rename this function to <code>chk_ymddate.pro</code>.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>cor_arrays</h2>
@@ -446,6 +572,7 @@ IDL&gt;    FORMAT = fmt
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>count_code_lines</h2>
@@ -491,14 +618,15 @@ IDL&gt;    FORMAT = fmt
 <li><p><strong>Note 2:</strong> The <code>STRING</code> variable <code>comm_char</code> can be either a scalar or an array, in which case all elements of that array are used in succession to check all possible options. Each element of <code>comm_char</code> can include multiple characters (e.g., to deal with <code>C</code> or <code>PL-1</code> language conventions such as <code>/* comment */</code>). And if <code>comm_char</code> is set to a scalar null string, this function returns the total number of lines in the file, as reported by <code>FILE_LINES</code>.</p></li>
 <li><p><strong>Note 3:</strong> This routine may not yield the correct number of code lines if comments span multiple lines, each terminated by a <code>&lt;CR&gt;</code> and/or <code>&lt;LF&gt;</code>, without repeating the commenting character sequence on each line. However, a comment written on a single long line, which may appear on multiple lines on screen due to soft wrapping, would be treated correctly.</p></li>
 <li><p><strong>Note 4:</strong> This function is also usable in other contexts that use a character string at the start of a line to indicate comments, such as in LaTeX, for instance.</p></li>
+<li><p><strong>Note 5:</strong> If the input positional parameter <code>comm_char</code> is the scalar empty string <code>&#8221;</code>, then this function returns the number of lines provided by the IDL function <code>FILE_LINES.</code></p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; file_spec = &#39;./Codes/IDL/Utilities/is_leap/is_leap.pro&#39;
 IDL&gt; PRINT, FILE_LINES(file_spec)
-                   206
+                   208
 IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
    DEBUG = 1, EXCPT_COND = excpt_cond)
-          48</code></pre></li>
+          49</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -508,6 +636,8 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;05&#8211;17: Version 2.01 &#8212; Code simplification (<code>FILE_TEST</code>).</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2019&#8211;10&#8211;10: Version 2.1.1 &#8212; Update the documentation to indicate that this function returns the value provided by <code>FILE_TEST</code> whenever the input positional parameter <code>comm_char</code> is set to a null string.</p></li>
 </ul></li>
 </ul>
 <h2>date_of_year</h2>
@@ -540,12 +670,11 @@ IDL&gt; PRINT, count_code_lines(file_spec, &#39;;&#39;, $
 <li><p>Error 110: Input positional parameter <code>day_of_year</code> is not of numeric type.</p></li>
 <li><p>Error 120: An exception condition occurred in <code>days_per_month.pro</code>.</p></li>
 <li><p>Error 130: Input positional parameter <code>day_of_year</code> is invalid.</p></li>
-<li><p>Error 200: Exception condition encountered in <code>CASE</code> statement, probably when optional keyword parameter <code>DEBUG</code> is not set.</p></li>
+<li><p>Error 200: Exception condition encountered in <code>CASE</code> statement: the value of the input positional parameter <code>day_of_year</code> is invalid. Set the optional keyword parameter <code>DEBUG</code> to get a more specific diagnostic.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>days_per_month.pro</code></p></li>
-<li><p><code>is_leap.pro</code></p></li>
 <li><p><code>is_numeric.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
@@ -573,6 +702,7 @@ month =        2 and day =       29</code></pre></li>
 <code>days_per_month.pro</code>.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>day_of_year</h2>
@@ -667,6 +797,7 @@ excpt_cond = &gt;&lt;</code></pre></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>days_per_month</h2>
@@ -719,6 +850,7 @@ num_days = 366  31  29  31  30  31  30  31  31  30  31  30  31</code></pre></li>
 <li><p>2018&#8211;03&#8211;28: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>discrete_integral</h2>
@@ -754,6 +886,7 @@ num_days = 366  31  29  31  30  31  30  31  31  30  31  30  31</code></pre></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>is_numeric.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
@@ -777,95 +910,35 @@ res =       5.00000</code></pre></li>
 <li><p>2018&#8211;03&#8211;25: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>first_char</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function returns the first character of the input positional parameter <code>arg_str</code>.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in string functions to extract the desired character.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = first_char(arg_str, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>arg_str {STRING} [I]:</code> An arbitrary string expression.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns the first character of the input positional parameter, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>arg_str</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>arg_str</code> does not contain at least one character.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong> None.</p></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; PRINT, first_char(&#39;Hello World&#39;)
-H
-
-IDL&gt; PRINT, &#39;&gt;&#39; + first_char(3.14, /DEBUG, $
-   EXCPT_COND = excpt_cond) + &#39;&lt;&#39;
-&gt;&lt;
-IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
-excpt_cond = Error 110 in FIRST_CHAR: Input
-   positional parameter must be of type STRING.
-
-[In the following example, variable xyz is undefined.]
-IDL&gt; PRINT, &#39;&gt;&#39; + first_char(xyz, /DEBUG, $
-   EXCPT_COND = excpt_cond) + &#39;&lt;
-&gt;&lt;
-IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
-excpt_cond = Error 110 in FIRST_CHAR: Input
-   positional parameter must be of type STRING.</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>force_path_sep</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function trims the input positional parmeter <code>dir_spec</code> of any white space at the front and at the end of the string, and ensures that it is terminated by the path segment separator character for the current operating system. If the input positional parmeter <code>dir_spec</code> is already terminated by that character, the function returns the input positional parameter.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in functions <code>STRTRIM()</code> and <code>PATH_SEP()</code> to deliver its outcome.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = force_path_sep(dir_spec, $</code><br />
+<li><p><strong>Purpose:</strong> This function trims the input positional parmeter <code>dir_spec</code> of any white space at the front and at the end of the string, and ensures that it is terminated by the path segment separator character for the current operating system, if it is not already present.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in functions <code>STRTRIM</code> and <code>PATH_SEP</code> to deliver its outcome.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = force_path_sep(dir_spec, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>dir_spec {STRING} [I/O]:</code> An arbitrary directory or path specification.</p></li>
+<li><p><code>dir_spec {STRING} [I/O]:</code> An arbitrary directory or path specification, used for both input and output.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
-<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
+<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns the input positional parameter <code>dir_spec</code> duly terminated by the appropriate path separator, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The input and output positional parameter <code>dir_spec</code> is updated as explained above.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The input positional parameter <code>dir_spec</code> is left untouched.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>dir_spec</code> is not of type <code>STRING</code>.</p></li>
 <li><p>Error 120: Positional parameter <code>dir_spec</code> must contain at least 1 character.</p></li>
-<li><p>Error 200: An exception condition occurred in <code>last_char.pro</code>.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -875,13 +948,19 @@ excpt_cond = Error 110 in FIRST_CHAR: Input
 </ul></li>
 <li><p><strong>Remarks:</strong> None.</p></li>
 <li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; PRINT, force_path_sep(&#39;   ~/Desktop   &#39;)
+<pre><code>IDL&gt; dir_spec = &#39;   ~/Desktop   &#39;
+IDL&gt; rc = force_path_sep(dir_spec)
+IDL&gt; PRINT, dir_spec
 ~/Desktop/
 
-IDL&gt; PRINT, force_path_sep(&#39;~/Desktop/&#39;)
+IDL&gt; dir_spec = &#39;~/Desktop/&#39;
+IDL&gt; PRINT, force_path_sep(dir_spec)
+IDL&gt; PRINT, dir_spec
 ~/Desktop/
 
-IDL&gt; print, force_path_sep(&#39;Hello&#39;)
+IDL&gt; dir_spec = &#39;Hello&#39;
+IDL&gt; print, force_path_sep(dir_spec)
+IDL&gt; PRINT, dir_spec
 Hello/</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
@@ -890,6 +969,7 @@ Hello/</code></pre></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>get_dirs_sizes</h2>
@@ -956,14 +1036,15 @@ IDL&gt; PRINT, dirs_sizes
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>get_disks_sizes</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function retrieves the name, total capacity, used space and available space of each of the disks mounted on the current computer and matching the optional pattern <code>DIR</code>, and passes that information to the calling routine through the output positional parameter <code>disks_sizes</code>. If the optional keyword parameter <code>PRINTIT</code> is set, this information is also printed on the console.</p></li>
 <li><p><strong>Algorithm:</strong> This function spawns a Linux <code>df</code> command to the operating system, extracts the desired information from the outcome, and uses it to populate the 2-dimensional output array <code>disks_sizes</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = get_disks_sizes(disks_sizes, DIR = dir, PRINTIT = printit, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Syntax:</strong> <code>res = get_disks_sizes(disks_sizes, DIR = dir, $</code><br />
+<code>PRINTIT = printit, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
 <li><p><code>disks_sizes {STRING array} [O]:</code> A 2-dimensional array containing size information for each disk mounted on the current computer.</p></li>
@@ -996,13 +1077,14 @@ IDL&gt; PRINT, dirs_sizes
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>get_host_info.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>set_white.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> This function relies on Linux&#8217;s <code>df</code> command, so it will only work within the macOS or Linux environments.</p></li>
+<li><p><strong>Note 1:</strong> This function relies on Linux&#8217;s <code>df</code> command, so it will only work within the MacOS or Linux environments.</p></li>
 <li><p><strong>Note 2:</strong> The 3 numbers reported for each disk found represent the total space, the used space and the remaining available space, respectively.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
@@ -1021,6 +1103,7 @@ There are 2 disks mounted on MicMac2:
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;02&#8211;28: Version 2.01 &#8212; Documentation update.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>get_host_info</h2>
@@ -1069,6 +1152,7 @@ comp_name = MicMac2</code></pre></li>
 <li><p>2018&#8211;07&#8211;10: Version 1.1 &#8212; Documentation update.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;02&#8211;26: Version 2.01 &#8212; Minor coding update: Add requirement to call this function with 2 output positional parameters.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>haversine</h2>
@@ -1083,7 +1167,7 @@ comp_name = MicMac2</code></pre></li>
 <li><p><code>lon_1 {DOUBLE} [I]:</code> The longitude of the first location, in decimal degrees.</p></li>
 <li><p><code>lat_2 {DOUBLE} [I]:</code> The latitude of the second location, in decimal degrees.</p></li>
 <li><p><code>lon_2 {DOUBLE} [I]:</code> The longitude of the second location, in decimal degrees.</p></li>
-<li><p><code>distance {DOUBLE} [O]:</code> The distance between the two locations, in m, following a great circle on a spherical Earth.</p></li>
+<li><p><code>distance {DOUBLE} [O]:</code> The shortest distance between the two locations, in m, following a great circle on a spherical Earth.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
@@ -1116,8 +1200,8 @@ comp_name = MicMac2</code></pre></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> The distance between two locations returned by this function does not take into account any differences in altitude: it only reports on the distance between the specified latitudes and longitudes, on a spherical Earth, at the mean sea level.</p></li>
-<li><p><strong>Note 2:</strong> The outcome of this routine is quite sensitive to the number of decimal places and the numerical precision with which the input latitudes and longitudes are provided: this is particularly important for small distances.</p></li>
+<li><p><strong>Note 1:</strong> The shortest distance between two locations returned by this function does not take into account any differences in altitude: it only reports on the distance between the specified latitudes and longitudes, on a spherical Earth, at the mean sea level.</p></li>
+<li><p><strong>Note 2:</strong> The outcome of this routine is quite sensitive to the number of decimal places and the numerical precision with which the input latitudes and longitudes are provided: this is particularly important for small distances (compare the results of the two examples below).</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; lat_1 = -27.34439555D
@@ -1125,8 +1209,18 @@ IDL&gt; lon_1 = 30.13553714D
 IDL&gt; lat_2 = -27.34400537D
 IDL&gt; lon_2 = 30.13680177D
 IDL&gt; rc = haversine(lat_1, lon_1, lat_2, lon_2, distance)
-IDL&gt; PRINT, &#39;distance = &#39; + strstr(distance)
-distance = 132.22839</code></pre></li>
+IDL&gt; PRINT, &#39;distance = &#39;, distance, &#39; m.&#39;, $
+   FORMAT = &#39;(3X, A12, D12.8, A)&#39;
+distance = 132.22838583 m.
+
+IDL&gt; lat_1 = -27.344D
+IDL&gt; lon_1 = 30.135D
+IDL&gt; lat_2 = -27.344D
+IDL&gt; lon_2 = 30.136D
+IDL&gt; rc = haversine(lat_1, lon_1, lat_2, lon_2, distance)
+IDL&gt; PRINT, &#39;distance = &#39;, distance, &#39; m.&#39;, $
+   FORMAT = &#39;(3X, A12, D12.8, A)&#39;
+distance =  98.77053613 m.</code></pre></li>
 <li><p><strong>References:</strong></p>
 <ul>
 <li><p>https://www.movable-type.co.uk/scripts/latlong.html, visited on 6 April 2019.</p></li>
@@ -1136,111 +1230,7 @@ distance = 132.22839</code></pre></li>
 <ul>
 <li><p>2019&#8211;04&#8211;06: Version 1.0 &#8212; Initial release.</p></li>
 <li><p>2019&#8211;04&#8211;06: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_dir</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function reports whether the input positional parameter <code>dir_spec</code> is a directory or not.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in function <code>FILEINFO()</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = is_dir(dir_spec, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>dir_spec {STRING} [I]:</code> An arbitrary directory specification.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input positional parameter <code>dir_spec</code> is a directory, and <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call.</p></li>
-<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>dir_spec</code> is not of type <code>STRING</code>.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong></p>
-<ul>
-<li><p><strong>Note 1:</strong> The input positional parameter <code>dir_spec</code> can include wild characters (<code>IDL</code>-allowed regular expressions): see the third example below, but it cannot be an explicit array of directories.</p></li>
-</ul></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; dir_spec = &#39;~/Desktop&#39;
-IDL&gt; PRINT, is_dir(dir_spec)
-       1
-
-IDL&gt; dir_spec = &#39;~/Documents/MySoftware/Test_dir/Test_file.txt&#39;
-IDL&gt; PRINT, is_dir(dir_spec, /DEBUG, EXCPT_COND = excpt_cond)
-       0
-
-IDL&gt; dir_spec = &#39;/Volumes/MISR_Data*/P*/&#39;
-IDL&gt; PRINT, is_dir(dir_spec, DEBUG = 1, EXCPT_COND = excpt_cond)
-       1</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_file</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function returns <code>1</code> if the input positional parameter <code>file_spec</code> is a regular file, and <code>0</code> otherwise.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on the <code>IDL</code> built-in function <code>FILEINFO()</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = is_finput positional parameter_spec, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>file_spec {STRING} [I]:</code> An arbitrary file specification.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input positional parameter <code>file_spec</code> is a regular file and <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call.</p></li>
-<li><p>If an exception condition has been detected, this function returns <code>-1</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong> None.</p></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; file_spec = &#39;~/Desktop&#39;
-IDL&gt; PRINT, is_file(file_spec)
-      0
-
-IDL&gt; file_spec = &#39;~/Codes/Test_dir/Test_file.txt&#39;
-IDL&gt; PRINT, is_file(file_spec, /DEBUG, EXCPT_COND = excpt_cond)
-      1</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>is_leap</h2>
@@ -1304,250 +1294,7 @@ IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_lowercase</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function determines whether the input positional parameter <code>char</code> is set in lower case letter or not.</p></li>
-<li><p><strong>Algorithm:</strong> This function checks whether the <code>BYTE</code> value of the character <code>char</code> lies in the range [97, 122].</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = is_lowercase(char, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>char {STRING} [I]:</code> The single character to be tested.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input positional parameter is set in lower case, <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns an error code larger than <code>1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>char</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>char</code> is not of length 1.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong> None.</p></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; res = is_lowercase(&#39;b&#39;, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, &#39;res = &#39;, res, &#39; excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-res =        1 excpt_cond = &gt;&lt;
-
-IDL&gt; res = is_lowercase(&#39;ab&#39;, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, &#39;res = &#39;, res, &#39; excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-res =      120 excpt_cond = &gt;Error 120 in IS_LOWERCASE:
-   Input positional parameter cannot be the null string or
-   contain more than 1 character.&lt;</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;18: Version 1.0 &#8212; Initial release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_readable</h2>
-<p>input positional parameter</p>
-<ul>
-<li><p><strong>Purpose:</strong> This function reports whether the input positional parameter <code>file_spec</code> exists or not, and if it exists, whether it points to a directory or file that is readable or not.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> internal functions to determine the status of the directory or file provided as input positional parameter <code>file_spec</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = is_readable(file_spec, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>file_spec {STRING} [I]:</code> The file specification (path and/or file name) to be checked for reading.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong> This function returns</p>
-<ul>
-<li><p><code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is readable; the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
-<li><p><code>0</code> if this file or directory exists but is unreadable; the output keyword parameter <code>excpt_cond</code> contains a message to this effect.</p></li>
-<li><p><code>-1</code> if an exception condition has been detected; the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
-<li><p><code>-2</code> if this file or directory does not exist; the output keyword parameter <code>excpt_cond</code> contains a message to this effect.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong></p>
-<ul>
-<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the existence and readability of the input positional parameter <code>file_spec</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The keywords <code>DEBUG</code> and <code>EXCPT_COND</code> are included for consistency, and to allow reporting of the exception condition if one is encountered.</p></li>
-<li><p><strong>Note 2:</strong> If the input positional parameter <code>file_spec</code> does not contain a path component (absolute or relative), the file is assumed to be located in the current working directory.</p></li>
-</ul></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; rc = is_readable(&#39;~/Desktop&#39;, $
-   /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-1,   &gt;&lt;
-
-IDL&gt; rc = is_readable(&#39;~/Codes/Test_dir/unreadable.txt&#39;, $
-   /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-0,   &gt;The file ~/Codes/Test_dir/unreadable.txt exists
-   but is unreadable.&lt;
-
-IDL&gt; rc = is_readable(234, $
-   /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
--1,   &gt;Error 110 in IS_READABLE: Input positional
-   parameter file_spec is not of type string.&lt;
-
-IDL&gt; rc = is_readable(&#39;~/Desktop/missing_file.txt&#39;, $
-   /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
--2,   &gt;&lt;</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the input positional parameter exists but is unreadable.</p></li>
-<li><p>2018&#8211;05&#8211;14: Version 1.3 &#8212; Add return code to indicate the input positional parameter does not exist, and update the documentation.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
-<li><p>2018&#8211;08&#8211;15: Version 1.7 &#8212; Return non-empty <code>excpt_cond</code> values only when errors are encountered (i.e., only when <code>rc = -1</code>, and not as warning or information messages).</p></li>
-<li><p>2018&#8211;08&#8211;28: Version 1.8 &#8212; Return empty <code>excpt_cond</code> value only when <code>file_spec</code> exists and is readable.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_uppercase</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function determines whether the input positional parameter <code>char</code> is set in upper case letter or not.</p></li>
-<li><p><strong>Algorithm:</strong> This function checks whether the <code>BYTE</code> value of the character <code>char</code> lies in the range [65, 90].</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = is_uppercase(char, DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>char {STRING} [I]:</code> The single character to be tested.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns <code>1</code> if the input positional parameter is set in upper case, <code>0</code> otherwise, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns an error code larger than <code>1</code> and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>char</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>char</code> is not of length 1.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong> None.</p></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; res = is_uppercase(&#39;C&#39;, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, &#39;res = &#39;, res, &#39; excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-res =        1 excpt_cond = &gt;&lt;
-
-IDL&gt; res = is_uppercase(&#39;c&#39;, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, &#39;res = &#39;, res, &#39; excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-res =        0 excpt_cond = &gt;&lt;</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;18: Version 1.0 &#8212; Initial release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
-</ul></li>
-</ul>
-<h2>is_writable</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function reports whether the input positional parameter <code>file_spec</code> exists or not, and if it exists, whether it points to a directory or file that is writable or not.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> internal functions to determine the status of the directory or file provided as input positional parameter <code>file_spec</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = is_writable(file_spec, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>file_spec {STRING} [I]:</code> The file specification (path and/or file name) to be checked for writing.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
-<li><p><strong>Outcome:</strong> This function returns</p>
-<ul>
-<li><p><code>1</code> if the file or directory provided as the input positional parameter <code>file_spec</code> exists and is writable; the output keyword parameter <code>excpt_cond</code> is set to a null string.</p></li>
-<li><p><code>0</code> if this file or directory exists but is unwritable; the output keyword parameter <code>excpt_cond</code> contains a message to this effect.</p></li>
-<li><p><code>-1</code> if an exception condition has been detected; the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered.</p></li>
-<li><p><code>-2</code> if this file or directory does not exist; the output keyword parameter <code>excpt_cond</code> contains a message to this effect.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>file_spec</code> is not of type <code>STRING</code>.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong></p>
-<ul>
-<li><p><strong>Note 1:</strong> Since the purpose of this function is to check the existence and writability of the input positional parameter <code>file_spec</code>, all tests are performed irrespective of the setting of the input keyword parameter <code>DEBUG</code>. The keywords <code>DEBUG</code> and <code>EXCPT_COND</code> are included for consistency, and to allow reporting of the exception condition if one is encountered.</p></li>
-<li><p><strong>Note 2:</strong> If the input positional parameter <code>file_spec</code> does not contain a path component (absolute or relative), the file is assumed to be located in the current working directory.</p></li>
-</ul></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; rc = is_writable(&#39;~/Desktop&#39;, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-1,   &gt;&lt;
-
-IDL&gt; rc = is_writable(&#39;~/Codes/Test_dir/unwritable.txt&#39;,
-   /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-0,   &gt;The file ~/Codes/Test_dir/unwritable.txt exists but is
-   unwritable.&lt;
-
-IDL&gt; rc = is_writable(3, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, rc, &#39;,   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
--1,   &gt;Error 110 in IS_WRITABLE: Input positional parameter
-   file_spec is not of type string.&lt;</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;07&#8211;05: Version 0.9 &#8212; Initial release.</p></li>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;04&#8211;24: Version 1.2 &#8212; Update the function to return <code>0</code> but no exception condition if the input positional parameter exists but is unwritable.</p></li>
-<li><p>2018&#8211;05&#8211;13: Version 1.3 &#8212; Add return code to indicate the input positional parameter does not exist, and update the documentation.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2018&#8211;06&#8211;22: Version 1.6 &#8212; Improve diagnostic messages.</p></li>
-<li><p>2018&#8211;08&#8211;15: Version 1.7 &#8212; Return non-empty <code>excpt_cond</code> values only when errors are encountered (i.e., only when <code>rc = -1</code>, and not as warning or information messages).</p></li>
-<li><p>2018&#8211;08&#8211;28: Version 1.8 &#8212; Return empty <code>excpt_cond</code> value only when <code>file_spec</code> exists and is writable.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>iso2jul</h2>
@@ -1614,6 +1361,7 @@ juldate = 2434542.0417</code></pre></li>
 <li><p>2018&#8211;11&#8211;22: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2018&#8211;11&#8211;30: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>jul2iso</h2>
@@ -1672,66 +1420,7 @@ isodate = 2018-11-21T09:36:00Z</code></pre></li>
 <li><p>2018&#8211;11&#8211;30: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;02&#8211;24: Version 2.01 &#8212; Documentation update.</p></li>
-</ul></li>
-</ul>
-<h2>last_char</h2>
-<ul>
-<li><p><strong>Purpose:</strong> This function returns the last character of the input positional parameter <code>arg</code>.</p></li>
-<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in string functions to extract the desired character.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = last_char(arg, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
-<li><p><strong>Positional parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>arg {STRING} [I]:</code> An arbitrary string expression.</p></li>
-</ul></li>
-<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
-<ul>
-<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
-<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
-</ul></li>
-<li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
-<li><p><strong>Outcome:</strong></p>
-<ul>
-<li><p>If no exception condition has been detected, this function returns the last character of the input positional parameter, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-<li><p>If an exception condition has been detected, this function returns a null string, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
-</ul></li>
-<li><p><strong>Exception conditions:</strong></p>
-<ul>
-<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Positional parameter <code>arg</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Positional parameter <code>arg</code> does not contain at least one character.</p></li>
-</ul></li>
-<li><p><strong>Dependencies:</strong></p>
-<ul>
-<li><p><code>is_string.pro</code></p></li>
-<li><p><code>strstr.pro</code></p></li>
-</ul></li>
-<li><p><strong>Remarks:</strong></p>
-<ul>
-<li><p><strong>Note 1:</strong> This may be useful, for instance, to check whether a directory name is terminated by the proper path segment separator character for the current operating system.</p></li>
-</ul></li>
-<li><p><strong>Examples:</strong></p>
-<pre><code>IDL&gt; path = &#39;/Volumes/MISR_Data&#39;
-IDL&gt; PRINT, last_char(path)
-a
-
-IDL&gt; pi = 3.14
-IDL&gt; res = last_char(pi, /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, &#39;res = &gt;&#39; + res + &#39;&lt; and excpt_cond = &#39; + excpt_cond
-res = &gt;&lt; and excpt_cond = Error 110 in LAST_CHAR:
-   Input positional parameter must be of type STRING.
-
-IDL&gt; PRINT, last_char(xyz)
-% STRLEN: Variable is undefined: ARG.
-% Execution halted at: LAST_CHAR...
-%                      $MAIN$</code></pre></li>
-<li><p><strong>References:</strong> None.</p></li>
-<li><p><strong>Versioning:</strong></p>
-<ul>
-<li><p>2017&#8211;11&#8211;20: Version 1.0 &#8212; Initial public release.</p></li>
-<li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
-<li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
-<li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>make_bytemap</h2>
@@ -1755,7 +1444,7 @@ IDL&gt; PRINT, last_char(xyz)
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The output graphic file is saved in the location specified by the input positional parameter <code>save_spec</code>.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The output graphic file is saved in the location specified by the input positional parameter <code>save_spec</code>, and the implied directory path is created if it does not exist.</p></li>
 <li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output graphic file is not generated and is not saved.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -1769,9 +1458,13 @@ IDL&gt; PRINT, last_char(xyz)
 <li><p>Error 160: Input positional parameter <code>good_vals_cols</code> contains none or more than 256 values.</p></li>
 <li><p>Error 170: Input positional parameters <code>good_vals</code> and <code>good_vals_cols</code> must have the same dimensions.</p></li>
 <li><p>Error 180: At least one of the specified color names is unrecognized.</p></li>
+<li><p>Error 190: The input positional parameter <code>save_spec</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 400: The output folder <code>save_fpath</code> is unwritable.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>is_writable_dir.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
@@ -1787,7 +1480,7 @@ IDL&gt; FOR i = 0, 146 DO byte_array[i, *] = BYTE(i)
 IDL&gt; good_vals = BINDGEN(147)
 IDL&gt; good_vals_cols = TAG_NAMES(!COLOR)
 IDL&gt; rc = make_bytemap(byte_array, good_vals, $
-   good_vals_cols, &#39;/Users/michel/Desktop/test.png&#39;, $
+   good_vals_cols, &#39;~/Desktop/test.png&#39;, $
    /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, &#39;rc = &#39; + strstr(rc) + &#39; and excpt_cond = &gt;&#39; + $
    excpt_cond + &#39;&lt;&#39;
@@ -1802,17 +1495,18 @@ rc = 0 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p>2018&#8211;08&#8211;10: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2018&#8211;09&#8211;25: Version 1.1 &#8212; Move the code line to document the nature and properties of the input positional parameter <code>byte_array</code> before the initial testing block to ensure the function works when the <code>DEBUG</code> option is not used.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>oom</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This routine returns an integer value representing the order of magnitude of the input positional parameter <code>arg</code> in the optional logarithmic base <code>base</code> (10 by default).</p></li>
-<li><p><strong>Algorithm:</strong> The input positional parameters <code>arg</code> and the input keyword parameter <code>base</code> (if provided) must both be strictly positive numbers, in which case this function returns <code>FLOOR(alogb(arg, base))</code>. If either is not strictly positive, the function returns <code>NaN</code> and raises an exception condition.</p></li>
+<li><p><strong>Purpose:</strong> This routine returns an integer value representing the order of magnitude of the absolute value of the input positional parameter <code>arg</code> in the optional logarithmic base <code>base</code> (10 by default).</p></li>
+<li><p><strong>Algorithm:</strong> If the input positional parameter <code>arg</code> is not null and if the optional keyword parameter <code>base</code> is strictly positive, the function returns <code>FLOOR(alogb(ABS(arg), base))</code>. In all other cases, the function returns <code>NaN</code> and raises an exception condition.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = oom(arg, BASE = base, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>arg</code> is an arbitrary but strictly positive numeric expression.</p></li>
+<li><p><code>arg</code> is an arbitrary but non-null numeric expression.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
@@ -1823,26 +1517,30 @@ rc = 0 and excpt_cond = &gt;&lt;</code></pre></li>
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns the order of magnitude of input positional parameter <code>arg</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected, this function returns the order of magnitude of the absolute value of the input positional parameter <code>arg</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>If an exception condition has been detected, this function returns <code>NaN</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Positional parameter <code>arg</code> is not of type numeric.</p></li>
-<li><p>Error 120: Positional parameter <code>arg</code> is not strictly positive.</p></li>
-<li><p>Error 130: Keyword parameter <code>base</code> is not of type numeric.</p></li>
-<li><p>Error 140: Keyword parameter <code>base</code> is not strictly positive.</p></li>
-<li><p>Error 200: An exception condition occurred in <code>alogb.pro</code>.</p></li>
+<li><p>Error 120: Input keyword parameter <code>base</code> is specified but not numeric.</p></li>
+<li><p>Error 130: Input keyword parameter <code>base</code> is not strictly positive.</p></li>
+<li><p>Error 200: Scalar input keyword parameter <code>arg</code> is indistinguishable from <code>0.0</code>.</p></li>
+<li><p>Error 210: An exception condition occurred in function <code>alogb.pro</code>.</p></li>
+<li><p>Error 220: At least one of the elements of the array input positional parameter <code>arg</code> is indistinguishable from <code>0.0</code>.</p></li>
+<li><p>Error 230: An exception condition occurred in function <code>alogb.pro</code>.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>alogb.pro</code></p></li>
+<li><p><code>is_numeric.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> Positional parameter <code>arg</code> and keyword parameter <code>base</code> must both be strictly positive numbers. If the order of magnitude of a negative number is required, provide the absolute value of that number as the input positional parameter to <code>oom</code>.</p></li>
-<li><p><strong>Note 2:</strong> Input positional parameters <code>arg</code> and <code>base</code> can be of any numeric type, including <code>COMPLEX</code> or <code>DOUBLE</code>; the result will be of the same type as <code>arg</code>.</p></li>
+<li><p><strong>Note 1:</strong> The input positional parameter <code>arg</code> can be a scalar or an array.</p></li>
+<li><p><strong>Note 2:</strong> If the input positional parameter <code>arg</code> is of type <code>COMPLEX</code>, the function returns the order of magnitude of the modulus of the complex number, which can be larger than either of the components of that number: See the examples below.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; a = 99.9
@@ -1853,20 +1551,23 @@ IDL&gt; b = 100.0
 IDL&gt; PRINT, oom(b)
            2
 
-IDL&gt; c = 123
-IDL&gt; PRINT, oom(c, BASE = 5)
-           2
+IDL&gt; c = -1234.56
+IDL&gt; PRINT, oom(c)
+           3
 
-IDL&gt; d = 123.45
-IDL&gt; PRINT, oom(e, BASE = 2.8)
-           4
-
-IDL&gt; f = -12
-IDL&gt; PRINT, oom(f, /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; d = 1.0E-50
+IDL&gt; PRINT, oom(d)
+  2147483647
+% Program caused arithmetic error: Floating divide by 0
+% Program caused arithmetic error: Floating illegal operand
+IDL&gt; PRINT, oom(d, /DEBUG, EXCPT_COND = excpt_cond)
           NaN
-IDL&gt; PRINT, excpt_cond
-Error 120 in routine OOM: Input positional parameter
-   arg is not strictly positive.</code></pre></li>
+IDL&gt; PRINT, &#39;excpt_cond = &#39; + excpt_cond
+excpt_cond = Error 200 in OOM: Scalar input positional parameter arg is indistinguishable from 0.0.
+
+IDL&gt; e = [234.0, -32.1]
+IDL&gt; PRINT, oom(e)
+       2       1</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -1876,35 +1577,36 @@ Error 120 in routine OOM: Input positional parameter
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Update the function to handle negative input positional parameters <code>arg</code>, update the documentation, adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2019&#8211;10&#8211;05: Version 2.1.1 &#8212; Simplify and update the code to handle array arguments, update the documentation.</p></li>
 </ul></li>
 </ul>
 <h2>percentile</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function estimates the sample value <code>thresh</code> of the specified percentile <code>per</code> in the input <code>array</code> and returns some basic statistical information on that <code>array</code>, which may contain missing values and may but does not need to be sorted in ascending order.</p></li>
-<li><p><strong>Algorithm:</strong> This function determines the sample value corresponding to the desired percentile <code>per</code> by either selecting a particular item of <code>array</code>, if it corresponds exactly, or interpolating between two <code>array</code> sample values otherwise. If missing values may be present in <code>array</code> (i.e., input keyword parameter <code>AMISS</code> is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
-<li><p><strong>Syntax:</strong> <code>res = percentile(per, array, amin, amax, thresh, $</code><br />
-<code>AMISS = amiss, IGN_BEL_STR = ign_bel_str, $</code><br />
-<code>IGN_ABO_STR = ign_abo_str, ASORT = asort, $</code><br />
-<code>COUNT = count, DOUBLE = double, $</code><br />
-<code>DEBUG = debug, EXCPT_COND = excpt_cond</code>)</p></li>
+<li><p><strong>Purpose:</strong> This function estimates the sample value <code>thresh</code> of the specified percentile <code>per</code> in the input <code>array</code> and returns some basic statistical information on that <code>array</code>, which may contain missing values and does not need to be sorted prior to the call.</p></li>
+<li><p><strong>Algorithm:</strong> This function determines the sample value corresponding to the desired percentile <code>per</code> by either selecting a particular item of <code>array</code>, if it corresponds exactly, or interpolating between two <code>array</code> sample values otherwise. If missing values may be present in <code>array</code> (i.e., input keyword parameter <code>AMISS</code> is set), then</p>
+<ul>
+<li><p>the range of valid values must be specified by setting the input keyword parameters <code>ignore_below</code> and <code>ignore_above</code> (missing values are deemed to lie outside of that range), and</p></li>
+<li><p>the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within that range, as opposed to within the original <code>array</code>.</p></li>
+</ul></li>
+<li><p><strong>Syntax:</strong> <code>rc = percentile(per, array, amin, amax, thresh, $</code><br />
+<code>AMISS = amiss, IGNORE_BELOW = ignore_below, $</code><br />
+<code>IGNORE_ABOVE = ignore_above, COUNT = count, $</code><br />
+<code>DOUBLE = double, DEBUG = debug, EXCPT_COND = excpt_cond</code>)</p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>per {FLOAT} [I]:</code> The desired percentile, a decimal number between 0.0 and 1.0.</p></li>
+<li><p><code>per {FLOAT} [I]:</code> The desired percentile, a decimal number within the range <code>[0.0, 1.0]</code>.</p></li>
 <li><p><code>array {FLOAT array} [I]:</code> The statistical sample from which the percentile needs to be estimated.</p></li>
-<li><p><code>amin {FLOAT} [O]:</code> The minimum value of array, within the allowed range<br />
-<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these input positional parameters are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
-<li><p><code>amax {FLOAT} [O]:</code> The maximum value of array, within the allowed range<br />
-<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>, if these input positional parameters are provided, or within the whole array otherwise. <code>DOUBLE</code> precision equivalents are used if required.</p></li>
-<li><p><code>thresh {FLOAT} [O]:</code> The threshold value in the given array, within the allowed range <code>[FLOAT(ign_bel_str),FLOAT(ign_abo_str)]</code>, if specified, such that <code>per</code> percents of the sorted array are below or equal to thresh.</p></li>
+<li><p><code>amin {FLOAT} [O]:</code> The minimum value of array. If the optional input keyword parameters <code>AMISS</code> is set, this minimum value is for the valid values contained within the allowed range <code>[ignore_below, ignore_above]</code>.</p></li>
+<li><p><code>amax {FLOAT} [O]:</code> The maximum value of array. If the optional input keyword parameters <code>AMISS</code> is set, this maximum value is for the valid values contained within the allowed range <code>[ignore_below, ignore_above]</code>.</p></li>
+<li><p><code>thresh {FLOAT} [O]:</code> The threshold value in the given array, within the allowed range <code>[ignore_below, ignore_above]</code>, if specified, such that <code>per</code> percents of the sorted array elements are smaller than or equal to <code>thresh</code>.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>AMISS = amiss {INT} [I]:</code> Flag indicating whether the array contains (<code>1</code>) or does not contain (<code>0</code>) missing values. If missing values are present in <code>array</code>, they are assumed to be strictly smaller than the numerical equivalent of <code>ign_bel_str</code> or strictly larger than the numerical equivalent of <code>ign_abo_str</code>.</p></li>
-<li><p><code>IGN_BEL_STR = ign_bel_str {STRING} [I]:</code> Threshold value provided as a string: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly lower than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>AMISS</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
-<li><p><code>IGN_ABO_STR = ign_abo_str {STRING} [I]:</code> Threshold value provided as a string: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly higher than the numerical equivalent to that string are ignored for the purpose of computing statistics and <code>thresh</code>. If the <code>AMISS</code> keyword has not been set, this keyword is ignored. See the notes below for additional information.</p></li>
-<li><p><code>ASORT = asort {INT} [I]:</code> Flag indicating whether <code>array</code> is already sorted in ascending order (<code>1</code>) or not (<code>0</code>).</p></li>
-<li><p><code>COUNT = count {LONG} [O]:</code> If the keyword parameter <code>AMISS</code> is not set, <code>count</code> is the number of elements of <code>array</code>. If the keyword parameter <code>AMISS</code> is set, <code>count</code> reports on the number of non-missing elements in <code>array</code> that were considered in the estimation of the percentile <code>thresh</code> (i.e., the number of <code>array</code> elements within the range<br />
-<code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>.</p></li>
+<li><p><code>AMISS = amiss {INT} [I]:</code> Flag indicating whether the array contains (<code>1</code>) or does not contain (<code>0</code>) missing values. If missing values are present in <code>array</code>, they are assumed to be strictly smaller than <code>ignore_below</code> or strictly larger than <code>ignore_above</code>.</p></li>
+<li><p><code>IGNORE_BELOW = ignore_below {STRING} [I]:</code> Minimum valid value within the input positional parameter <code>array</code>: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly lower than this value are ignored for the purpose of computing statistics and <code>thresh</code>.</p></li>
+<li><p><code>IGNORE_ABOVE = ignore_above {STRING} [I]:</code> Maximum valid value within the input positional parameter <code>array</code>: If the <code>AMISS</code> keyword has been set, this keyword is mandatory and all array values strictly higher than this value are ignored for the purpose of computing statistics and <code>thresh</code>.</p></li>
+<li><p><code>COUNT = count {LONG} [O]:</code> If the keyword parameter <code>AMISS</code> is not set, <code>count</code> is the number of elements of <code>array</code>. If the keyword parameter <code>AMISS</code> is set, <code>count</code> reports on the number of non-missing elements in <code>array</code> that were considered in the estimation of the percentile <code>thresh</code> (i.e., the number of <code>array</code> elements within the range <code>[ignore_below, ignore_above]</code>.</p></li>
 <li><p><code>DOUBLE = double {INT} [I]:</code> Flag requesting explicitly (<code>1</code>) that computations be carried out in double precision or not (<code>0</code>).</p></li>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
@@ -1912,20 +1614,16 @@ Error 120 in routine OOM: Input positional parameter
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>amin</code>, <code>amax</code> and <code>thresh</code> provide the minimum and maximum values of the input positional parameter <code>array</code> and the desired percentile, respectively.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>amin</code>, <code>amax</code> and <code>thresh</code> provide the minimum and maximum values of the input positional parameter <code>array</code>, as well as the desired percentile, respectively.</p></li>
 <li><p>If an exception condition has been detected, this function returns a non-zero value, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters <code>thresh</code>, <code>amin</code> and <code>amax</code> are set to <code>!VALUES.F_INFINITY</code>.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
-<li><p>Warning 10: Keyword parameter <code>IGN_BEL_STR</code> was provided as numerical value and has been converted to a string. Processing continues.</p></li>
-<li><p>Warning 20: Keyword parameter <code>IGN_ABO_STR</code> was provided as numerical value and has been converted to a string. Processing continues.</p></li>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: The requested percentile is not within [0.0, 1.0].</p></li>
-<li><p>Error 120: Input positional parameter <code>array</code> is not an array or not numeric.</p></li>
-<li><p>Error 130: Input positional parameter <code>array</code> contains less than 4 elements.</p></li>
-<li><p>Error 140: Keyword AMISS was set but keyword <code>IGN_BEL_STR</code> was not.</p></li>
-<li><p>Error 150: Keyword AMISS was set but keyword <code>IGN_ABO_STR</code> was not.</p></li>
-<li><p>Error 160: Input positional parameter <code>array</code> contains less than 2 non-missing values.</p></li>
+<li><p>Error 110: The requested percentile is not a number within the range <code>[0.0, 1.0]</code>.</p></li>
+<li><p>Error 120: Input positional parameter <code>array</code> is not a numeric array.</p></li>
+<li><p>Error 130: Input keyword parameter <code>AMISS</code> is set while keywords <code>IGNORE_BELOW</code> and <code>IGNORE_ABOVE</code> are both null.</p></li>
+<li><p>Error 140: Input positional parameter <code>array</code> contains fewer than 3 valid elements.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -1935,29 +1633,19 @@ Error 120 in routine OOM: Input positional parameter
 <li><p><strong>Remarks:</strong></p>
 <ul>
 <li><p><strong>Note 1:</strong> The input positional parameter <code>array</code> can be multi-dimensional, but the resulting <code>thresh</code> applies to all elements of <code>array</code>.</p></li>
-<li><p><strong>Note 2:</strong> The keyword parameters <code>ign_bel_str</code> and <code>ign_abo_str</code> must be provided as strings because <code>IDL</code> interprets a null value as meaning that this keyword is NOT set (rather than being set to a null value).</p></li>
-<li><p><strong>Note 3:</strong> If missing values may be present in <code>array</code> (i.e., input keyword parameter <code>AMISS</code> is set), the output keyword parameters <code>amin</code> and <code>amax</code> report the minimum and maximum valid values within the allowed range <code>[FLOAT(ign_bel_str), FLOAT(ign_abo_str)]</code>; otherwise <code>amin</code> and <code>amax</code> report the minimum and maximum values within the entire <code>array</code>.</p></li>
+<li><p><strong>Note 2:</strong> If the input keyword parameter <code>AMISS</code> is set, the keyword parameters <code>ignore_below</code> and <code>ignore_above</code> are required. At least one of them must be set explicitly to a non-zero value, otherwise all values are considered missing.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; a = [1, 7, 3, -99, 4, 5, -99, 9, 6, 2, 8]
 IDL&gt; PRINT, N_ELEMENTS(a), MIN(a), MAX(a)
           11     -99       9
-IDL&gt; res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
-   IGN_BEL_STR = &#39;0&#39;, IGN_ABO_STR = &#39;100&#39;, COUNT = count, $
+IDL&gt; rc = percentile(0.5, a, amin, amax, thresh, /AMISS, $
+   IGNORE_BELOW = &#39;0&#39;, IGNORE_ABOVE = &#39;100&#39;, COUNT = count, $
    /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, res, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
+IDL&gt; PRINT, rc, &#39;   &gt;&#39; + excpt_cond + &#39;&lt;&#39;
        0   &gt;&lt;
 IDL&gt; PRINT, thresh, count, amin, amax
-       5           9       1       9
-
-IDL&gt; res = percentile(0.5, a, amin, amax, thresh, /AMISS, $
-IDL&gt;    IGN_BEL_STR = &#39;0&#39;, IGN_ABO_STR = 100, COUNT = count, $
-&gt;    /DEBUG, EXCPT_COND = excpt_cond)
-IDL&gt; PRINT, thresh, count, amin, amax
-       5           9       1       9
-IDL&gt; PRINT, excpt_cond
-Warning 20 in PERCENTILE: Keyword IGN_ABO_STR, provided as
-numerical value was converted to a STRING. Processing continues.</code></pre></li>
+       5           9       1       9</code></pre></li>
 <li><p><strong>References:</strong></p>
 <ul>
 <li><p>Web page<br />
@@ -1975,24 +1663,23 @@ visited on 30 Oct 2017.</p></li>
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Update and simplify the function, adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>round_dec</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function rounds the input positional parameter <code>arg</code> to a new representation with only <code>n_dec</code> significant decimals.</p></li>
-<li><p><strong>Algorithm:</strong> This function implements the following rules:</p>
+<li><p><strong>Purpose:</strong> This function returns a <code>STRING</code> representation of the input positional parameter <code>arg</code>, rounded to <code>n_dec</code> decimals.</p></li>
+<li><p><strong>Algorithm:</strong> If the input positional parameter <code>arg</code></p>
 <ul>
-<li><p>If <code>arg</code> is of type <code>BYTE</code> (code 1), <code>INT</code> (code 2), <code>LONG</code> (code 3), <code>UINT</code> (code 12), <code>ULONG</code> (code 13), <code>LONG64</code> (code 14), or <code>ULONG64</code> (code 15), the function returns the input positional parameter <code>arg</code> unmodified.</p></li>
-<li><p>If <code>arg</code> is of type <code>FLOAT</code> (code 4), the function returns the desired output provided the total number of significant digits of the input positional parameter does not exceed 6. The accuracy of the result for longer input positional parameters cannot be guaranteed.</p></li>
-<li><p>If <code>arg</code> is of type <code>DOUBLE</code> (code 5), the function returns the desired output provided the total number of significant digits of the input positional parameter does not exceed 15. The accuracy of the result for longer input positional parameters cannot be guaranteed.</p></li>
-<li><p>If <code>arg</code> is of a numeric type different than those mentioned above, the function returns <code>NaN</code>.</p></li>
-<li><p>If <code>n_dec</code> is not of one of the numeric types, the function returns the value <code>NaN</code>; if <code>n_dec</code> is a non-integer numeric expression, its <code>INT</code> value, as returned by the <code>FIX</code> built-in function is used.</p></li>
+<li><p>is of type <code>FLOAT</code>, <code>DOUBLE</code>, <code>COMPLEX</code> or <code>DCOMPLEX</code>, the function returns a <code>STRING</code> representation of <code>arg</code> with the specified number of decimal places;</p></li>
+<li><p>is of one of the integer types, the function returns <code>arg</code> unchanged.</p></li>
+<li><p>is not numeric, the function returns <code>NaN</code>.</p></li>
 </ul></li>
 <li><p><strong>Syntax:</strong> <code>res = round_dec(arg, n_dec, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond</code>)</p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>arg {Number} [I]:</code> An arbitrary expression of type <code>FLOAT</code> or <code>DOUBLE</code>. Integer values are tolerated (the function returns the input unmodified). If <code>arg</code> is an array, each of its elements will be treated in the same way.</p></li>
+<li><p><code>arg {Number} [I]:</code> An arbitrary numeric expression, typically of one of the types <code>FLOAT</code>, <code>DOUBLE</code>, <code>COMPLEX</code> or <code>DCOMPLEX</code>. Integer values are tolerated (the function returns the input unmodified).</p></li>
 <li><p><code>n_dec {INT} [I]:</code> The desired number of decimal digits in the result.</p></li>
 </ul></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
@@ -2000,43 +1687,48 @@ visited on 30 Oct 2017.</p></li>
 <li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
 <li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
 </ul></li>
-<li><p><strong>Returned value type:</strong> <code>Number</code> or <code>NaN</code>.</p></li>
+<li><p><strong>Returned value type:</strong> <code>STRING</code>, or <code>Number</code> or <code>NaN</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected and the input positional parameter <code>arg</code> is of one of the <code>INTEGER</code> types, this function returns the value <code>arg</code> itself and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
+<li><p>If no exception condition has been detected and the type of the input positional parameter <code>arg</code> is <code>INTEGER</code>, <code>COMPLEX</code>, or one of the compound data types, this function returns the value <code>arg</code> itself and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>If no exception condition has been detected and the input positional parameter <code>arg</code> is either of type <code>FLOAT</code> or <code>DOUBLE</code>, this function returns a numeric approximation of the input positional parameter <code>arg</code>, rounded to <code>n_dec</code> significant decimals, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 <li><p>If an exception condition has been detected, this function returns <code>NaN</code>, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
-<li><p>Error 110: Input positional parameter <code>n_dec</code> must be numeric.</p></li>
-<li><p>Error 120: Input positional parameter <code>arg</code> cannot be rounded because it is not numeric or <code>COMPLEX</code>.</p></li>
+<li><p>Error 110: Input positional parameter <code>arg</code> must be numeric.</p></li>
+<li><p>Error 120: Input positional parameter <code>n_dec</code> must be numeric.</p></li>
+<li><p>Error 130: Input positional parameter <code>n_dec</code> must be a scalar.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>is_scalar.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
 <li><p><code>type_of.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> Floating point numbers often cannot be represented internally with an exact number of decimals, hence, after rounding off, the returned number is the closest to the desired number but may still contain arbitrary digits in less significant places.</p></li>
-<li><p><strong>Note 2:</strong> If the number of required decimals exceeds the inherent precision of the input number, this function returns a result equal to the input <code>arg</code>. See the examples below.</p></li>
+<li><p><strong>Note 1:</strong> The returned (<code>STRING</code>) value can be converted back to a numeric expression using the <code>IDL</code> built-in functions <code>FLOAT</code> and <code>DOUBLE</code>, for instance.</p></li>
+<li><p><strong>Note 2:</strong> The input positional parameter <code>arg</code> can be a scalar or an array.</p></li>
+<li><p><strong>Note 3:</strong> If the required number of decimals <code>n_dec</code> exceeds the number of decimals provided in the input positional parameter <code>arg</code>, the result is padded with zeros.</p></li>
+<li><p><strong>Note 4:</strong> If the required number of decimals <code>n_dec</code> exceeds the inherent precision of the input number, this function returns a result equal to the input <code>arg</code>. See the examples below.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; arg = 12.345678
 IDL&gt; n_dec = 2
 IDL&gt; res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, &#39;arg = &#39;, arg, &#39;n_dec = &#39;, n_dec, &#39;res = &#39;, res, $
-   FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)&#39;
-arg = 12.3456783   n_dec = 2   res = 12.3500004
+   FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, A)&#39;
+arg =            12.3456783   n_dec =   2   res = 12.35
 
 IDL&gt; arg = 12.987654
 IDL&gt; n_dec = 1
 IDL&gt; res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, &#39;arg = &#39;, arg, &#39;n_dec = &#39;, n_dec, &#39;res = &#39;, res, $
-   FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, F18.7)&#39;
-arg = 12.9876537   n_dec = 1   res = 13.0000000
+   FORMAT = &#39;(A6, 3X, F18.7, 3X, A8, I3, 3X, A6, A)&#39;
+arg =            12.9876537   n_dec =   1   res = 13.0
 
 IDL&gt; arg = [1.23456, 2.34567]
 IDL&gt; n_dec = 1
@@ -2044,7 +1736,14 @@ IDL&gt; res = round_dec(arg, n_dec, /DEBUG, EXCPT_COND = excpt_cond)
 IDL&gt; PRINT, arg
       1.23456      2.34567
 IDL&gt; PRINT, res
-      1.20000      2.30000</code></pre></li>
+      1.20000      2.30000
+
+IDL&gt; arg = [DCOMPLEX(12.345678, -98.432101), $
+   DCOMPLEX(-34.567890, 87.543215)]
+IDL&gt; n_dec = 2
+IDL&gt; res = round_dec(arg, n_dec)
+IDL&gt; PRINT, &#39;res = &#39; + res
+      res = (12.35, -98.43) res = (-34.57, 87.54)</code></pre></li>
 <li><p><strong>References:</strong> None.</p></li>
 <li><p><strong>Versioning:</strong></p>
 <ul>
@@ -2053,13 +1752,15 @@ IDL&gt; PRINT, res
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;04&#8211;17: Version 2.01 &#8212; Update the code to always round the decimal part of the input argument to 64-bit integers.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Improve the algorithm to handle arrays and <code>COMPLEX</code> arguments, update the documentation, adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2019&#8211;10&#8211;05: Version 2.1.1 &#8212; Update the code to correctly handle a null argument.</p></li>
 </ul></li>
 </ul>
 <h2>set_cap</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function capitalizes the first word, and optionally each word or all characters, of the input positional parameter <code>arg</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This function scans the input positional parameter <code>arg</code> to identify the first valid letter and capitalizes it. This operation can also be optionally performed on each word (continuous sequence of letters) or on all characters.</p></li>
-<li><p><strong>Syntax:</strong> <code>rc = set_cap, arg, $</code><br />
+<li><p><strong>Syntax:</strong> <code>res = set_cap, arg, $</code><br />
 <code>ALLCHARS = allchars, ALLWORDS = allwords, $</code><br />
 <code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong></p>
@@ -2080,7 +1781,7 @@ IDL&gt; PRINT, res
 <ul>
 <li><p>If neither of the optional keyword parameters <code>ALLCHARS</code> and <code>ALLWORDS</code> are set (default), the first letter of the first word of <code>arg</code> is set in upper case.</p></li>
 <li><p>If the optional keyword parameter <code>ALLCHARS</code> is set, all letters of <code>arg</code> are set in upper case.</p></li>
-<li><p>If the optional keyword parameter <code>ALLWORDS</code> is set, each word of <code>arg</code> is set in upper case.</p></li>
+<li><p>If the optional keyword parameter <code>ALLWORDS</code> is set, the first letter of each word of <code>arg</code> is set in upper case.</p></li>
 <li><p>If both optional keyword parameters <code>ALLCHARS</code> and <code>ALLWORDS</code> are set, the former takes precedence and all letters of <code>arg</code> are set in upper case.</p></li>
 <li><p>The input positional parameter <code>arg</code> is left unmodified.</p></li>
 </ul>
@@ -2095,6 +1796,7 @@ IDL&gt; PRINT, res
 <li><p><strong>Dependencies:</strong></p>
 <ul>
 <li><p><code>is_array.pro</code></p></li>
+<li><p><code>is_letter.pro</code></p></li>
 <li><p><code>is_string.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
@@ -2121,6 +1823,7 @@ South Africa United States</code></pre></li>
 <li><p>2018&#8211;12&#8211;02: Version 0.9 &#8212; Initial release.</p></li>
 <li><p>2018&#8211;12&#8211;12: Version 1.0 &#8212; Initial public release.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>set_value_range</h2>
@@ -2167,12 +1870,9 @@ IDL&gt; PRINT, res
 IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
 excpt_cond = &gt;&lt;
 
-IDL&gt; res = set_value_range(-2.5, 12.7, $
-   /DEBUG, EXCPT_COND = excpt_cond)
+IDL&gt; res = set_value_range(-2.5, 12.7)
 IDL&gt; PRINT, res
      -10.0000      20.0000
-IDL&gt; PRINT, &#39;excpt_cond = &gt;&#39; + excpt_cond + &#39;&lt;&#39;
-excpt_cond = &gt;&lt;
 
 IDL&gt; res = set_value_range(15.0, $
    /DEBUG, EXCPT_COND = excpt_cond)
@@ -2189,6 +1889,7 @@ excpt_cond = Error 100 in set_value_range: Routine must be
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>set_year_range</h2>
@@ -2223,6 +1924,8 @@ excpt_cond = Error 100 in set_value_range: Routine must be
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
+<li><p><code>is_numeric.pro</code></p></li>
+<li><p><code>is_scalar.pro</code></p></li>
 <li><p><code>strstr.pro</code></p></li>
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
@@ -2263,6 +1966,7 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>sha256</h2>
@@ -2315,6 +2019,7 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;05&#8211;17: Version 2.01 &#8212; Code simplification (<code>FILE_TEST</code>).</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>strcat</h2>
@@ -2343,9 +2048,8 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <ul>
 <li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
 <li><p>Error 110: Input positional parameter <code>str_array</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 120: Input positional parameter <code>str_array</code> is not an array.</p></li>
-<li><p>Error 130: Input positional parameter <code>sep_char</code> is not of type <code>STRING</code>.</p></li>
-<li><p>Error 140: Input positional parameter <code>sep_char</code> is not a scalar.</p></li>
+<li><p>Error 120: Input positional parameter <code>sep_char</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 130: Input positional parameter <code>sep_char</code> is not a scalar.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -2357,7 +2061,8 @@ excpt_cond = Error 140 in SET_YEAR_RANGE:
 <li><p><strong>Remarks:</strong></p>
 <ul>
 <li><p><strong>Note 1:</strong> The input positional parameter <code>str_array</code> can be multi-dimensional. In the case of a 2D array, the elements are concatenated line by line.</p></li>
-<li><p><strong>Note 1:</strong> The input positional parameter <code>sep_char</code> can be a null string or contain multiple characters.</p></li>
+<li><p><strong>Note 2:</strong> If the input positional parameter <code>str_array</code> is empty or a scalar <code>STRING</code>, this function returns that argument unmodified.</p></li>
+<li><p><strong>Note 3:</strong> The input positional parameter <code>sep_char</code> can be a null string or contain multiple characters.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; a = [&#39;multi&#39;, &#39;spectral&#39;]
@@ -2385,6 +2090,7 @@ res = &gt;P168_O068050_B110&lt;</code></pre></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2018&#8211;12&#8211;04: Version 1.6 &#8212; Convert the input keyword parameter <code>sep_char</code> into the input positional parameter <code>separator</code> to allow concatenation with empty separators.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>strrepeat</h2>
@@ -2445,6 +2151,7 @@ This is a title
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2018&#8211;12&#8211;04: Version 1.6 &#8212; Update the function documentation.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>strstr</h2>
@@ -2483,6 +2190,7 @@ This is a title
 <li><p><strong>Remarks:</strong></p>
 <ul>
 <li><p><strong>Note 1:</strong> The input positional parameter <code>arg</code> can be an array, in which case each array element is converted into a string without any blank space in the front or at the back.</p></li>
+<li><p><strong>Note 2:</strong> Note that if an exception condition is encountered, this function calls itself recursively to output the corresponding message.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; pi = 3.14159
@@ -2519,6 +2227,7 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>today</h2>
@@ -2577,6 +2286,7 @@ IDL&gt; PRINT, res
 <li><p>2018&#8211;01&#8211;15: Version 1.1 &#8212; Implement optional debugging.</p></li>
 <li><p>2019&#8211;01&#8211;04: Version 1.2 &#8212; Add the optional output formats <code>jul</code> and <code>julday</code>.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 <h2>uniq2</h2>
@@ -2600,7 +2310,7 @@ IDL&gt; PRINT, res
 <li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
 <ul>
-<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The output positional parameters <code>out_array_1</code> and <code>out_array_2</code> contain the unique combinations of values of the input positional parameters.</p></li>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> was set and if the optional output keyword parameter <code>EXCPT_COND</code> was provided in the call. The positional parameters <code>out_array_1</code> and <code>out_array_2</code> contain the unique combinations of values of the input positional parameters.</p></li>
 <li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The output positional parameters may be undefined, inexistent, incomplete or useless.</p></li>
 </ul></li>
 <li><p><strong>Exception conditions:</strong></p>
@@ -2618,7 +2328,7 @@ IDL&gt; PRINT, res
 </ul></li>
 <li><p><strong>Remarks:</strong></p>
 <ul>
-<li><p><strong>Note 1:</strong> The input positional parameters <code>in_array_1</code> and <code>in_array_2</code> can be of any alphanumeric type, but must be defined.</p></li>
+<li><p><strong>Note 1:</strong> The positional parameters <code>in_array_1</code> and <code>in_array_2</code> can be of any alphanumeric type, but must be defined.</p></li>
 </ul></li>
 <li><p><strong>Examples:</strong></p>
 <pre><code>IDL&gt; in_array_1 = [1.1, 1.1, 2.2, 2.2, 3.3, 3.3, $
@@ -2642,6 +2352,7 @@ IDL&gt; PRINT, out_array_2
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;02&#8211;28: Version 2.01 &#8212; Documentation update.</p></li>
+<li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
 </body>

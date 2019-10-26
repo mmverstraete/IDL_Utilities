@@ -83,12 +83,9 @@ FUNCTION set_value_range, $
    ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
    ;      excpt_cond = ><
    ;
-   ;      IDL> res = set_value_range(-2.5, 12.7, $
-   ;         /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> res = set_value_range(-2.5, 12.7)
    ;      IDL> PRINT, res
    ;           -10.0000      20.0000
-   ;      IDL> PRINT, 'excpt_cond = >' + excpt_cond + '<'
-   ;      excpt_cond = ><
    ;
    ;      IDL> res = set_value_range(15.0, $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
@@ -112,6 +109,11 @@ FUNCTION set_value_range, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -160,7 +162,7 @@ FUNCTION set_value_range, $
    ;  Initialize the default return code:
    return_code = [-99.9, -99.9]
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -197,14 +199,13 @@ FUNCTION set_value_range, $
    ENDIF
 
    ;  Set the logarithm base to use:
-   base = 10
+   base = 10.0
 
    ;  Set the increment to expand the new range by 1/10 of the actual range
    ;  on either side of the actual range:
    actual_range = max_val - min_val
    oom_act_rng = oom(actual_range, DEBUG = debug, EXCPT_COND = excpt_cond)
-
-   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
+   IF (debug AND (excpt_cond NE '')) THEN BEGIN
       error_code = 130
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          excpt_cond
@@ -219,8 +220,8 @@ FUNCTION set_value_range, $
    IF ((min_val * new_min_val) LT 0.0) THEN BEGIN
       min_range = 0.0
    ENDIF ELSE BEGIN
-      min_range = (FLOOR(new_min_val / (FLOAT(base)^oom_act_rng))) * $
-         (FLOAT(base)^oom_act_rng)
+      min_range = (FLOOR(new_min_val / (base^oom_act_rng))) * $
+         (base^oom_act_rng)
    ENDELSE
 
    ;  Set the new maximum:
@@ -230,8 +231,8 @@ FUNCTION set_value_range, $
    IF ((max_val * new_max_val) LT 0.0) THEN BEGIN
       max_range = 0.0
    ENDIF ELSE BEGIN
-      max_range = (CEIL(new_max_val / (FLOAT(base)^oom_act_rng))) * $
-         (FLOAT(base)^oom_act_rng)
+      max_range = (CEIL(new_max_val / (base^oom_act_rng))) * $
+         (base^oom_act_rng)
    ENDELSE
 
    RETURN, [min_range, max_range]

@@ -70,27 +70,31 @@ FUNCTION chk_ymddate, $
    ;
    ;  *   Error 120: Positional parameter date is not of length 10.
    ;
-   ;  *   Error 130: Positional parameter date does not contain a dash
+   ;  *   Error 130: Positional parameter date cannot be an array.
+   ;
+   ;  *   Error 200: Positional parameter date does not contain a dash
    ;      character.
    ;
-   ;  *   Error 140: Positional parameter date does not contain 2 dash
+   ;  *   Error 210: Positional parameter date does not contain 2 dash
    ;      characters.
    ;
-   ;  *   Error 150: Positional parameter date does not contain 3 elements
+   ;  *   Error 220: Positional parameter date does not contain 3 elements
    ;      separated by 2 dashes.
    ;
-   ;  *   Error 160: Positional parameter date specifies an invalid year.
+   ;  *   Error 230: Positional parameter date specifies an invalid year.
    ;
-   ;  *   Error 170: Positional parameter date specifies an invalid month.
+   ;  *   Error 240: Positional parameter date specifies an invalid month.
    ;
-   ;  *   Error 180: Positional parameter date specifies an invalid day.
-   ;
-   ;  *   Error 200: An exception condition occurred in
+   ;  *   Error 250: An exception condition occurred in
    ;      days_per_month.pro.
+   ;
+   ;  *   Error 260: Positional parameter date specifies an invalid day.
    ;
    ;  DEPENDENCIES:
    ;
    ;  *   days_per_month.pro
+   ;
+   ;  *   is_array.pro
    ;
    ;  *   is_string.pro
    ;
@@ -101,11 +105,14 @@ FUNCTION chk_ymddate, $
    ;  *   NOTE 1: Since the purpose of this function is to check the
    ;      validity of the input positional parameter date, all tests are
    ;      performed irrespective of the setting of the input keyword
-   ;      parameter DEBUG. The keywords DEBUG and EXCPT_COND are included
-   ;      for consistency, and to allow reporting of the exception
-   ;      condition if one is encountered.
+   ;      parameter DEBUG. The optional input keyword DEBUG is included
+   ;      for consistency but its value on input is ignored, while the
+   ;      optional output keyword parameter EXCPT_COND allows reporting of
+   ;      the exception condition if one is encountered.
    ;
-   ;  *   NOTE 2: The month and day elements of the input positional
+   ;  *   NOTE 2: The input positional parameter date cannot be an array.
+   ;
+   ;  *   NOTE 3: The month and day elements of the input positional
    ;      parameter date must be 0-filled to make up a 10-character long
    ;      string; hence a date like 5 Feb 2011 must be provided as
    ;      2011-02-05.
@@ -122,13 +129,13 @@ FUNCTION chk_ymddate, $
    ;      IDL> rc = chk_ymddate('2200-01-01', year, month, day, $
    ;         DEBUG = 1, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, '   >' + excpt_cond + '<'
-   ;           160   >Error 160 in CHK_DATE_YMD: Year 2200 is invalid
+   ;           230   >Error 230 in CHK_YMDDATE: Year 2200 is invalid
    ;            (must be 4 digits long and lie within [1582, 2100]).<
    ;
    ;      IDL> rc = chk_ymddate('1999-02-29', year, month, day, $
    ;         /DEBUG, EXCPT_COND = excpt_cond)
    ;      IDL> PRINT, rc, '   >' + excpt_cond + '<'
-   ;           180   >Error 180 in CHK_DATE_YMD: Day 29 is invalid
+   ;           260   >Error 260 in CHK_YMDDATE: Day 29 is invalid
    ;           (must be 2 digits long and lie within
    ;           [1, #days in the month]).<
    ;      IDL> PRINT, year, month, day
@@ -156,6 +163,11 @@ FUNCTION chk_ymddate, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -204,7 +216,7 @@ FUNCTION chk_ymddate, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -213,7 +225,7 @@ FUNCTION chk_ymddate, $
    month = 0
    day = 0
 
-   ;  Implement all tests: See Note 1 above.
+   ;  Implement all tests on the input positional parameter: See Note 1 above.
 
    ;  Return to the calling routine with an error message if one or more
    ;  positional parameters are missing:
@@ -245,10 +257,19 @@ FUNCTION chk_ymddate, $
    ENDIF
 
    ;  Return to the calling routine with an error message if the input
+   ;  positional parameter 'date' is an array:
+   IF (is_array(date) EQ 1) THEN BEGIN
+      error_code = 130
+      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+         ': Input positional parameter date cannot be an array.'
+      RETURN, error_code
+   ENDIF
+
+   ;  Return to the calling routine with an error message if the input
    ;  positional parameter 'date' does not contain 2 dashes:
    pos1 = STRPOS(date, '-')
    IF (pos1 LE 0) THEN BEGIN
-      error_code = 130
+      error_code = 200
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date does not contain a dash ' + $
          'character.'
@@ -256,7 +277,7 @@ FUNCTION chk_ymddate, $
    ENDIF ELSE BEGIN
       pos2 = STRPOS(date, '-', pos1 + 1)
       IF (pos2 LE 0) THEN BEGIN
-         error_code = 140
+         error_code = 210
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter date does not contain 2 dash ' + $
             'characters.'
@@ -274,7 +295,7 @@ FUNCTION chk_ymddate, $
    ;  positional parameter 'date' is not formatted as a sequence of 3 elements
    ;  separated by 2 dashes (e.g., contains more than 2 dashes):
    IF (nparts NE 3) THEN BEGIN
-      error_code = 150
+      error_code = 220
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Input positional parameter date does not contain 3 elements ' + $
          'separated by 2 dashes.'
@@ -286,7 +307,7 @@ FUNCTION chk_ymddate, $
    IF (((STRLEN(parts[0]) NE 4)) OR $
       (year LT 1582) OR $
       (year GT 2100)) THEN BEGIN
-      error_code = 160
+      error_code = 230
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Year ' + strstr(year) + ' is invalid (must be 4 digits long ' + $
          'and lie within [1582, 2100]).'
@@ -299,7 +320,7 @@ FUNCTION chk_ymddate, $
    IF (((STRLEN(parts[1]) NE 2)) OR $
       (month LT 1) OR $
       (month GT 12)) THEN BEGIN
-      error_code = 170
+      error_code = 240
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Month ' + strstr(month) + $
          ' is invalid (must be 2 digits long and lie within [1, 12]).'
@@ -311,7 +332,7 @@ FUNCTION chk_ymddate, $
    rc = days_per_month(num_days, YEAR = year, $
       DEBUG = debug, EXCPT_COND = excpt_cond)
    IF (rc NE 0) THEN BEGIN
-      error_code = 200
+      error_code = 250
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': ' + excpt_cond
       RETURN, error_code
@@ -322,7 +343,7 @@ FUNCTION chk_ymddate, $
    IF ((STRLEN(parts[2]) NE 2) OR $
       (day LT 1) OR $
       (day GT num_days[month])) THEN BEGIN
-      error_code = 180
+      error_code = 260
       excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
          ': Day ' + strstr(day) + ' is invalid (must be 2 digits long ' + $
          'and lie within [1, #days in the month]).'

@@ -6,21 +6,20 @@ FUNCTION oom, $
 
    ;Sec-Doc
    ;  PURPOSE: This routine returns an integer value representing the
-   ;  order of magnitude of the input positional parameter arg in the
-   ;  optional logarithmic base base (10 by default).
+   ;  order of magnitude of the absolute value of the input positional
+   ;  parameter arg in the optional logarithmic base base (10 by default).
    ;
-   ;  ALGORITHM: The input positional parameters arg and the input keyword
-   ;  parameter base (if provided) must both be strictly positive numbers,
-   ;  in which case this function returns FLOOR(alogb(arg, base)). If
-   ;  either is not strictly positive, the function returns NaN and raises
-   ;  an exception condition.
+   ;  ALGORITHM: If the input positional parameter arg is not null and if
+   ;  the optional keyword parameter base is strictly positive, the
+   ;  function returns FLOOR(alogb(ABS(arg), base)). In all other cases,
+   ;  the function returns NaN and raises an exception condition.
    ;
    ;  SYNTAX: res = oom(arg, BASE = base, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   arg is an arbitrary but strictly positive numeric expression.
+   ;  *   arg is an arbitrary but non-null numeric expression.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -39,11 +38,11 @@ FUNCTION oom, $
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns the order of magnitude of input positional parameter
-   ;      arg, and the output keyword parameter excpt_cond is set to a
-   ;      null string, if the optional input keyword parameter DEBUG is
-   ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      returns the order of magnitude of the absolute value of the
+   ;      input positional parameter arg, and the output keyword parameter
+   ;      excpt_cond is set to a null string, if the optional input
+   ;      keyword parameter DEBUG is set and if the optional output
+   ;      keyword parameter EXCPT_COND is provided.
    ;
    ;  *   If an exception condition has been detected, this function
    ;      returns NaN, and the output keyword parameter excpt_cond
@@ -57,28 +56,41 @@ FUNCTION oom, $
    ;
    ;  *   Error 110: Positional parameter arg is not of type numeric.
    ;
-   ;  *   Error 120: Positional parameter arg is not strictly positive.
+   ;  *   Error 120: Input keyword parameter base is specified but not
+   ;      numeric.
    ;
-   ;  *   Error 130: Keyword parameter base is not of type numeric.
+   ;  *   Error 130: Input keyword parameter base is not strictly
+   ;      positive.
    ;
-   ;  *   Error 140: Keyword parameter base is not strictly positive.
+   ;  *   Error 200: Scalar input keyword parameter arg is
+   ;      indistinguishable from 0.0.
    ;
-   ;  *   Error 200: An exception condition occurred in alogb.pro.
+   ;  *   Error 210: An exception condition occurred in function
+   ;      alogb.pro.
+   ;
+   ;  *   Error 220: At least one of the elements of the array input
+   ;      positional parameter arg is indistinguishable from 0.0.
+   ;
+   ;  *   Error 230: An exception condition occurred in function
+   ;      alogb.pro.
    ;
    ;  DEPENDENCIES:
+   ;
+   ;  *   alogb.pro
+   ;
+   ;  *   is_numeric.pro
    ;
    ;  *   strstr.pro
    ;
    ;  REMARKS:
    ;
-   ;  *   NOTE 1: Positional parameter arg and keyword parameter base must
-   ;      both be strictly positive numbers. If the order of magnitude of
-   ;      a negative number is required, provide the absolute value of
-   ;      that number as the input positional parameter to oom.
+   ;  *   NOTE 1: The input positional parameter arg can be a scalar or an
+   ;      array.
    ;
-   ;  *   NOTE 2: Input positional parameters arg and base can be of any
-   ;      numeric type, including COMPLEX or DOUBLE; the result will be of
-   ;      the same type as arg.
+   ;  *   NOTE 2: If the input positional parameter arg is of type
+   ;      COMPLEX, the function returns the order of magnitude of the
+   ;      modulus of the complex number, which can be larger than either
+   ;      of the components of that number: See the examples below.
    ;
    ;  EXAMPLES:
    ;
@@ -90,20 +102,23 @@ FUNCTION oom, $
    ;      IDL> PRINT, oom(b)
    ;                 2
    ;
-   ;      IDL> c = 123
-   ;      IDL> PRINT, oom(c, BASE = 5)
-   ;                 2
+   ;      IDL> c = -1234.56
+   ;      IDL> PRINT, oom(c)
+   ;                 3
    ;
-   ;      IDL> d = 123.45
-   ;      IDL> PRINT, oom(e, BASE = 2.8)
-   ;                 4
-   ;
-   ;      IDL> f = -12
-   ;      IDL> PRINT, oom(f, /DEBUG, EXCPT_COND = excpt_cond)
+   ;      IDL> d = 1.0E-50
+   ;      IDL> PRINT, oom(d)
+   ;        2147483647
+   ;      % Program caused arithmetic error: Floating divide by 0
+   ;      % Program caused arithmetic error: Floating illegal operand
+   ;      IDL> PRINT, oom(d, /DEBUG, EXCPT_COND = excpt_cond)
    ;                NaN
-   ;      IDL> PRINT, excpt_cond
-   ;      Error 120 in routine OOM: Input positional parameter
-   ;         arg is not strictly positive.
+   ;      IDL> PRINT, 'excpt_cond = ' + excpt_cond
+   ;      excpt_cond = Error 200 in OOM: Scalar input positional parameter arg is indistinguishable from 0.0.
+   ;
+   ;      IDL> e = [234.0, -32.1]
+   ;      IDL> PRINT, oom(e)
+   ;             2       1
    ;
    ;  REFERENCES: None.
    ;
@@ -122,6 +137,15 @@ FUNCTION oom, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Update the function to handle
+   ;      negative input positional parameters arg, update the
+   ;      documentation, adopt revised coding and documentation standards
+   ;      (in particular regarding the assignment of numeric return
+   ;      codes), and switch to 3-parts version identifiers.
+   ;
+   ;  *   2019–10–05: Version 2.1.1 — Simplify and update the code to
+   ;      handle array arguments, update the documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -168,14 +192,15 @@ FUNCTION oom, $
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
    ;  Initialize the default return code:
-   return_code = 0
+   return_code = !VALUES.F_NAN
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
+   IF (~KEYWORD_SET(base)) THEN base = 10.0
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
-   res = MACHAR()
-   smallest = res.XMIN
+   res_mac = MACHAR()
+   smallest = res_mac.XMIN
 
    IF (debug) THEN BEGIN
 
@@ -187,7 +212,7 @@ FUNCTION oom, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
             ' positional parameter(s): arg.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -196,51 +221,78 @@ FUNCTION oom, $
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter arg is not numeric.'
-         RETURN, !VALUES.F_NAN
+         RETURN, return_code
       ENDIF
 
-   ;  Return to the calling routine with an error message if the input
-   ;  positional parameter 'arg' is not strictly positive:
-      IF (arg LT smallest) THEN BEGIN
-         excpt_cond = 'Error 120 in routine ' + rout_name + $
-            ': Input positional parameter arg is not strictly positive.'
-         RETURN, !VALUES.F_NAN
+   ;  Return to the calling routine with an error message if the keyword
+   ;  parameter 'base' is defined and not of a numeric type:
+      IF (KEYWORD_SET(base) AND (is_numeric(base) EQ 0)) THEN BEGIN
+         error_code = 120
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input keyword parameter base is specified but not numeric.'
+         RETURN, return_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if the keyword
+   ;  parameter 'base' is defined and not strictly positive:
+      IF (KEYWORD_SET(base) AND (base LT smallest)) THEN BEGIN
+         error_code = 130
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Input keyword parameter base is not strictly positive.'
+         RETURN, return_code
       ENDIF
    ENDIF
 
-      IF (KEYWORD_SET(base)) THEN BEGIN
+   ;  Ensure that the evaluation is performed on positive input positional
+   ;  parameter(s) arg:
+   absarg = ABS(arg)
 
-         IF (debug) THEN BEGIN
+   ;  Return to the calling routine with an error message if the scalar input
+   ;  positional parameter 'arg' is indistinguishable from 0.0; otherwise
+   ;  compute the order of magnitude of the input argument:
+   IF (is_scalar(absarg) EQ 1) THEN BEGIN
+      IF (debug AND (absarg LT smallest)) THEN BEGIN
+         error_code = 200
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': Scalar input positional parameter arg is indistinguishable ' + $
+            'from 0.0.'
+         RETURN, return_code
+      ENDIF
+      res_oom = FLOOR(alogb(absarg, base, $
+         DEBUG = debug, EXCPT_COND = excpt_cond))
+      IF (debug AND (excpt_cond NE '')) THEN BEGIN
+         error_code = 210
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': ' + excpt_cond
+         RETURN, return_code
+      ENDIF
+   ENDIF ELSE BEGIN
 
-   ;  Return to the calling routine with an error message if the keyword
-   ;  parameter 'base' is of a numeric type:
-            IF (is_numeric(base) EQ 0) THEN BEGIN
-               excpt_cond = 'Error 130 in routine ' + rout_name + $
-                  ': Input positional parameter base is not numeric.'
-               RETURN, !VALUES.F_NAN
-            ENDIF
-
-   ;  Return to the calling routine with an error message if the keyword
-   ;  parameter 'base' is not strictly positive:
-            IF (base LT smallest) THEN BEGIN
-               excpt_cond = 'Error 140 in routine ' + rout_name + $
-                  ': Input positional parameter base is not strictly positive.'
-               RETURN, !VALUES.F_NAN
-            ENDIF
+   ;  Return to the calling routine with an error message if one of the
+   ;  elements of the array input positional parameter 'arg' is
+   ;  indistinguishable from 0.0; otherwise compute the order of magnitude
+   ;  of each element of the input argument:
+      n_elem = N_ELEMENTS(absarg)
+      res_oom = INTARR(n_elem)
+      FOR i = 0, N_ELEMENTS(absarg) - 1 DO BEGIN
+         IF (debug AND (absarg[i] LT smallest)) THEN BEGIN
+            error_code = 220
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': At least one of the elements of the array input ' + $
+               'positional parameter arg is indistinguishable from 0.0.'
+            RETURN, return_code
          ENDIF
-      ENDIF ELSE BEGIN
-         base = 10.0
-      ENDELSE
+         res_oom[i] = FLOOR(alogb(absarg[i], base, $
+            DEBUG = debug, EXCPT_COND = excpt_cond))
+         IF (debug AND (excpt_cond NE '')) THEN BEGIN
+            error_code = 230
+            excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+               ': ' + excpt_cond
+            RETURN, return_code
+         ENDIF
+      ENDFOR
+   ENDELSE
 
-   ;  Compute the order of magnitude of 'arg':
-   res = FLOOR(alogb(arg, base, DEBUG = debug, EXCPT_COND = excpt_cond))
-
-   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
-      excpt_cond = 'Error 200 in routine ' + rout_name + $
-         ': ' + excpt_cond
-      RETURN, !VALUES.F_NAN
-   ENDIF
-
-   RETURN, res
+   RETURN, res_oom
 
 END

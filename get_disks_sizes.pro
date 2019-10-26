@@ -17,9 +17,8 @@ FUNCTION get_disks_sizes, $
    ;  system, extracts the desired information from the outcome, and uses
    ;  it to populate the 2-dimensional output array disks_sizes.
    ;
-   ;  SYNTAX:
-   ;  res = get_disks_sizes(disks_sizes, DIR = dir, PRINTIT = printit, $
-   ;  DEBUG = debug, EXCPT_COND = excpt_cond)
+   ;  SYNTAX: res = get_disks_sizes(disks_sizes, DIR = dir, $
+   ;  PRINTIT = printit, DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -88,6 +87,8 @@ FUNCTION get_disks_sizes, $
    ;
    ;  DEPENDENCIES:
    ;
+   ;  *   get_host_info.pro
+   ;
    ;  *   is_string.pro
    ;
    ;  *   set_white.pro
@@ -97,7 +98,7 @@ FUNCTION get_disks_sizes, $
    ;  REMARKS:
    ;
    ;  *   NOTE 1: This function relies on Linux’s df command, so it will
-   ;      only work within the macOS or Linux environments.
+   ;      only work within the MacOS or Linux environments.
    ;
    ;  *   NOTE 2: The 3 numbers reported for each disk found represent the
    ;      total space, the used space and the remaining available space,
@@ -130,6 +131,11 @@ FUNCTION get_disks_sizes, $
    ;      implement stricter coding standards and improve documentation.
    ;
    ;  *   2019–02–28: Version 2.01 — Documentation update.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -178,7 +184,7 @@ FUNCTION get_disks_sizes, $
    ;  Initialize the default return code:
    return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 

@@ -7,20 +7,19 @@ FUNCTION force_path_sep, $
    ;  PURPOSE: This function trims the input positional parmeter dir_spec
    ;  of any white space at the front and at the end of the string, and
    ;  ensures that it is terminated by the path segment separator
-   ;  character for the current operating system. If the input positional
-   ;  parmeter dir_spec is already terminated by that character, the
-   ;  function returns the input positional parameter.
+   ;  character for the current operating system, if it is not already
+   ;  present.
    ;
-   ;  ALGORITHM: This function relies on IDL built-in functions STRTRIM()
-   ;  and PATH_SEP() to deliver its outcome.
+   ;  ALGORITHM: This function relies on IDL built-in functions STRTRIM
+   ;  and PATH_SEP to deliver its outcome.
    ;
-   ;  SYNTAX: res = force_path_sep(dir_spec, $
+   ;  SYNTAX: rc = force_path_sep(dir_spec, $
    ;  DEBUG = debug, EXCPT_COND = excpt_cond)
    ;
    ;  POSITIONAL PARAMETERS [INPUT/OUTPUT]:
    ;
    ;  *   dir_spec {STRING} [I/O]: An arbitrary directory or path
-   ;      specification.
+   ;      specification, used for both input and output.
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
@@ -31,23 +30,24 @@ FUNCTION force_path_sep, $
    ;      Description of the exception condition if one has been
    ;      encountered, or a null string otherwise.
    ;
-   ;  RETURNED VALUE TYPE: STRING.
+   ;  RETURNED VALUE TYPE: INT.
    ;
    ;  OUTCOME:
    ;
    ;  *   If no exception condition has been detected, this function
-   ;      returns the input positional parameter dir_spec duly terminated
-   ;      by the appropriate path separator, and the output keyword
-   ;      parameter excpt_cond is set to a null string, if the optional
-   ;      input keyword parameter DEBUG is set and if the optional output
-   ;      keyword parameter EXCPT_COND is provided.
+   ;      returns 0, and the output keyword parameter excpt_cond is set to
+   ;      a null string, if the optional input keyword parameter DEBUG is
+   ;      set and if the optional output keyword parameter EXCPT_COND is
+   ;      provided in the call. The input and output positional parameter
+   ;      dir_spec is updated as explained above.
    ;
    ;  *   If an exception condition has been detected, this function
-   ;      returns a null string, and the output keyword parameter
+   ;      returns a non-zero error code, and the output keyword parameter
    ;      excpt_cond contains a message about the exception condition
    ;      encountered, if the optional input keyword parameter DEBUG is
    ;      set and if the optional output keyword parameter EXCPT_COND is
-   ;      provided.
+   ;      provided. The input positional parameter dir_spec is left
+   ;      untouched.
    ;
    ;  EXCEPTION CONDITIONS:
    ;
@@ -57,8 +57,6 @@ FUNCTION force_path_sep, $
    ;
    ;  *   Error 120: Positional parameter dir_spec must contain at least 1
    ;      character.
-   ;
-   ;  *   Error 200: An exception condition occurred in last_char.pro.
    ;
    ;  DEPENDENCIES:
    ;
@@ -72,13 +70,19 @@ FUNCTION force_path_sep, $
    ;
    ;  EXAMPLES:
    ;
-   ;      IDL> PRINT, force_path_sep('   ~/Desktop   ')
+   ;      IDL> dir_spec = '   ~/Desktop   '
+   ;      IDL> rc = force_path_sep(dir_spec)
+   ;      IDL> PRINT, dir_spec
    ;      ~/Desktop/
    ;
-   ;      IDL> PRINT, force_path_sep('~/Desktop/')
+   ;      IDL> dir_spec = '~/Desktop/'
+   ;      IDL> PRINT, force_path_sep(dir_spec)
+   ;      IDL> PRINT, dir_spec
    ;      ~/Desktop/
    ;
-   ;      IDL> print, force_path_sep('Hello')
+   ;      IDL> dir_spec = 'Hello'
+   ;      IDL> print, force_path_sep(dir_spec)
+   ;      IDL> PRINT, dir_spec
    ;      Hello/
    ;
    ;  REFERENCES: None.
@@ -93,6 +97,11 @@ FUNCTION force_path_sep, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -139,9 +148,9 @@ FUNCTION force_path_sep, $
    rout_name = info[N_ELEMENTS(info) - 1].ROUTINE
 
    ;  Initialize the default return code:
-   return_code = ''
+   return_code = 0
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -155,7 +164,7 @@ FUNCTION force_path_sep, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Routine must be called with ' + strstr(n_reqs) + $
             ' positional parameter(s): dir_spec.'
-         RETURN, return_code
+         RETURN, error_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -164,7 +173,7 @@ FUNCTION force_path_sep, $
          error_code = 110
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter must be of type STRING.'
-         RETURN, return_code
+         RETURN, error_code
       ENDIF
 
    ;  Return to the calling routine with an error message if the input
@@ -173,21 +182,16 @@ FUNCTION force_path_sep, $
          error_code = 120
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': Input positional parameter must contain at least 1 ' + $
-            'character.''
+            'character.'
+         RETURN, error_code
       ENDIF
    ENDIF
 
    ;  Append the path separator if necessary:
    dir_spec = STRTRIM(dir_spec, 2)
-   res = last_char(dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
-   IF ((debug) AND (excpt_cond NE '')) THEN BEGIN
-      error_code = 200
-      excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
-         ': ' + excpt_cond
-      RETURN, return_code
-   ENDIF
+   res = last_char(dir_spec)
    IF (res NE PATH_SEP()) THEN dir_spec = dir_spec + PATH_SEP()
 
-   RETURN, dir_spec
+   RETURN, return_code
 
 END

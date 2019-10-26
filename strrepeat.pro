@@ -99,6 +99,11 @@ FUNCTION strrepeat, $
    ;
    ;  *   2019–01–28: Version 2.00 — Systematic update of all routines to
    ;      implement stricter coding standards and improve documentation.
+   ;
+   ;  *   2019–08–20: Version 2.1.0 — Adopt revised coding and
+   ;      documentation standards (in particular regarding the assignment
+   ;      of numeric return codes), and switch to 3-parts version
+   ;      identifiers.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -147,7 +152,7 @@ FUNCTION strrepeat, $
    ;  Initialize the default return code:
    return_code = ''
 
-   ;  Set the default values of flags and essential output keyword parameters:
+   ;  Set the default values of flags and essential keyword parameters:
    IF (KEYWORD_SET(debug)) THEN debug = 1 ELSE debug = 0
    excpt_cond = ''
 
@@ -193,20 +198,26 @@ FUNCTION strrepeat, $
    ENDIF
 
    ;  Generate the output string:
-   IF (n_rep GT 1) THEN BEGIN
-      o_str = ''
-      FOR i = 0, n_rep - 1 DO BEGIN
-         o_str = o_str + str
-      ENDFOR
-      RETURN, o_str
-   END
-   IF (n_rep EQ 1) THEN BEGIN
-      o_str = str
-      RETURN, o_str
-   ENDIF
-   IF (n_rep EQ 0) THEN BEGIN
-      o_str = ''
-      RETURN, o_str
-   ENDIF
+   CASE 1 OF
+      (n_rep GT 1): BEGIN
+         o_str = ''
+         FOR i = 0, n_rep - 1 DO BEGIN
+            o_str = o_str + str
+         ENDFOR
+         RETURN, o_str
+      END
+      (n_rep EQ 1): BEGIN
+         o_str = str
+         RETURN, o_str
+      END
+      (n_rep EQ 0): BEGIN
+         o_str = ''
+         RETURN, o_str
+      END
+      ELSE: BEGIN
+         o_str = ''
+         RETURN, o_str
+      END
+   ENDCASE
 
 END
