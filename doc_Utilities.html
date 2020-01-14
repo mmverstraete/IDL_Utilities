@@ -1744,6 +1744,53 @@ visited on 30 Oct 2017.</p></li>
 <li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Update and simplify the function, adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
 </ul></li>
 </ul>
+<h2>remove_path_sep</h2>
+<ul>
+<li><p><strong>Purpose:</strong> This function trims the input positional parmeter <code>dir_spec</code> of any white space at the front and at the end of the string, and ensures that it is not terminated by the path segment separator character for the current operating system, if it is present.</p></li>
+<li><p><strong>Algorithm:</strong> This function relies on <code>IDL</code> built-in functions <code>STRTRIM</code> and <code>PATH_SEP</code> to deliver its outcome.</p></li>
+<li><p><strong>Syntax:</strong> <code>rc = remove_path_sep(dir_spec, $</code><br />
+<code>DEBUG = debug, EXCPT_COND = excpt_cond)</code></p></li>
+<li><p><strong>Positional parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>dir_spec {STRING} [I/O]:</code> An arbitrary directory or path specification, used for both input and output.</p></li>
+</ul></li>
+<li><p><strong>Keyword parameters [Input/Output]:</strong></p>
+<ul>
+<li><p><code>DEBUG = debug {INT} [I] (Default value: 0):</code> Flag to activate (<code>1</code>) or skip (<code>0</code>) debugging tests.</p></li>
+<li><p><code>EXCPT_COND = excpt_cond {STRING} [O] (Default value: &#8221;):</code> Description of the exception condition if one has been encountered, or a null string otherwise.</p></li>
+</ul></li>
+<li><p><strong>Returned value type:</strong> <code>INT</code>.</p></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li><p>If no exception condition has been detected, this function returns <code>0</code>, and the output keyword parameter <code>excpt_cond</code> is set to a null string, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided in the call. The input and output positional parameter <code>dir_spec</code> is updated as explained above.</p></li>
+<li><p>If an exception condition has been detected, this function returns a non-zero error code, and the output keyword parameter <code>excpt_cond</code> contains a message about the exception condition encountered, if the optional input keyword parameter <code>DEBUG</code> is set and if the optional output keyword parameter <code>EXCPT_COND</code> is provided. The input positional parameter <code>dir_spec</code> is left untouched.</p></li>
+</ul></li>
+<li><p><strong>Exception conditions:</strong></p>
+<ul>
+<li><p>Error 100: One or more positional parameter(s) are missing.</p></li>
+<li><p>Error 110: Positional parameter <code>dir_spec</code> is not of type <code>STRING</code>.</p></li>
+<li><p>Error 120: Positional parameter <code>dir_spec</code> must contain at least 1 character.</p></li>
+</ul></li>
+<li><p><strong>Dependencies:</strong></p>
+<ul>
+<li><p><code>is_string.pro</code></p></li>
+<li><p><code>last_char.pro</code></p></li>
+<li><p><code>strstr.pro</code></p></li>
+</ul></li>
+<li><p><strong>Remarks:</strong> None.</p></li>
+<li><p><strong>Examples:</strong></p>
+<pre><code>IDL&gt; dir_spec = &#39;    ~/Desktop/   &#39;
+IDL&gt; debug = 1
+IDL&gt; rc = remove_path_sep(dir_spec, DEBUG = debug, EXCPT_COND = excpt_cond)
+IDL&gt; PRINT, &#39;dir_spec = &gt;&#39; + dir_spec + &#39;&lt;&#39;
+dir_spec = &gt;~/Desktop&lt;</code></pre></li>
+<li><p><strong>References:</strong> None.</p></li>
+<li><p><strong>Versioning:</strong></p>
+<ul>
+<li><p>2020&#8211;01&#8211;09: Version 0.9 &#8212; Initial release.</p></li>
+<li><p>2020&#8211;01&#8211;10: Version 2.1.0 &#8212; Adopt revised coding and documentation standards, and switch to 3-parts version identifiers.</p></li>
+</ul></li>
+</ul>
 <h2>round_dec</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function returns a <code>STRING</code> representation of the input positional parameter <code>arg</code>, rounded to <code>n_dec</code> decimals.</p></li>
