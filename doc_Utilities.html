@@ -2357,13 +2357,13 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt
 </ul>
 <h2>today</h2>
 <ul>
-<li><p><strong>Purpose:</strong> This function returns today&#8217;s date and time as a string in one of the following formats: default (keyword <code>FMT</code> not set), <code>iso</code>, <code>jul</code>, <code>julian</code>, <code>nice</code>, <code>usa</code> or <code>ymd</code>.</p></li>
+<li><p><strong>Purpose:</strong> This function returns today&#8217;s date and time as a string in one of the following formats, specified by the optional input keyword parameter <code>FMT</code>: default (keyword <code>FMT</code> not set or unrecognized), <code>iso</code>, <code>jul</code>, <code>julian</code>, <code>nice</code>, <code>usa</code>, <code>ymd</code> or <code>dmy</code>.</p></li>
 <li><p><strong>Algorithm:</strong> This routine implements some of the recommendations by World Wide Web Consortium (W3C) regarding simplified formats to represent dates and times, as provided originally by the ISO 8601 standard. It relies on the <code>IDL</code> function <code>SYSTIME</code> to generate the information (in <code>IDL</code>&#8217;s format) and reformats the result as described below.</p></li>
 <li><p><strong>Syntax:</strong> <code>res = today(FMT = fmt)</code></p></li>
 <li><p><strong>Positional parameters [Input/Output]:</strong> None.</p></li>
 <li><p><strong>Keyword parameters [Input/Output]:</strong></p>
 <ul>
-<li><p><code>FMT = fmt {STRING} [I]:</code> Set this optional keyword to <code>iso</code>, <code>nice</code>, <code>usa</code> or <code>ymd</code> to generate the return value in a format different from the default. If the value of this keyword is not set or unrecognized, the result will be formatted according to the default format.</p></li>
+<li><p><code>FMT = fmt {STRING} [I]:</code> Set this optional keyword to <code>iso</code>, <code>jul</code>, <code>julian</code>, <code>nice</code>, <code>usa</code>, <code>ymd</code> or <code>dmy</code> to generate the return value in a format different from the default. If the value of this keyword is not set or unrecognized, the result will be formatted according to the default format.</p></li>
 </ul></li>
 <li><p><strong>Returned value type:</strong> <code>STRING</code>.</p></li>
 <li><p><strong>Outcome:</strong></p>
@@ -2377,6 +2377,7 @@ IDL&gt; PRINT, &#39;&gt;&#39; + res[0] + &#39;&lt;&#39; + &#39; &#39; + &#39;&gt
 <li><p>If the keyword <code>FMT</code> is set to <code>nice</code>, the current date and time are provided as a string formatted like <code>YYYY-MM-DD at hh:mm:ss</code>.</p></li>
 <li><p>If the keyword <code>FMT</code> is set to <code>usa</code>, the current date is provided as a string formatted like <code>Mo DD, YYYY</code>, where <code>Mon</code> is a 3-character string abreviation of the month name.</p></li>
 <li><p>If the keyword <code>FMT</code> is set to <code>ymd</code>, the current date is provided as a string formatted like <code>YYYY-MM-DD</code>.</p></li>
+<li><p>If the keyword <code>FMT</code> is set to <code>dmy</code>, the current date is provided as a string formatted like <code>DD Month YYYY</code>, where <code>Month</code> is the month name, spelled out in full.</p></li>
 </ul></li>
 <li><p>This routine does not provide diagnostic information on exception conditions.</p></li>
 </ul></li>
@@ -2412,6 +2413,7 @@ IDL&gt; PRINT, res
 <li><p>2019&#8211;01&#8211;04: Version 1.2 &#8212; Add the optional output formats <code>jul</code> and <code>julday</code>.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2020&#8211;01&#8211;27: Version 2.1.1 &#8212; Add the optional keyword value <code>dmy</code> and update the documentation.</p></li>
 </ul></li>
 </ul>
 <h2>uniq2</h2>

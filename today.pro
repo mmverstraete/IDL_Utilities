@@ -3,8 +3,9 @@ FUNCTION today, $
 
    ;Sec-Doc
    ;  PURPOSE: This function returns today’s date and time as a string in
-   ;  one of the following formats: default (keyword FMT not set), iso,
-   ;  jul, julian, nice, usa or ymd.
+   ;  one of the following formats, specified by the optional input
+   ;  keyword parameter FMT: default (keyword FMT not set or
+   ;  unrecognized), iso, jul, julian, nice, usa, ymd or dmy.
    ;
    ;  ALGORITHM: This routine implements some of the recommendations by
    ;  World Wide Web Consortium (W3C) regarding simplified formats to
@@ -19,11 +20,11 @@ FUNCTION today, $
    ;
    ;  KEYWORD PARAMETERS [INPUT/OUTPUT]:
    ;
-   ;  *   FMT = fmt {STRING} [I]: Set this optional keyword to iso, nice,
-   ;      usa or ymd to generate the return value in a format different
-   ;      from the default. If the value of this keyword is not set or
-   ;      unrecognized, the result will be formatted according to the
-   ;      default format.
+   ;  *   FMT = fmt {STRING} [I]: Set this optional keyword to iso, jul,
+   ;      julian, nice, usa, ymd or dmy to generate the return value in a
+   ;      format different from the default. If the value of this keyword
+   ;      is not set or unrecognized, the result will be formatted
+   ;      according to the default format.
    ;
    ;  RETURNED VALUE TYPE: STRING.
    ;
@@ -59,6 +60,10 @@ FUNCTION today, $
    ;
    ;      -   If the keyword FMT is set to ymd, the current date is
    ;          provided as a string formatted like YYYY-MM-DD.
+   ;
+   ;      -   If the keyword FMT is set to dmy, the current date is
+   ;          provided as a string formatted like DD Month YYYY, where
+   ;          Month is the month name, spelled out in full.
    ;
    ;  *   This routine does not provide diagnostic information on
    ;      exception conditions.
@@ -115,6 +120,9 @@ FUNCTION today, $
    ;      documentation standards (in particular regarding the assignment
    ;      of numeric return codes), and switch to 3-parts version
    ;      identifiers.
+   ;
+   ;  *   2020–01–27: Version 2.1.1 — Add the optional keyword value dmy
+   ;      and update the documentation.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
@@ -165,21 +173,57 @@ FUNCTION today, $
    ;  Save the current year:
    yyyy = sres[4]
 
-   ;  Save the current month:
+   ;  Save the current month number and name:
    sm = sres[1]
    CASE sm OF
-      'Jan': mm = '01'
-      'Feb': mm = '02'
-      'Mar': mm = '03'
-      'Apr': mm = '04'
-      'May': mm = '05'
-      'Jun': mm = '06'
-      'Jul': mm = '07'
-      'Aug': mm = '08'
-      'Sep': mm = '09'
-      'Oct': mm = '10'
-      'Nov': mm = '11'
-      'Dec': mm = '12'
+      'Jan': BEGIN
+         mm = '01'
+         month = 'January'
+      END
+      'Feb': BEGIN
+         mm = '02'
+         month = 'February'
+      END
+      'Mar': BEGIN
+         mm = '03'
+         month = 'March'
+      END
+      'Apr': BEGIN
+         mm = '04'
+         month = 'April'
+      END
+      'May': BEGIN
+         mm = '05'
+         month = 'May'
+      END
+      'Jun': BEGIN
+         mm = '06'
+         month = 'June'
+      END
+      'Jul': BEGIN
+         mm = '07'
+         month = 'July'
+      END
+      'Aug': BEGIN
+         mm = '08'
+         month = 'August'
+      END
+      'Sep': BEGIN
+         mm = '09'
+         month = 'September'
+      END
+      'Oct': BEGIN
+         mm = '10'
+         month = 'October'
+      END
+      'Nov': BEGIN
+         mm = '11'
+         month = 'November'
+      END
+      'Dec': BEGIN
+         mm = '12'
+         month = 'December'
+      END
    ENDCASE
 
    ;  Save the current day:
@@ -207,6 +251,7 @@ FUNCTION today, $
          'nice': ymdhms = yyyy + '-' + mm + '-' + dd + ' at ' + sres[3]
          'usa': ymdhms = sres[1] + ' ' + dd + ', ' + yyyy
          'ymd': ymdhms = yyyy + '-' + mm + '-' + dd
+         'dmy': ymdhms = dd + ' ' + month + ' ' + yyyy
          ELSE: BEGIN
             ymdhms = yyyy + '-' + mm + '-' + dd + '_' + $
                hor + '-' + min + '-' + sec
