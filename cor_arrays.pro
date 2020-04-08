@@ -90,6 +90,9 @@ FUNCTION cor_arrays, $
    ;  *   Error 130: Positional parameter array_1 and array_2 are of
    ;      different sizes.
    ;
+   ;  *   Error 140: Positional parameter array_1 and array_2 contain
+   ;      fewer than 5 elements.
+   ;
    ;  DEPENDENCIES:
    ;
    ;  *   is_numeric.pro
@@ -172,10 +175,13 @@ FUNCTION cor_arrays, $
    ;      documentation standards (in particular regarding the assignment
    ;      of numeric return codes), and switch to 3-parts version
    ;      identifiers.
+   ;
+   ;  *   2020–03–05: Version 2.1.1 — Add a test on the input data arrays
+   ;      to ensure they contain at least 5 elements.
    ;Sec-Lic
    ;  INTELLECTUAL PROPERTY RIGHTS
    ;
-   ;  *   Copyright (C) 2017-2019 Michel M. Verstraete.
+   ;  *   Copyright (C) 2017-2020 Michel M. Verstraete.
    ;
    ;      Permission is hereby granted, free of charge, to any person
    ;      obtaining a copy of this software and associated documentation
@@ -187,7 +193,7 @@ FUNCTION cor_arrays, $
    ;      conditions:
    ;
    ;      1. The above copyright notice and this permission notice shall
-   ;      be included in its entirety in all copies or substantial
+   ;      be included in their entirety in all copies or substantial
    ;      portions of the Software.
    ;
    ;      2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
@@ -275,6 +281,16 @@ FUNCTION cor_arrays, $
          excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
             ': The input positional parameters array_1 and array_2 are ' + $
             'not of the same size.'
+         RETURN, error_code
+      ENDIF
+
+   ;  Return to the calling routine with an error message if input positional
+   ;  parameters 'array_1' and 'array_2' contain fewer than 5 elements:
+      IF (n_elms_1 LT 5) THEN BEGIN
+         error_code = 140
+         excpt_cond = 'Error ' + strstr(error_code) + ' in ' + rout_name + $
+            ': The input positional parameters array_1 and array_2 ' + $
+            'contain fewer than 5 elements.'
          RETURN, error_code
       ENDIF
    ENDIF

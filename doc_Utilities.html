@@ -7,6 +7,21 @@
    </head>
 <body>
 <h1>Documentation for the IDL routines in project Utilities</h1>
+<ul>
+<li><p><strong>Intellectual property rights</strong></p>
+<ul>
+<li><p>Copyright (C) 2017-2020 Michel M. Verstraete.</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following three conditions:</p>
+<p>1. The above copyright notice and this permission notice shall be included in their entirety in all copies or substantial portions of the Software.</p>
+<p>2. THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+<p>See: <a href="https://opensource.org/licenses/MIT" class="uri">https://opensource.org/licenses/MIT</a>.</p>
+<p>3. The current version of this Software is freely available from</p>
+<p><a href="https://github.com/mmverstraete" class="uri">https://github.com/mmverstraete</a>.</p></li>
+<li><p>Feedback</p>
+<p>Please send comments and suggestions to the author at<br />
+<a href="mailto:MMVerstraete@gmail.com">MMVerstraete@gmail.com</a></p></li>
+</ul></li>
+</ul>
 <h2>alogb</h2>
 <ul>
 <li><p><strong>Purpose:</strong> This function returns the logarithm of the input positional parameter <code>arg</code> to an arbitrary base <code>base</code>.</p></li>
@@ -510,6 +525,7 @@ IDL&gt; PRINT, year, month, day
 <li><p>Error 110: Positional parameter <code>array_1</code> or <code>array_2</code> is not of type numeric.</p></li>
 <li><p>Error 120: Positional parameter <code>array_1</code> or <code>array_2</code> is not an array.</p></li>
 <li><p>Error 130: Positional parameter <code>array_1</code> and <code>array_2</code> are of different sizes.</p></li>
+<li><p>Error 140: Positional parameter <code>array_1</code> and <code>array_2</code> contain fewer than 5 elements.</p></li>
 </ul></li>
 <li><p><strong>Dependencies:</strong></p>
 <ul>
@@ -573,6 +589,7 @@ IDL&gt;    FORMAT = fmt
 <li><p>2018&#8211;06&#8211;01: Version 1.5 &#8212; Implement new coding standards.</p></li>
 <li><p>2019&#8211;01&#8211;28: Version 2.00 &#8212; Systematic update of all routines to implement stricter coding standards and improve documentation.</p></li>
 <li><p>2019&#8211;08&#8211;20: Version 2.1.0 &#8212; Adopt revised coding and documentation standards (in particular regarding the assignment of numeric return codes), and switch to 3-parts version identifiers.</p></li>
+<li><p>2020&#8211;03&#8211;05: Version 2.1.1 &#8212; Add a test on the input data arrays to ensure they contain at least 5 elements.</p></li>
 </ul></li>
 </ul>
 <h2>count_code_lines</h2>
